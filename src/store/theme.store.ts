@@ -19,14 +19,14 @@ const VALID_THEMES = new Set(Object.values(Theme))
 const SESSION_THEMES = new Set<Theme>([Theme.Black, Theme.NuclearDark])
 
 const sanitizeTheme = (value: unknown): Theme =>
-  VALID_THEMES.has(value as Theme) ? (value as Theme) : Theme.Dark
+  VALID_THEMES.has(value as Theme) ? (value as Theme) : Theme.Reactive
 
 export const useThemeStore = createWithEqualityFn<IThemeContext>()(
   subscribeWithSelector(
     persist(
       devtools(
         immer((set) => ({
-          theme: sanitizeTheme(appThemeFromEnv || Theme.Dark),
+          theme: sanitizeTheme(appThemeFromEnv || Theme.Reactive),
           setTheme: (theme: Theme) => {
             set((state) => {
               state.theme = theme

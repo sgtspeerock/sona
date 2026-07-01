@@ -17,17 +17,19 @@ export function QueuePanelView({
     <div
       className={cn(
         'flex w-full h-full gap-6',
-        inFullscreenOverlay && 'items-stretch',
+        inFullscreenOverlay &&
+          'items-stretch rounded-[var(--radius-surface-lg)] border border-border/25 bg-background/92 p-4',
         inFullscreenOverlay &&
           (useDarkForeground
             ? 'fullscreen-panel-readable-light-bg'
             : 'fullscreen-panel-readable-dark-bg'),
+        !inFullscreenOverlay && 'sona-shell p-4',
       )}
     >
       <div
         className={cn(
           'shrink-0',
-          inFullscreenOverlay && 'p-4',
+          inFullscreenOverlay && 'p-0',
         )}
       >
         <CurrentSongInfo />
@@ -35,7 +37,7 @@ export function QueuePanelView({
       <div
         className={cn(
           'flex-1 min-w-0',
-          inFullscreenOverlay && 'p-4',
+          inFullscreenOverlay && 'p-0',
         )}
       >
         <QueueSongList inFullscreenOverlay={inFullscreenOverlay} />
@@ -55,7 +57,9 @@ export function LyricsPanelView({
     <div
       className={cn(
         'w-full h-full',
-        inFullscreenOverlay && 'p-5',
+        inFullscreenOverlay &&
+          'rounded-[var(--radius-surface-lg)] border border-border/25 bg-background/92 p-5',
+        !inFullscreenOverlay && 'sona-shell p-4',
         inFullscreenOverlay &&
           (useDarkForeground
             ? 'fullscreen-panel-readable-light-bg'

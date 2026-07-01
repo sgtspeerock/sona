@@ -13,6 +13,7 @@ import { BadgesData } from '@/app/components/header-info'
 import PreviewList from '@/app/components/home/preview-list'
 import ListWrapper from '@/app/components/list-wrapper'
 import { PageState } from '@/app/components/ui/page-state'
+import { SonaPanel } from '@/app/components/ui/sona'
 import {
   useGetArtist,
   useGetArtistInfo,
@@ -203,52 +204,60 @@ export default function Artist() {
         coverArtSize="700"
         coverArtAlt={artist.name}
         badges={badges}
+        variant="artist"
       />
 
-      <ListWrapper>
-        <ArtistInfo artist={artist} />
+      <ListWrapper className="space-y-6">
+        <SonaPanel className="p-5">
+          <ArtistInfo artist={artist} />
 
-        {topSongsIsLoading && <TopSongsTableFallback />}
-        {topSongs && !topSongsIsLoading && (
-          <ArtistTopSongs topSongs={topSongs} artist={artist} />
-        )}
-        {!topSongsIsLoading &&
-          (topSongs?.length ?? 0) === 0 &&
-          recentAlbums.length === 0 && (
-            <PageState
-              title={t('states.empty.title')}
-              description={t('states.empty.artistDescription')}
-              className="min-h-[180px] px-0 py-4"
-              actionLabel={
-                isLidarrConfigured
-                  ? isLidarrRequesting
-                    ? t('command.lidarr.requesting')
-                    : t('command.lidarr.request', { artist: artist.name })
-                  : undefined
-              }
-              onAction={isLidarrConfigured ? handleLidarrArtistRequest : undefined}
-            />
+          {topSongsIsLoading && <TopSongsTableFallback />}
+          {topSongs && !topSongsIsLoading && (
+            <ArtistTopSongs topSongs={topSongs} artist={artist} />
           )}
+          {!topSongsIsLoading &&
+            (topSongs?.length ?? 0) === 0 &&
+            recentAlbums.length === 0 && (
+              <PageState
+                title={t('states.empty.title')}
+                description={t('states.empty.artistDescription')}
+                className="min-h-[180px] px-0 py-4"
+                actionLabel={
+                  isLidarrConfigured
+                    ? isLidarrRequesting
+                      ? t('command.lidarr.requesting')
+                      : t('command.lidarr.request', { artist: artist.name })
+                    : undefined
+                }
+                onAction={
+                  isLidarrConfigured ? handleLidarrArtistRequest : undefined
+                }
+              />
+            )}
+        </SonaPanel>
 
         {recentAlbums.length > 0 && (
-          <PreviewList
-            title={t('artist.recentAlbums')}
-            list={recentAlbums}
-            moreTitle={t('album.more.discography')}
-            moreRoute={ROUTES.ALBUMS.ARTIST(artist.id, artist.name)}
-            showAlbumYearInSubtitle
-          />
+          <section className="px-1 pt-1">
+            <PreviewList
+              title={t('artist.recentAlbums')}
+              list={recentAlbums}
+              moreTitle={t('album.more.discography')}
+              moreRoute={ROUTES.ALBUMS.ARTIST(artist.id, artist.name)}
+              showAlbumYearInSubtitle
+            />
+          </section>
         )}
 
         {artistInfoIsLoading && <PreviewListFallback />}
         {artistInfo?.similarArtist && !artistInfoIsLoading && (
-          <RelatedArtistsList
-            title={t('artist.relatedArtists')}
-            similarArtists={artistInfo.similarArtist}
-          />
+          <section className="px-1 pt-1">
+            <RelatedArtistsList
+              title={t('artist.relatedArtists')}
+              similarArtists={artistInfo.similarArtist}
+            />
+          </section>
         )}
       </ListWrapper>
     </div>
   )
 }
-

@@ -623,20 +623,26 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                   state.songlist.currentSongIndex = index
                   state.playerState.isShuffleActive = false
                 })
-              } else {
-                const { currentList, currentSongIndex } = get().songlist
-                const shuffledList = shuffleSongList(
-                  currentList,
-                  currentSongIndex,
-                )
+                } else {
+                  const { currentList, currentSongIndex } = get().songlist
+                  const playedSegment = currentList.slice(
+                    0,
+                    currentSongIndex + 1,
+                  )
+                  const upcomingSegment = shuffleSongList(
+                    currentList.slice(currentSongIndex + 1),
+                    0,
+                    true,
+                  )
+                  const shuffledList = [...playedSegment, ...upcomingSegment]
 
-                set((state) => {
-                  state.songlist.shuffledList = shuffledList
-                  state.songlist.currentList = shuffledList
-                  state.songlist.currentSongIndex = 0
-                  state.playerState.isShuffleActive = true
-                })
-              }
+                  set((state) => {
+                    state.songlist.shuffledList = shuffledList
+                    state.songlist.currentList = shuffledList
+                    state.songlist.currentSongIndex = currentSongIndex
+                    state.playerState.isShuffleActive = true
+                  })
+                }
             },
             playNextSong: () => {
               const { loopState } = get().playerState

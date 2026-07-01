@@ -13,7 +13,7 @@ interface InfoPanelProps {
 }
 
 const containerClasses =
-  'flex flex-col items-start gap-1 rounded-lg border p-5 text-left text-sm transition-all bg-background-foreground'
+  'flex flex-col items-start gap-2 border-l border-primary/45 py-2 pl-5 pr-2 text-left text-sm transition-all'
 
 export default function InfoPanel({
   title,
@@ -27,22 +27,22 @@ export default function InfoPanel({
 
   return (
     <div className={containerClasses} id="artist-biography">
-      <h3 className="scroll-m-20 mb-2 text-2xl font-semibold tracking-tight">
+      <h3 className="sona-section-title scroll-m-20">
         {t('album.info.about', { name: title })}
       </h3>
       <p
-        className="html leading-6 text-muted-foreground"
+        className="html max-w-5xl leading-6 text-muted-foreground"
         dangerouslySetInnerHTML={{ __html: sanitizeLinks(bio) }}
       />
 
-      <div className="flex w-full mt-2 gap-2">
+      <div className="flex w-full mt-1 gap-2">
         {lastFmUrl && (
           <SimpleTooltip text={t('album.info.lastfm')}>
             <a
               target="_blank"
               rel="nofollow noreferrer"
               href={lastFmUrl}
-              className="p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full"
+              className="rounded-[var(--radius-control)] border border-border/25 bg-foreground/[0.045] p-2 transition-colors hover:bg-foreground/[0.09]"
             >
               <LastFmIcon className="w-6 h-6 fill-foreground" />
             </a>
@@ -55,7 +55,7 @@ export default function InfoPanel({
               target="_blank"
               rel="nofollow noreferrer"
               href={`https://musicbrainz.org/artist/${musicBrainzId}`}
-              className="p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full"
+              className="rounded-[var(--radius-control)] border border-border/25 bg-foreground/[0.045] p-2 transition-colors hover:bg-foreground/[0.09]"
             >
               <MusicbrainzIcon className="w-6 h-6 fill-foreground" />
             </a>

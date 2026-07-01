@@ -95,7 +95,7 @@ export function DiscoverWeeklyCard() {
 
   return (
     <div
-      className="group relative h-full w-full cursor-pointer overflow-hidden rounded-xl border border-border/60 bg-gradient-to-br from-primary/12 via-accent/8 to-background/10 p-4 transition-colors hover:border-primary/35"
+      className="sona-panel group relative h-full w-full cursor-pointer bg-background-foreground p-5 transition-colors hover:border-primary/35"
       onClick={() => navigateSafe(navigate, ROUTES.LIBRARY.DISCOVER_WEEKLY)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -107,25 +107,27 @@ export function DiscoverWeeklyCard() {
       tabIndex={0}
     >
       {coverArt && (
-        <ImageLoader id={coverArt} type="album" size="300">
+        <ImageLoader id={coverArt} type="album" size="520">
           {(src) => (
             <>
               <div
-                className="absolute inset-0 bg-cover bg-center blur-md scale-105 opacity-30"
+                className="absolute inset-0 scale-[1.13] bg-cover bg-center opacity-[0.34] blur-sm saturate-150"
                 style={{ backgroundImage: `url(${src})` }}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-background/35 via-background/22 to-background/35" />
+              <div className="absolute inset-0 bg-gradient-to-r from-background/82 via-background/62 to-background/34" />
               <div
-                className="absolute right-0 top-0 h-full w-[58%] bg-cover bg-center opacity-70"
+                className="absolute right-0 top-0 h-full w-[58%] scale-[1.1] bg-cover bg-center opacity-[0.68] saturate-125"
                 style={{
                   backgroundImage: `url(${src})`,
                   WebkitMaskImage:
-                    'linear-gradient(to left, rgba(0, 0, 0, 1) 58%, rgba(0, 0, 0, 0) 100%)',
+                    'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0.55) 72%, rgba(0,0,0,0) 100%)',
                   maskImage:
-                    'linear-gradient(to left, rgba(0, 0, 0, 1) 58%, rgba(0, 0, 0, 0) 100%)',
+                    'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0.55) 72%, rgba(0,0,0,0) 100%)',
                 }}
               />
-              <div className="absolute right-0 top-0 h-full w-[62%] bg-gradient-to-l from-background/58 via-background/34 to-transparent" />
+              <div className="absolute inset-y-0 right-0 w-[62%] bg-gradient-to-l from-background/12 via-background/8 to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_26%,hsl(var(--primary)/0.28),transparent_36%),radial-gradient(circle_at_18%_82%,hsl(var(--accent-foreground)/0.14),transparent_34%)] mix-blend-screen" />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background/48 to-transparent" />
             </>
           )}
         </ImageLoader>
@@ -134,60 +136,31 @@ export function DiscoverWeeklyCard() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/12 via-primary/6 to-transparent" />
       )}
 
-      <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr),auto] items-stretch gap-3">
-        <div className="flex min-w-0 flex-col justify-between">
-          <div className="mb-2 inline-flex w-fit max-w-max self-start items-center gap-1.5 rounded-md border border-foreground/15 bg-foreground/5 px-2 py-1 text-xs text-foreground/75 backdrop-blur-sm">
+      <div className="relative z-10 flex h-full min-w-0 flex-col justify-between">
+        <div>
+          <div className="sona-pill mb-3">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <span>{t('home.weeklyMix')}</span>
           </div>
           <div className="min-w-0">
-            <h2 className="line-clamp-2 break-words text-[1.05rem] font-semibold leading-snug sm:text-[1.12rem]">
+            <h2 className="truncate text-xl font-bold leading-tight tracking-[-0.035em]">
               {t('home.discoverWeekly')}
             </h2>
-            <p className="mt-0.5 text-xs text-muted-foreground/90">
+            <p className="mt-1.5 truncate text-xs font-medium leading-snug text-muted-foreground/[0.92]">
               {t('playlist.songCount', { count: playlist.length })}
             </p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handlePlay}
-              className="h-7 gap-1.5 border border-primary/35 bg-primary/90 px-2.5 text-xs hover:bg-primary"
-              size="sm"
-            >
-              <Play className="h-3.5 w-3.5" fill="currentColor" />
-              {t('options.play')}
-            </Button>
-          </div>
         </div>
 
-        <div className="flex items-center justify-end">
-          <div className="h-[104px] w-[104px] overflow-hidden rounded-lg border border-border/50 bg-muted shadow-lg min-[1700px]:h-[116px] min-[1700px]:w-[116px]">
-            {coverArt ? (
-              <ImageLoader id={coverArt} type="album" size="420">
-                {(src, isLoadingImage) => (
-                  <>
-                    {src && (
-                      <img
-                        src={src}
-                        alt={t('home.discoverWeekly')}
-                        className="h-full w-full object-cover text-transparent"
-                      />
-                    )}
-                    {!src && !isLoadingImage && (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                        <Calendar className="h-10 w-10 text-muted-foreground" />
-                      </div>
-                    )}
-                  </>
-                )}
-              </ImageLoader>
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                <Calendar className="h-10 w-10 text-muted-foreground" />
-              </div>
-            )}
-          </div>
+        <div className="mt-3 flex items-center gap-2">
+          <Button
+            onClick={handlePlay}
+            className="h-8 gap-1.5 border border-primary/35 bg-primary px-3 text-xs text-primary-foreground hover:bg-primary/90"
+            size="sm"
+          >
+            <Play className="h-3.5 w-3.5" fill="currentColor" />
+            {t('options.play')}
+          </Button>
         </div>
       </div>
     </div>

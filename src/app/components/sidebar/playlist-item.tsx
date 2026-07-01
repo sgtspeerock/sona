@@ -54,10 +54,9 @@ export function SidebarPlaylistItem({ playlist }: { playlist: Playlist }) {
       >
         <MainSidebarMenuButton
           asChild
+          isActive={isOnPlaylist(playlist.id)}
           tooltip={playlist.name}
-          className={clsx(
-            isOnPlaylist(playlist.id) && 'cursor-default bg-accent',
-          )}
+          className={clsx(isOnPlaylist(playlist.id) && 'cursor-default')}
         >
           <Link
             to={ROUTES.PLAYLIST.PAGE(playlist.id)}

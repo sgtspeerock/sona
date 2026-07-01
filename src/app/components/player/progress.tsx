@@ -25,9 +25,13 @@ import { logger } from '@/utils/logger'
 
 interface PlayerProgressProps {
   audioRef: RefObject<HTMLAudioElement>
+  layout?: 'default' | 'rail'
 }
 
-export function PlayerProgress({ audioRef }: PlayerProgressProps) {
+export function PlayerProgress({
+  audioRef,
+  layout = 'default',
+}: PlayerProgressProps) {
   const progress = usePlayerProgress()
   const [localProgress, setLocalProgress] = useState(progress)
   const [visualProgress, setVisualProgress] = useState(progress)
@@ -335,7 +339,10 @@ export function PlayerProgress({ audioRef }: PlayerProgressProps) {
           tooltipTransformer={convertSecondsToTime}
           max={currentDuration}
           step={1}
-          className="cursor-pointer w-full max-w-[32rem] min-w-[8rem] player-progress-slider"
+          className={clsx(
+            'cursor-pointer w-full min-w-[8rem] player-progress-slider',
+            layout === 'rail' ? 'max-w-none' : 'max-w-[32rem]',
+          )}
           onValueChange={([value]) => handleSeeking(value)}
           onValueCommit={([value]) => handleSeeked(value)}
           // Sometimes onValueCommit doesn't work properly
@@ -351,7 +358,10 @@ export function PlayerProgress({ audioRef }: PlayerProgressProps) {
           max={100}
           step={1}
           disabled={true}
-          className="cursor-pointer w-full max-w-[32rem] min-w-[8rem] pointer-events-none player-progress-slider"
+          className={clsx(
+            'cursor-pointer w-full min-w-[8rem] pointer-events-none player-progress-slider',
+            layout === 'rail' ? 'max-w-none' : 'max-w-[32rem]',
+          )}
         />
       )}
       <small

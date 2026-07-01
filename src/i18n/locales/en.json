@@ -22,7 +22,7 @@
     "playsThisWeek_other": "{{count}} plays this week",
     "playNow": "Play Now",
     "genreRadio": {
-      "label": "{{genre}} Radio",
+      "label": "Genre radio",
       "play": "Start radio"
     },
     "anniversaryRadio": {
@@ -32,26 +32,14 @@
       "empty": "No memory found",
       "emptyDescription": "No matching release metadata yet."
     },
-    "daypart": {
-      "label": "Daypart Mix",
-      "usedGenres": "Using: {{genres}}",
-      "names": {
-        "morning": "Coffee Before Chaos",
-        "noon": "Lunch Break Bangers",
-        "afternoon": "Post-Lunch Liftoff",
-        "evening": "Golden Hour Groove",
-        "night": "Night Shift Stereo",
-        "midnight": "Midnight Mood Machine"
-      },
-      "moods": {
-        "morning": "Soft, focused energy for a calm start.",
-        "noon": "Catchy, upbeat momentum for the middle of the day.",
-        "afternoon": "Driven energy with sharper edges for late-day focus.",
-        "evening": "Warm groove and color for golden-hour listening.",
-        "night": "Cinematic late-evening flow with atmospheric textures.",
-        "midnight": "Dark, heavy energy for deep night sessions."
-      }
-    }
+    "sessionEnergy": {
+      "label": "Session Vibe",
+      "title": "Keep the last vibe",
+      "description": "Start a vibe",
+      "descriptionWithGenre": "Start {{genre}} vibe",
+      "play": "Start vibe"
+    },
+    "forYou": "For you"
   },
   "sidebar": {
     "home": "Home",
@@ -146,7 +134,6 @@
       "artistDescription": "No tracks or albums are available for this artist yet.",
       "albumDescription": "No tracks are available for this album yet.",
       "playlistDescription": "This playlist is empty. Add songs to get started.",
-      "daypartDescription": "No songs are available for this time window yet.",
       "noResults": "No results found.",
       "noTracks": "No tracks available."
     },
@@ -160,23 +147,15 @@
   },
   "theme": {
     "label": "Theme",
-    "dark": "Dark",
-    "reactive": "Reactive",
-    "ember-dusk": "Ember Dusk",
-    "verdant-pulse": "Verdant Pulse",
-    "system": "System",
-    "black": "Black and White",
-    "one-dark": "One Dark",
-    "marmalade-beaver": "Marmalade Beaver",
-    "monokai-pro": "Monokai Pro",
-    "github-dark": "Github Dark",
-    "catppuccin-mocha": "Catppuccin Mocha",
-    "nuclear-dark": "Nuclear Dark",
-    "achiever": "Achiever",
-    "dracula": "Dracula",
-    "discord": "Discord",
-    "tinacious-design": "Tinacious Design",
-    "vue-dark": "Vue Dark"
+    "reactive": "Reactive (default)",
+    "dark": "Graphite",
+    "ember-dusk": "Ember",
+    "verdant-pulse": "Moss",
+    "black": "Monochrome",
+    "catppuccin-mocha": "Mocha",
+    "nuclear-dark": "Cyberpunk",
+    "discord": "Midnight Blue",
+    "system": "System"
   },
   "playlist": {
     "headline": "Playlist",
@@ -1215,5 +1194,3 @@
     }
   }
 }
-
-

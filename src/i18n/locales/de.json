@@ -17,24 +17,16 @@
     "yourTop50": "Your Top 50"
   },
   "theme": {
-    "nuclear-dark": "Nuclear Dark",
-    "achiever": "Achiever",
-    "dracula": "Dracula",
     "label": "Theme",
-    "dark": "Dark",
-    "reactive": "Reactive",
-    "ember-dusk": "Abendglut",
-    "verdant-pulse": "Smaragdfluss",
-    "system": "System",
-    "black": "Black and White",
-    "one-dark": "One Dark",
-    "marmalade-beaver": "Marmalade Beaver",
-    "monokai-pro": "Monokai Pro",
-    "github-dark": "Github Dark",
-    "catppuccin-mocha": "Catppuccin Mocha",
-    "discord": "Discord",
-    "tinacious-design": "Tinacious Design",
-    "vue-dark": "Vue Dark"
+    "reactive": "Reactive (Standard)",
+    "dark": "Graphit",
+    "ember-dusk": "Glutrot",
+    "verdant-pulse": "Moosgrün",
+    "black": "Monochrom",
+    "catppuccin-mocha": "Mokka",
+    "nuclear-dark": "Cyberpunk",
+    "discord": "Mitternachtsblau",
+    "system": "System"
   },
   "playlist": {
     "form": {
@@ -388,7 +380,7 @@
     "playsThisWeek_other": "{{count}} Mal diese Woche gehört",
     "playNow": "Jetzt abspielen",
     "genreRadio": {
-      "label": "{{genre}} Radio",
+      "label": "Genre-Radio",
       "play": "Radio starten"
     },
     "anniversaryRadio": {
@@ -398,26 +390,14 @@
       "empty": "Keine Erinnerung gefunden",
       "emptyDescription": "Noch keine passenden Release-Daten."
     },
-    "daypart": {
-      "label": "Tageszeiten-Mix",
-      "usedGenres": "Mit: {{genres}}",
-      "names": {
-        "morning": "Coffee Before Chaos",
-        "noon": "Lunch Break Bangers",
-        "afternoon": "Post-Lunch Liftoff",
-        "evening": "Golden Hour Groove",
-        "night": "Night Shift Stereo",
-        "midnight": "Midnight Mood Machine"
-      },
-      "moods": {
-        "morning": "Sanfter Mix für den Morgen.",
-        "noon": "Energiegeladener Mix für die Mittagszeit.",
-        "afternoon": "Treibender Mix für den Nachmittag.",
-        "evening": "Warmer Mix für den Abend.",
-        "night": "Cineastischer Mix für die späten Abendstunden.",
-        "midnight": "Dunkler, harter Mix für die Tiefnacht."
-      }
-    }
+    "sessionEnergy": {
+      "label": "Session Vibe",
+      "title": "Wieder eintauchen",
+      "description": "Vibe starten",
+      "descriptionWithGenre": "{{genre}}-Vibe starten",
+      "play": "Vibe starten"
+    },
+    "forYou": "Für dich"
   },
   "menu": {
     "language": "Sprache",
@@ -495,7 +475,6 @@
       "artistDescription": "Für diesen Künstler sind aktuell keine Songs oder Alben verfügbar.",
       "albumDescription": "Für dieses Album sind aktuell keine Songs verfügbar.",
       "playlistDescription": "Diese Wiedergabeliste ist leer. Füge Songs hinzu, um zu starten.",
-      "daypartDescription": "Für dieses Zeitfenster sind aktuell keine Songs verfügbar.",
       "noResults": "Keine Ergebnisse gefunden.",
       "noTracks": "Keine Songs verfügbar."
     },
@@ -567,7 +546,7 @@
     },
     "queue": "Warteschlange",
     "playing": "Jetzt läuft",
-    "lyrics": "Songtexte",
+    "lyrics": "Songtext",
     "visualizerLabel": "Visualizer",
     "hypnoticBackdrop": "Animierter Hintergrund",
     "switchButton": "Zum großen Player wechseln",
@@ -1215,5 +1194,3 @@
     }
   }
 }
-
-

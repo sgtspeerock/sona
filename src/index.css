@@ -9,7 +9,35 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background:
+      radial-gradient(
+        ellipse at 7% 10%,
+        hsl(var(--sona-gradient-a, 323 72% 48%) / 0.16),
+        transparent 34%
+      ),
+      radial-gradient(
+        ellipse at 62% 5%,
+        hsl(var(--sona-gradient-b, 222 82% 48%) / 0.17),
+        transparent 38%
+      ),
+      radial-gradient(
+        ellipse at 95% 24%,
+        hsl(var(--sona-gradient-c, 323 68% 52%) / 0.1),
+        transparent 34%
+      ),
+      radial-gradient(
+        ellipse at 100% 48%,
+        hsl(var(--sona-gradient-d, 205 78% 38%) / 0.08),
+        transparent 40%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(222 36% 7%),
+        hsl(var(--background)) 42%,
+        hsl(222 30% 5%)
+      );
+    background-attachment: fixed;
   }
   body.windows-linux {
     @apply antialiased;
@@ -236,6 +264,66 @@ img {
   box-shadow:
     0 0 3px hsl(var(--primary) / 0.45),
     0 0 20px hsl(var(--primary) / 0.35);
+}
+
+@layer components {
+  .sona-atmosphere {
+    background:
+      radial-gradient(
+        ellipse at 7% 10%,
+        hsl(var(--sona-gradient-a, 323 72% 48%) / 0.16),
+        transparent 32%
+      ),
+      radial-gradient(
+        ellipse at 62% 5%,
+        hsl(var(--sona-gradient-b, 222 82% 48%) / 0.17),
+        transparent 38%
+      ),
+      radial-gradient(
+        ellipse at 95% 24%,
+        hsl(var(--sona-gradient-c, 323 68% 52%) / 0.1),
+        transparent 34%
+      ),
+      radial-gradient(
+        ellipse at 100% 46%,
+        hsl(var(--sona-gradient-d, 205 78% 38%) / 0.08),
+        transparent 40%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(222 36% 7% / 0.98),
+        hsl(var(--background) / 0.98) 46%,
+        hsl(222 30% 5% / 0.98)
+      );
+  }
+
+  .sona-shell {
+    @apply rounded-[var(--radius-surface-lg)] border border-border/35 bg-card shadow-none;
+  }
+
+  .sona-panel {
+    @apply relative overflow-hidden rounded-[var(--radius-surface-lg)] border border-border/35 bg-background-foreground shadow-none;
+  }
+
+  .sona-panel-soft {
+    @apply rounded-[var(--radius-surface-lg)] border border-border/25 bg-background-foreground/80;
+  }
+
+  .sona-pill {
+    @apply inline-flex items-center gap-1.5 rounded-[var(--radius-control)] border border-foreground/[0.12] bg-foreground/[0.055] px-2 py-1 text-xs font-medium text-foreground/75;
+  }
+
+  .sona-card-action {
+    @apply inline-flex h-7 items-center gap-1.5 rounded-full border border-foreground/[0.13] bg-foreground/[0.10] px-3 text-xs font-semibold text-foreground/[0.88] transition-colors hover:bg-foreground/[0.16] hover:text-foreground;
+  }
+
+  .sona-section-title {
+    @apply text-base font-semibold tracking-[-0.01em] text-foreground;
+  }
+
+  .sona-section-subtitle {
+    @apply text-xs text-muted-foreground;
+  }
 }
 
 .dj-card-active-pulse {

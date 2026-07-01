@@ -34,9 +34,9 @@ const CommandDialog = ({
     <Dialog {...props}>
       <DialogTitle className="sr-only">Search Dialog</DialogTitle>
       <DialogContent
-        overlayClassName="bg-black/72 backdrop-blur-sm supports-[backdrop-filter]:bg-black/62"
+        overlayClassName="bg-black/72"
         className={cn(
-          'w-[min(96vw,58rem)] max-w-none overflow-hidden rounded-[var(--radius-surface-lg)] border border-border/70 bg-background/95 p-0 shadow-[0_24px_70px_hsl(var(--background)/0.65)]',
+          'w-[min(96vw,58rem)] max-w-none overflow-hidden rounded-[var(--radius-surface-lg)] border border-border/45 bg-background p-0 shadow-none',
           contentClassName,
         )}
         aria-describedby={undefined}
@@ -53,7 +53,7 @@ const CommandInput = React.forwardRef<
 >(({ className, ...props }, ref) => (
   // eslint-disable-next-line react/no-unknown-property
   <div
-    className="flex items-center border-b border-border/70 bg-background/60 px-3.5"
+    className="mx-3 mt-3 flex items-center rounded-[var(--radius-surface)] border border-border/45 bg-background-foreground px-3.5 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.035)]"
     cmdk-input-wrapper=""
   >
     <Search className="mr-2 h-3.5 w-3.5 shrink-0 text-primary/75" />

@@ -2,7 +2,7 @@ import { Info, Music, Play, RefreshCw } from 'lucide-react'
 import type { MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { ImageLoader } from '@/app/components/image-loader'
+import { SecondaryTileFrame } from '@/app/components/home/secondary-tile'
 import { Button } from '@/app/components/ui/button'
 import { useThisIsArtist } from '@/app/hooks/use-this-is-artist'
 import { ROUTES } from '@/routes/routesList'
@@ -103,7 +103,7 @@ export function ThisIsArtist() {
 
   return (
     <div
-      className="group relative h-full w-full cursor-pointer overflow-hidden rounded-xl border border-border/60 bg-gradient-to-br from-primary/12 via-accent/8 to-background/10 p-4 transition-colors hover:border-primary/35"
+      className="group block h-full w-full cursor-pointer text-left"
       onClick={() => navigateSafe(navigate, ROUTES.LIBRARY.THIS_IS_ARTIST)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -114,43 +114,21 @@ export function ThisIsArtist() {
       role="link"
       tabIndex={0}
     >
-      <ImageLoader id={artist.coverArt} type="artist" size="300">
-        {(artistCoverUrl) => (
-          <>
-            {artistCoverUrl && (
-              <>
-                <div
-                  className="absolute inset-0 bg-cover bg-center blur-md scale-105 opacity-30"
-                  style={{ backgroundImage: `url(${artistCoverUrl})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-background/35 via-background/22 to-background/35" />
-                <div
-                  className="absolute right-0 top-0 h-full w-[58%] bg-cover bg-center opacity-70"
-                  style={{
-                    backgroundImage: `url(${artistCoverUrl})`,
-                    WebkitMaskImage:
-                      'linear-gradient(to left, rgba(0, 0, 0, 1) 58%, rgba(0, 0, 0, 0) 100%)',
-                    maskImage:
-                      'linear-gradient(to left, rgba(0, 0, 0, 1) 58%, rgba(0, 0, 0, 0) 100%)',
-                  }}
-                />
-                <div className="absolute right-0 top-0 h-full w-[62%] bg-gradient-to-l from-background/58 via-background/34 to-transparent" />
-              </>
-            )}
-          </>
-        )}
-      </ImageLoader>
-
-      <div className="relative z-10 flex h-full min-w-0 flex-col justify-between">
+      <SecondaryTileFrame
+        coverArt={artist.coverArt}
+        imageType="artist"
+        imageSize="800"
+        imagePosition="center 28%"
+      >
         <div>
-          <div className="mb-2 inline-flex w-fit max-w-max self-start items-center gap-1.5 rounded-md border border-foreground/15 bg-foreground/5 px-2 py-1 text-xs text-foreground/75 backdrop-blur-sm">
+          <div className="sona-pill mb-3">
             <Music className="h-3.5 w-3.5 text-primary" />
             <span>{t('home.thisIsPrefix')}</span>
           </div>
-          <h2 className="max-w-[70%] break-words text-[1.05rem] font-semibold leading-snug sm:text-[1.12rem]">
+          <h2 className="line-clamp-2 break-words text-[1.06rem] font-semibold leading-[1.12] tracking-[-0.018em] sm:text-[1.14rem]">
             {artist.name}
           </h2>
-          <p className="mt-0.5 text-xs text-muted-foreground/90">
+          <p className="mt-1 text-xs font-medium text-muted-foreground/90">
             {t('playlist.songCount', { count: playlist.length })}
           </p>
         </div>
@@ -158,7 +136,7 @@ export function ThisIsArtist() {
         <div className="flex items-center gap-2">
           <Button
             onClick={handlePlay}
-            className="h-7 gap-1.5 border border-primary/35 bg-primary/90 px-2.5 text-xs hover:bg-primary"
+            className="sona-card-action"
             size="sm"
           >
             <Play className="h-3.5 w-3.5" fill="currentColor" />
@@ -173,14 +151,14 @@ export function ThisIsArtist() {
               generate()
             }}
             disabled={isGenerating}
-            className="h-7 w-7 rounded-md border border-foreground/15 bg-foreground/5 text-foreground/75 hover:bg-foreground/12"
+            className="h-7 w-7 rounded-full border border-foreground/[0.13] bg-foreground/[0.10] text-foreground/75 hover:bg-foreground/[0.16] hover:text-foreground"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isGenerating ? 'animate-spin' : ''}`}
             />
           </Button>
         </div>
-      </div>
+      </SecondaryTileFrame>
     </div>
   )
 }

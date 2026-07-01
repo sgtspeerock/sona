@@ -80,6 +80,7 @@ export function AlbumButtons({ album, showInfoButton }: AlbumButtonsProps) {
         }
       >
         <Actions.PlayIcon />
+        <span>{t('player.tooltips.play', 'Play')}</span>
       </Actions.Button>
 
       {album.song.length > 1 && (

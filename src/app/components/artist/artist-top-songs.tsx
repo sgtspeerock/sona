@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { RabbitHoleButton } from '@/app/components/rabbit-hole-button'
 import { DataTable } from '@/app/components/ui/data-table'
 import { songsColumns } from '@/app/tables/songs-columns'
 import { ROUTES } from '@/routes/routesList'
@@ -27,34 +26,22 @@ export default function ArtistTopSongs({ topSongs, artist }: TopSongsProps) {
     'album',
     'year',
     'duration',
-    'playCount',
-    'played',
-    'contentType',
     'select',
   ]
 
   return (
-    <div className="w-full mb-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-            {t('artist.topSongs')}
-          </h3>
-          <RabbitHoleButton
-            type="artist"
-            artistName={name}
-            artistId={id}
-            size="sm"
-            variant="ghost"
-          />
-        </div>
+    <div className="w-full">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="sona-section-title scroll-m-20">
+          {t('artist.topSongs')}
+        </h3>
 
         <Link
           to={ROUTES.SONGS.ARTIST_TRACKS(id, name)}
           className="h-full"
           data-testid="view-all-tracks-link"
         >
-          <p className="leading-7 text-sm truncate hover:underline text-muted-foreground hover:text-primary">
+          <p className="truncate text-sm text-muted-foreground hover:text-primary hover:underline">
             {t('generic.viewAll')}
           </p>
         </Link>

@@ -14,8 +14,8 @@ export function DataTableListHeader<TData>({
   return (
     <div
       className={clsx(
-        'p-2 h-10 flex items-center justify-start align-middle font-medium',
-        'text-muted-foreground',
+        'p-2 h-10 flex items-center justify-start align-middle text-xs font-semibold uppercase tracking-[0.08em]',
+        'text-muted-foreground/80',
         '[&:has([role=checkbox])]:pr-4',
         columnDef.className,
       )}

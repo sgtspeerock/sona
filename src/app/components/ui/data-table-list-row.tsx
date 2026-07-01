@@ -79,15 +79,15 @@ export function TableListRow<TData>({
         onTouchCancel={handleTouchCancel}
         onContextMenu={(e) => handleClicks(e, row)}
         className={clsx(
-          'group/tablerow w-[calc(100%-10px)] flex flex-row transition-colors',
-          'data-[state=selected]:bg-foreground/30 hover:bg-foreground/20',
-          isQueue && 'rounded-md',
-          isRowSongActive && 'row-active bg-foreground/20',
+          'group/tablerow flex w-[calc(100%-10px)] flex-row rounded-[var(--radius-control)] border border-transparent bg-background-foreground/70 transition-colors',
+          'data-[state=selected]:border-border/35 data-[state=selected]:bg-foreground/[0.11] hover:border-border/25 hover:bg-foreground/[0.075]',
+          isQueue && 'rounded-[var(--radius-control)]',
+          isRowSongActive && 'row-active border-primary/30 bg-primary/10',
         )}
         style={{
-          height: `${virtualRow.size}px`,
+          height: `${Math.max(44, virtualRow.size - 4)}px`,
           position: 'absolute',
-          top: virtualRow.start,
+          top: virtualRow.start + 2,
         }}
       >
         {row.getVisibleCells().map((cell) => (

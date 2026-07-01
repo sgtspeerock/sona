@@ -11,6 +11,7 @@ import PreviewList from '@/app/components/home/preview-list'
 import ListWrapper from '@/app/components/list-wrapper'
 import { DataTable } from '@/app/components/ui/data-table'
 import { PageState } from '@/app/components/ui/page-state'
+import { SonaPanel } from '@/app/components/ui/sona'
 import {
   useGetAlbum,
   useGetArtistAlbums,
@@ -82,12 +83,7 @@ export default function Album() {
   const columnsToShow: ColumnFilter[] = [
     'trackNumber',
     'title',
-    // 'artist',
     'duration',
-    'playCount',
-    'played',
-    'bitRate',
-    'contentType',
     'select',
   ]
 
@@ -142,52 +138,59 @@ export default function Album() {
         badges={badges}
       />
 
-      <ListWrapper>
-        <AlbumInfo album={album} />
+      <ListWrapper className="space-y-6">
+        <SonaPanel className="p-5">
+          <AlbumInfo album={album} />
 
-        <DataTable
-          columns={columns}
-          data={albumSongs}
-          handlePlaySong={(row) => playAlbumFromIndex(row.index)}
-          columnFilter={columnsToShow}
-          noRowsMessage={t('states.empty.noTracks')}
-          showDiscNumber={true}
-          variant="modern"
-          highlightRowId={highlightSongId}
-        />
-
-        {albumSongs.length === 0 && (
-          <PageState
-            title={t('states.empty.title')}
-            description={t('states.empty.albumDescription')}
-            className="min-h-[160px] px-0 py-2"
+          <DataTable
+            columns={columns}
+            data={albumSongs}
+            handlePlaySong={(row) => playAlbumFromIndex(row.index)}
+            columnFilter={columnsToShow}
+            noRowsMessage={t('states.empty.noTracks')}
+            showDiscNumber={true}
+            variant="modern"
+            highlightRowId={highlightSongId}
           />
-        )}
 
-        <RecordLabelsInfo album={album} />
+          {albumSongs.length === 0 && (
+            <PageState
+              title={t('states.empty.title')}
+              description={t('states.empty.albumDescription')}
+              className="min-h-[160px] px-0 py-2"
+            />
+          )}
 
-        <div className="mt-4">
+          <RecordLabelsInfo album={album} />
+        </SonaPanel>
+
+        <div className="space-y-6">
           {moreAlbumsIsLoading && <PreviewListFallback />}
           {artistAlbums && !moreAlbumsIsLoading && album.artistId && (
-            <PreviewList
-              list={artistAlbums}
-              showMore={true}
-              title={t('album.more.listTitle')}
-              moreTitle={t('album.more.discography')}
-              moreRoute={ROUTES.ALBUMS.ARTIST(album.artistId, album.artist)}
-              showAlbumYearInSubtitle
-            />
+            <section className="px-1 pt-1">
+              <PreviewList
+                list={artistAlbums}
+                showMore={true}
+                title={t('album.more.listTitle')}
+                moreTitle={t('album.more.discography')}
+                moreRoute={ROUTES.ALBUMS.ARTIST(album.artistId, album.artist)}
+                showAlbumYearInSubtitle
+              />
+            </section>
           )}
 
           {randomAlbumsIsLoading && <PreviewListFallback />}
           {!randomAlbumsIsLoading && randomGenreAlbums && (
-            <PreviewList
-              list={randomGenreAlbums}
-              moreRoute={ROUTES.ALBUMS.GENRE(album.genre)}
-              title={t('album.more.genreTitle', {
-                genre: album.genre,
-              })}
-            />
+            <section className="px-1 pt-1">
+              <PreviewList
+                list={randomGenreAlbums}
+                moreRoute={ROUTES.ALBUMS.GENRE(album.genre)}
+                title={t('album.more.genreTitle', {
+                  genre: album.genre,
+                })}
+                compact
+              />
+            </section>
           )}
         </div>
       </ListWrapper>

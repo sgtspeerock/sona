@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { subsonic } from '@/service/subsonic'
 import { Albums, AlbumsListData } from '@/types/responses/album'
 import { Genres } from '@/types/responses/genre'
+import type { ISong } from '@/types/responses/song'
 import { convertMinutesToMs } from '@/utils/convertSecondsToTime'
 import { logger } from '@/utils/logger'
 import { queryKeys } from '@/utils/queryKeys'
@@ -90,6 +91,12 @@ export interface GenreDiscoveryItem {
 export interface AnniversaryRadioData {
   album?: Albums
   yearsAgo?: number
+}
+
+export interface SessionEnergyData {
+  songs: ISong[]
+  genre?: string
+  artist?: string
 }
 
 function deriveGenreDiscoveryItems(
@@ -202,6 +209,66 @@ export const useGetAnniversaryRadio = () => {
     },
     staleTime: convertMinutesToMs(60),
     gcTime: convertMinutesToMs(120),
+    refetchOnWindowFocus: false,
+  })
+}
+
+export const useGetSessionEnergy = () => {
+  const { data: recentlyPlayed } = useGetRecentlyPlayed()
+  const { data: mostPlayed } = useGetMostPlayed()
+
+  const profile = useMemo(() => {
+    const recentAlbums = recentlyPlayed?.list ?? []
+    const fallbackAlbums = mostPlayed?.list ?? []
+    const sourceAlbums = recentAlbums.length > 0 ? recentAlbums : fallbackAlbums
+    const genreCounts = new Map<string, number>()
+    const artistCounts = new Map<string, number>()
+
+    sourceAlbums.slice(0, 12).forEach((album, index) => {
+      const weight = Math.max(1, 12 - index)
+      if (album.genre) {
+        genreCounts.set(album.genre, (genreCounts.get(album.genre) ?? 0) + weight)
+      }
+      if (album.artist) {
+        artistCounts.set(
+          album.artist,
+          (artistCounts.get(album.artist) ?? 0) + weight,
+        )
+      }
+    })
+
+    const genre = Array.from(genreCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0]
+    const artist = Array.from(artistCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0]
+
+    return { genre, artist }
+  }, [mostPlayed?.list, recentlyPlayed?.list])
+
+  return useQuery({
+    queryKey: [queryKeys.song.sessionEnergy, profile.genre, profile.artist],
+    queryFn: async (): Promise<SessionEnergyData> => {
+      const songs =
+        (await subsonic.songs.getRandomSongs({
+          size: 40,
+          genre: profile.genre,
+        })) ?? []
+
+      if (songs.length > 0) {
+        return {
+          songs,
+          genre: profile.genre,
+          artist: profile.artist,
+        }
+      }
+
+      return {
+        songs: (await subsonic.songs.getRandomSongs({ size: 40 })) ?? [],
+        genre: profile.genre,
+        artist: profile.artist,
+      }
+    },
+    enabled: Boolean(recentlyPlayed || mostPlayed),
+    staleTime: convertMinutesToMs(8),
+    gcTime: convertMinutesToMs(30),
     refetchOnWindowFocus: false,
   })
 }

@@ -12,9 +12,10 @@ import type { Song } from '@/types/responses/song'
 interface OnRepeatItemProps {
   song: Song
   playcount: number
+  compact?: boolean
 }
 
-export function OnRepeatItem({ song, playcount }: OnRepeatItemProps) {
+export function OnRepeatItem({ song, playcount: _playcount, compact = false }: OnRepeatItemProps) {
   const { t } = useTranslation()
   const { setSongList } = usePlayerActions()
   const [imageLoaded, setImageLoaded] = useState(false)
@@ -26,21 +27,40 @@ export function OnRepeatItem({ song, playcount }: OnRepeatItemProps) {
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Background Image with Blur */}
-      <ImageLoader id={song.coverArt} type="album">
+      <ImageLoader
+        id={song.artistId || song.coverArt}
+        type={song.artistId ? 'artist' : 'album'}
+        size="1200"
+      >
         {(src) => (
           <>
             <div
-              className="absolute inset-0 bg-cover bg-center blur-2xl scale-110 opacity-45"
-              style={{ backgroundImage: `url(${src})` }}
+              className="absolute inset-y-0 left-0 w-[62%] scale-[1.16] bg-cover opacity-[0.7] blur-3xl saturate-125"
+              style={{
+                backgroundImage: `url(${src})`,
+                backgroundPosition: 'center 28%',
+              }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/72 via-background/52 to-background/86" />
+            <div
+              className="absolute right-0 top-0 h-full w-[80%] scale-[1.08] bg-cover opacity-100 saturate-125"
+              style={{
+                backgroundImage: `url(${src})`,
+                backgroundPosition: 'center 28%',
+                WebkitMaskImage:
+                  'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 48%, rgba(0,0,0,0.24) 76%, rgba(0,0,0,0) 100%)',
+                maskImage:
+                  'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 48%, rgba(0,0,0,0.24) 76%, rgba(0,0,0,0) 100%)',
+              }}
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,hsl(var(--background)/0.96)_0%,hsl(var(--background)/0.84)_35%,hsl(var(--background)/0.28)_72%,hsl(var(--background)/0.06)_100%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_20%,hsl(var(--primary)/0.34),transparent_34%),radial-gradient(circle_at_72%_88%,hsl(var(--accent-foreground)/0.18),transparent_36%)] opacity-85 mix-blend-screen" />
           </>
         )}
       </ImageLoader>
 
       {/* Content */}
-      <div className="relative z-10 grid h-full grid-cols-[auto,minmax(0,1fr)] items-center gap-5 py-4 pl-7 pr-5 min-[1700px]:gap-6 min-[1700px]:py-5 min-[1700px]:pl-8 min-[1700px]:pr-6 min-[2600px]:gap-7 min-[2600px]:pl-9 min-[2600px]:pr-7">
-        <div className="flex flex-col items-center justify-center gap-3">
+      <div className="relative z-10 grid h-full grid-cols-[auto,minmax(0,1fr)] items-center gap-7 py-5 pl-8 pr-20 min-[1700px]:gap-8 min-[1700px]:pl-9 min-[2600px]:gap-10">
+        <div className="flex flex-col items-center justify-center gap-2.5">
           <Link
             to={ROUTES.ALBUM.PAGE(song.albumId)}
             className="group relative block"
@@ -51,7 +71,9 @@ export function OnRepeatItem({ song, playcount }: OnRepeatItemProps) {
                   src={src}
                   alt={song.title}
                   className={cn(
-                    'aspect-square h-[236px] w-[236px] rounded-xl border border-border/55 object-cover shadow-2xl transition-all duration-300 group-hover:scale-[1.02] min-[1700px]:h-[272px] min-[1700px]:w-[272px] min-[2600px]:h-[300px] min-[2600px]:w-[300px]',
+                    compact
+                      ? 'aspect-square h-[178px] w-[178px] rounded-xl border border-border/55 object-cover shadow-none transition-all duration-300 group-hover:scale-[1.015] min-[1700px]:h-[188px] min-[1700px]:w-[188px]'
+                      : 'aspect-square h-[210px] w-[210px] rounded-xl border border-border/55 object-cover shadow-2xl transition-all duration-300 group-hover:scale-[1.02] min-[1700px]:h-[230px] min-[1700px]:w-[230px] min-[2600px]:h-[250px] min-[2600px]:w-[250px]',
                     imageLoaded ? 'opacity-100' : 'opacity-0',
                   )}
                   onLoad={() => setImageLoaded(true)}
@@ -60,8 +82,9 @@ export function OnRepeatItem({ song, playcount }: OnRepeatItemProps) {
             </ImageLoader>
           </Link>
 
-          <div className="w-[236px] min-[1700px]:w-[272px] min-[2600px]:w-[300px]">
-            <div className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border/60 bg-background/70 px-3 py-1.5 text-center text-sm text-foreground/80 min-[2300px]:text-base">
+          {!compact && (
+          <div className="w-[210px] min-[1700px]:w-[230px] min-[2600px]:w-[250px]">
+            <div className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border/45 bg-background px-2.5 py-1.5 text-center text-xs font-medium text-foreground/[0.82]">
               {song.genre && <span className="truncate">{song.genre}</span>}
               {song.genre && song.year && (
                 <span className="text-foreground/40">•</span>
@@ -69,39 +92,44 @@ export function OnRepeatItem({ song, playcount }: OnRepeatItemProps) {
               {song.year && <span>{song.year}</span>}
             </div>
           </div>
+          )}
         </div>
 
-        <div className="min-w-0 space-y-3 text-left">
-          <div className="space-y-1.5">
-            <div className="mb-1 inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">
+        <div className="min-w-0 max-w-[560px] space-y-3 text-left">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-md border border-primary/35 bg-primary/12 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.11em] text-primary">
               <Repeat className="w-3.5 h-3.5" />
               <span>On Repeat</span>
             </div>
             <Link
               to={ROUTES.ALBUM.PAGE(song.albumId)}
-              className="hover:underline"
+              className="mt-4 block hover:underline"
             >
-              <h2 className="line-clamp-2 break-words text-[1.9rem] font-bold leading-tight min-[1700px]:text-[2.2rem] min-[2600px]:text-[2.45rem]">
+              <h2 className="line-clamp-2 break-words text-[1.98rem] font-bold leading-[1.01] tracking-[-0.045em] min-[1700px]:text-[2.2rem] min-[2600px]:text-[2.4rem]">
                 {song.title}
               </h2>
             </Link>
             <Link
               to={ROUTES.ARTIST.PAGE(song.artistId)}
-              className="inline-block text-base text-muted-foreground hover:text-primary hover:underline min-[1700px]:text-[1.1rem]"
+              className="mt-1.5 inline-block text-base text-muted-foreground hover:text-primary hover:underline min-[1700px]:text-[1.05rem]"
             >
               {song.artist}
             </Link>
-            <p className="text-sm text-muted-foreground/90">
-              {t('home.playsThisWeek', { count: playcount })}
-            </p>
+            {compact && (
+              <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] font-medium text-muted-foreground/90">
+                {song.year && <span>{song.year}</span>}
+                {song.year && song.genre && <span>&bull;</span>}
+                {song.genre && <span>{song.genre}</span>}
+              </div>
+            )}
           </div>
 
           <Button
             onClick={handlePlaySong}
-            className="mt-4 h-10 w-fit gap-2 border border-primary/30 bg-primary/90 px-4 text-sm hover:bg-primary"
-            size="default"
+            className="mt-1 h-8 w-fit gap-2 border border-primary/30 bg-primary px-3 text-xs text-primary-foreground hover:bg-primary/90"
+            size="sm"
           >
-            <Play className="w-4 h-4" fill="currentColor" />
+            <Play className="h-3.5 w-3.5" fill="currentColor" />
             {t('home.playNow')}
           </Button>
         </div>

@@ -87,7 +87,7 @@ export function SessionModeDropdown() {
       const previousTheme = getStoredTheme()
       const fallbackTheme = getLastNonSessionTheme()
       startTransition(() => {
-        setTheme(previousTheme ?? fallbackTheme ?? theme ?? Theme.Dark)
+        setTheme(previousTheme ?? fallbackTheme ?? theme ?? Theme.Reactive)
       })
       if (mode === 'focus') {
         const closeButton = document.querySelector(

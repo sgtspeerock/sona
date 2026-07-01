@@ -7,6 +7,17 @@ import { useFullscreenState } from '@/store/ui.store'
 
 export const appThemes: Theme[] = Object.values(Theme)
 
+const legacyThemes = [
+  'one-dark',
+  'marmalade-beaver',
+  'monokai-pro',
+  'github-dark',
+  'achiever',
+  'dracula',
+  'tinacious-design',
+  'vue-dark',
+]
+
 const REACTIVE_TRANSITION_CLASS = 'reactive-theme-transition'
 
 function hexToHsl(hex: string) {
@@ -118,7 +129,7 @@ export function ThemeObserver() {
   useLayoutEffect(() => {
     const root = window.document.documentElement
 
-    root.classList.remove(...appThemes)
+    root.classList.remove(...appThemes, ...legacyThemes)
     root.classList.add(theme)
 
     if (theme === Theme.Reactive) {

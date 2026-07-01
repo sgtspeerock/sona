@@ -41,7 +41,8 @@ export function SidebarPodcastHoverItem({ item }: { item: ISidebarItem }) {
                 asChild
                 className={clsx(
                   'justify-start px-2 py-0 text-sm font-normal h-8 rounded-sm',
-                  isActive(item.route) && 'pointer-events-none bg-accent',
+                  isActive(item.route) &&
+                    'pointer-events-none bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
                 )}
               >
                 <Link to={item.route}>{t(item.title)}</Link>

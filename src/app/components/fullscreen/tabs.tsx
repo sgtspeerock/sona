@@ -38,7 +38,7 @@ export function FullscreenTabs({
 
   const exitFocusMode = () => {
     const previousTheme = getStoredTheme()
-    setTheme(previousTheme ?? Theme.Dark)
+    setTheme(previousTheme ?? Theme.Reactive)
     safeStorageSet(FULLSCREEN_HYPNOTIC_BACKDROP_KEY, 'false')
     startSessionMode('off').catch(() => undefined)
 

@@ -15,8 +15,15 @@ export function FullscreenSongImage({ isChromeVisible = true }: FullscreenSongIm
     return songlist.currentSong
   })
 
-  const [showVisualizer, setShowVisualizer] = useState(false)
-  const [renderVisualizerLayer, setRenderVisualizerLayer] = useState(false)
+  const requestedVisualizerActive = useFullscreenState(
+    (state) => state.visualizerActive,
+  ) as boolean
+  const [showVisualizer, setShowVisualizer] = useState(
+    requestedVisualizerActive,
+  )
+  const [renderVisualizerLayer, setRenderVisualizerLayer] = useState(
+    requestedVisualizerActive,
+  )
   const {
     preset,
     setVisualizerActive,
@@ -44,6 +51,10 @@ export function FullscreenSongImage({ isChromeVisible = true }: FullscreenSongIm
   }
 
   const VisualizerComponent = VISUALIZERS[preset]
+
+  useEffect(() => {
+    if (requestedVisualizerActive) setShowVisualizer(true)
+  }, [requestedVisualizerActive])
 
   useEffect(() => {
     setVisualizerActive(showVisualizer)

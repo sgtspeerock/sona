@@ -23,7 +23,7 @@ function Container({ children, className, ...rest }: ActionsContainerProps) {
   return (
     <div
       {...rest}
-      className={cn('mb-6 flex w-full items-center gap-2', className)}
+      className={cn('mb-5 flex w-full items-center gap-2', className)}
     >
       {children}
     </div>
@@ -49,12 +49,12 @@ function Button({
     <ComponentButton
       data-state={isActive ? 'active' : 'inactive'}
       className={cn(
-        'h-14 w-14 rounded-full border border-transparent transition-all duration-150',
+        'h-10 rounded-[var(--radius-control)] border border-transparent transition-all duration-150',
         'active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
-        'data-[state=active]:bg-foreground/12 data-[state=active]:border-border/60',
+        'data-[state=active]:border-border/60 data-[state=active]:bg-foreground/12',
         buttonStyle === 'primary'
-          ? 'mr-2 hover:scale-105'
-          : 'hover:bg-foreground/20',
+          ? 'mr-1 min-w-10 gap-2 px-4 text-sm font-semibold shadow-[0_12px_36px_hsl(var(--primary)/0.22)] hover:scale-[1.02]'
+          : 'w-10 px-0 text-muted-foreground hover:bg-foreground/12 hover:text-foreground',
         className,
       )}
       variant={buttonStyle === 'primary' ? 'default' : 'ghost'}
@@ -83,15 +83,15 @@ function Dropdown({ tooltip, options }: DropdownProps) {
       >
         <ComponentButton
           className={clsx(
-            'h-14 w-14 rounded-full border border-transparent',
-            'data-[state=open]:bg-foreground/20',
-            'hover:bg-foreground/20',
+            'h-10 w-10 rounded-[var(--radius-control)] border border-transparent px-0 text-muted-foreground',
+            'data-[state=open]:bg-foreground/12 data-[state=open]:text-foreground',
+            'hover:bg-foreground/12 hover:text-foreground',
             'transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
           )}
           variant="ghost"
         >
           <SimpleTooltip text={tooltip}>
-            <div className="min-w-14 h-14 rounded-full flex justify-center items-center">
+            <div className="flex h-10 min-w-10 items-center justify-center rounded-[var(--radius-control)]">
               <EllipsisIcon />
             </div>
           </SimpleTooltip>

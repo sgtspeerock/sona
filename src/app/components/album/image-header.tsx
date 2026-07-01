@@ -6,7 +6,6 @@ import {
   AlbumArtistInfo,
   AlbumMultipleArtistsInfo,
 } from '@/app/components/album/artists'
-import { ImageHeaderEffect } from '@/app/components/album/header-effect'
 import { AlbumHeaderFallback } from '@/app/components/fallbacks/album-fallbacks'
 import { BadgesData, HeaderInfoGenerator } from '@/app/components/header-info'
 import { ImageLoader } from '@/app/components/image-loader'
@@ -28,6 +27,7 @@ interface ImageHeaderProps {
   coverArtAlt: string
   badges: BadgesData
   isPlaylist?: boolean
+  variant?: 'release' | 'artist'
 }
 
 export default function ImageHeader({
@@ -42,6 +42,7 @@ export default function ImageHeader({
   coverArtAlt,
   badges,
   isPlaylist = false,
+  variant = 'release',
 }: ImageHeaderProps) {
   const [open, setOpen] = useState(false)
   const [overlayOpacity, setOverlayOpacity] = useState(0.42)
@@ -128,6 +129,7 @@ export default function ImageHeader({
   }
 
   const hasMultipleArtists = artists ? artists.length > 1 : false
+  const isArtistVariant = variant === 'artist'
 
   return (
     <ImageLoader id={coverArtId} type={coverArtType} size={coverArtSize}>
@@ -137,149 +139,178 @@ export default function ImageHeader({
           const usesExternalUrl = /^https?:\/\//i.test(resolvedDisplaySrc)
           const shouldUseAnonymousCors = !usesExternalUrl
           return (
-            <div
-              className="flex relative w-full h-[calc(3rem+200px)] 2xl:h-[calc(3rem+250px)]"
-              key={`header-${coverArtId}`}
-            >
-              {isLoading && (
-                <div className="absolute inset-0 z-20">
-                  <AlbumHeaderFallback />
-                </div>
-              )}
-
-              {/* Blurred background image */}
-              {!isLoading && src && (
-                <div className="absolute inset-0 z-0 overflow-visible">
-                  <img
-                    src={resolvedDisplaySrc}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-full h-[calc(100%+205px)] object-cover scale-125"
-                    style={{
-                      filter: 'blur(24px)',
-                      WebkitMaskImage:
-                        'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) calc(100% - 205px), rgba(0,0,0,0) 100%)',
-                      maskImage:
-                        'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) calc(100% - 205px), rgba(0,0,0,0) 100%)',
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0 pointer-events-none transition-opacity duration-500"
-                    style={{
-                      background:
-                        'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,var(--sona-header-overlay-mid)) 52%, rgba(0,0,0,0.22) 100%)',
-                      // CSS custom prop keeps style readable and allows smooth updates.
-                      ['--sona-header-overlay-mid' as string]:
-                        overlayOpacity.toFixed(2),
-                    }}
-                  />
-                </div>
-              )}
-
+            <div className="relative pb-6" key={`header-${coverArtId}`}>
+              <div
+                className="pointer-events-none absolute inset-x-8 bottom-0 h-24 rounded-b-[var(--radius-surface-lg)] bg-[linear-gradient(180deg,hsl(var(--primary)/0.13),hsl(var(--background)/0))] blur-2xl"
+                aria-hidden="true"
+              />
               <div
                 className={cn(
-                  'w-full px-8 py-6 flex gap-4 absolute inset-0 z-10',
+                  'relative mx-8 mt-5 flex w-auto overflow-hidden rounded-[var(--radius-surface-lg)] border border-border/35 bg-card/82 shadow-[0_18px_70px_hsl(var(--background)/0.24)]',
+                  isArtistVariant
+                    ? 'h-[232px] 2xl:h-[270px]'
+                    : 'h-[266px] 2xl:h-[316px]',
                 )}
               >
-                <button
-                  type="button"
-                  onClick={() => setOpen(true)}
+                {isLoading && (
+                  <div className="absolute inset-0 z-20">
+                    <AlbumHeaderFallback />
+                  </div>
+                )}
+
+                {/* Blurred background image */}
+                {!isLoading && src && (
+                  <div className="absolute inset-0 z-0 overflow-visible">
+                    <img
+                      src={resolvedDisplaySrc}
+                      alt=""
+                      aria-hidden="true"
+                      className={cn(
+                        'h-full w-full scale-110 object-cover opacity-80 saturate-125',
+                        isArtistVariant && 'object-top',
+                      )}
+                      style={{
+                        filter: 'blur(18px)',
+                      }}
+                    />
+                    {!isArtistVariant && (
+                      <img
+                        src={resolvedDisplaySrc}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-y-0 right-0 h-full w-[52%] scale-105 object-cover object-center opacity-60 saturate-125"
+                        style={{
+                          WebkitMaskImage:
+                            'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.8) 34%, rgba(0,0,0,1) 100%)',
+                          maskImage:
+                            'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.8) 34%, rgba(0,0,0,1) 100%)',
+                        }}
+                      />
+                    )}
+                    <div
+                      className="absolute inset-0 pointer-events-none transition-opacity duration-500"
+                      style={{
+                        background:
+                          isArtistVariant
+                            ? 'linear-gradient(90deg, hsl(var(--background) / 0.9) 0%, hsl(var(--background) / var(--sona-header-overlay-mid)) 54%, hsl(var(--background) / 0.46) 100%), radial-gradient(circle at 74% 22%, hsl(var(--primary) / 0.18), transparent 42%)'
+                            : 'linear-gradient(90deg, hsl(var(--background) / 0.92) 0%, hsl(var(--background) / var(--sona-header-overlay-mid)) 46%, hsl(var(--background) / 0.34) 100%), linear-gradient(180deg, hsl(var(--primary) / 0.16) 0%, transparent 58%)',
+                        // CSS custom prop keeps style readable and allows smooth updates.
+                        ['--sona-header-overlay-mid' as string]:
+                          overlayOpacity.toFixed(2),
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div
                   className={cn(
-                    'w-[200px] h-[200px] min-w-[200px] min-h-[200px]',
-                    '2xl:w-[250px] 2xl:h-[250px] 2xl:min-w-[250px] 2xl:min-h-[250px]',
-                    'aspect-square rounded-[var(--radius-surface-lg)] bg-transparent',
-                    'shadow-header-image overflow-hidden group',
-                    'transition-transform duration-150 ease-out',
-                    'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
+                    'w-full px-9 py-7 flex gap-6 absolute inset-0 z-10',
                   )}
                 >
-                  <LazyLoadImage
-                    key={coverArtId}
-                    effect="opacity"
-                    crossOrigin={
-                      shouldUseAnonymousCors ? 'anonymous' : undefined
-                    }
-                    id="cover-art-image"
-                    src={resolvedDisplaySrc}
-                    alt={coverArtAlt}
-                    className="aspect-square object-cover w-full h-full rounded-[var(--radius-surface-lg)] transition-transform duration-150 ease-out will-change-transform group-hover:scale-[1.02]"
-                    width="100%"
-                    height="100%"
-                    onError={handleError}
-                    onLoad={handleImageLoad}
-                  />
-                </button>
-
-                <div className="flex w-full max-w-[calc(100%-216px)] 2xl:max-w-[calc(100%-266px)] flex-col justify-end z-10">
-                  <p className="text-sm text-muted-foreground text-shadow-md">
-                    {type}
-                  </p>
-                  <h1
-                    className={clsx(
-                      'max-w-full scroll-m-20 font-bold tracking-tight antialiased text-shadow-md break-words line-clamp-2',
-                      getTextSizeClass(title),
+                  <button
+                    type="button"
+                    onClick={() => setOpen(true)}
+                    className={cn(
+                      isArtistVariant
+                        ? 'h-[172px] min-h-[172px] w-[172px] min-w-[172px] 2xl:h-[208px] 2xl:min-h-[208px] 2xl:w-[208px] 2xl:min-w-[208px]'
+                        : 'h-[212px] min-h-[212px] w-[212px] min-w-[212px] 2xl:h-[262px] 2xl:min-h-[262px] 2xl:w-[262px] 2xl:min-w-[262px]',
+                      'aspect-square bg-transparent',
+                      isArtistVariant
+                        ? 'rounded-full'
+                        : 'rounded-[var(--radius-surface-lg)]',
+                      'group overflow-hidden border border-border/40 bg-background/70',
+                      isArtistVariant && 'border-primary/35 shadow-[0_0_0_6px_hsl(var(--primary)/0.08)]',
+                      'transition-transform duration-150 ease-out',
+                      'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
                     )}
                   >
-                    {title}
-                  </h1>
+                    <LazyLoadImage
+                      key={coverArtId}
+                      effect="opacity"
+                      crossOrigin={
+                        shouldUseAnonymousCors ? 'anonymous' : undefined
+                      }
+                      id="cover-art-image"
+                      src={resolvedDisplaySrc}
+                      alt={coverArtAlt}
+                      className={cn(
+                        'aspect-square h-full w-full object-cover transition-transform duration-150 ease-out will-change-transform group-hover:scale-[1.02]',
+                        isArtistVariant
+                          ? 'rounded-full object-top'
+                          : 'rounded-[var(--radius-surface-lg)]',
+                      )}
+                      width="100%"
+                      height="100%"
+                      onError={handleError}
+                      onLoad={handleImageLoad}
+                    />
+                  </button>
 
-                  {!isPlaylist && artists && hasMultipleArtists && (
-                    <div className="flex items-center mt-2">
-                      <AlbumMultipleArtistsInfo artists={artists} />
-                      <HeaderInfoGenerator badges={badges} />
-                    </div>
-                  )}
+                  <div className="z-10 flex w-full max-w-[calc(100%-236px)] flex-col justify-center 2xl:max-w-[calc(100%-286px)]">
+                    <p className="mb-5 w-fit rounded-full border border-border/45 bg-background/55 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary shadow-[0_10px_30px_hsl(var(--background)/0.22)]">
+                      {type}
+                    </p>
+                    <h1
+                      className={clsx(
+                        'max-w-full scroll-m-20 font-bold tracking-[-0.04em] antialiased text-shadow-md break-words line-clamp-2',
+                        getTextSizeClass(title),
+                      )}
+                    >
+                      {title}
+                    </h1>
 
-                  {!isPlaylist && subtitle && !hasMultipleArtists && (
-                    <>
-                      {artistId ? (
-                        <div className="flex items-center mt-2">
-                          <AlbumArtistInfo id={artistId} name={subtitle} />
-                          <HeaderInfoGenerator badges={badges} />
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-shadow-md">
+                    {!isPlaylist && artists && hasMultipleArtists && (
+                      <div className="mt-4 flex items-center">
+                        <AlbumMultipleArtistsInfo artists={artists} />
+                        <HeaderInfoGenerator badges={badges} />
+                      </div>
+                    )}
+
+                    {!isPlaylist && subtitle && !hasMultipleArtists && (
+                      <>
+                        {artistId ? (
+                          <div className="mt-4 flex items-center">
+                            <AlbumArtistInfo id={artistId} name={subtitle} />
+                            <HeaderInfoGenerator badges={badges} />
+                          </div>
+                        ) : (
+                          <p className="mt-3 text-sm text-muted-foreground text-shadow-md">
+                            {subtitle}
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {isPlaylist && subtitle && (
+                      <>
+                        <p className="mb-3 mt-3 max-w-3xl text-sm text-muted-foreground text-shadow-md line-clamp-2">
                           {subtitle}
                         </p>
-                      )}
-                    </>
-                  )}
+                        <HeaderInfoGenerator
+                          badges={badges}
+                          showFirstDot={false}
+                        />
+                      </>
+                    )}
 
-                  {isPlaylist && subtitle && (
-                    <>
-                      <p className="text-sm text-muted-foreground text-shadow-md line-clamp-2 mt-1 mb-2">
-                        {subtitle}
-                      </p>
-                      <HeaderInfoGenerator
-                        badges={badges}
-                        showFirstDot={false}
-                      />
-                    </>
-                  )}
-
-                  {!subtitle && (
-                    <div className="mt-1">
-                      <HeaderInfoGenerator
-                        badges={badges}
-                        showFirstDot={false}
-                      />
-                    </div>
-                  )}
+                    {!subtitle && (
+                      <div className="mt-4">
+                        <HeaderInfoGenerator
+                          badges={badges}
+                          showFirstDot={false}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                <CustomLightBox
+                  open={open}
+                  close={setOpen}
+                  src={resolvedDisplaySrc}
+                  alt={coverArtAlt}
+                />
               </div>
-
-              {isLoading ? (
-                <ImageHeaderEffect className="bg-muted-foreground" />
-              ) : (
-                <ImageHeaderEffect />
-              )}
-
-              <CustomLightBox
-                open={open}
-                close={setOpen}
-                src={resolvedDisplaySrc}
-                alt={coverArtAlt}
-              />
             </div>
           )
         })()

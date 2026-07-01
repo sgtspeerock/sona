@@ -3,7 +3,6 @@ import { SessionModeDropdown } from '@/app/components/header/session-mode-dropdo
 import { UserDropdown } from '@/app/components/header/user-dropdown'
 import { HeaderSongInfo } from '@/app/components/header-song'
 import { MiniPlayerModeButton } from '@/app/components/mini-player/mode-button'
-import { SettingsButton } from '@/app/components/settings/header-button'
 import { MainSidebarTrigger } from '@/app/components/ui/main-sidebar'
 import { WindowControlButtons } from '@/app/components/window-control-buttons'
 import { useAppWindow } from '@/app/hooks/use-app-window'
@@ -23,7 +22,6 @@ export function Header() {
       <HeaderSongInfo />
       <div className="flex justify-end items-center gap-2">
         <SessionModeDropdown />
-        <SettingsButton />
         <UserDropdown />
         {isWindows && !isFullscreen && (
           <WindowControlButtons

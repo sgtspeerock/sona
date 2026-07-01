@@ -75,6 +75,8 @@ interface DataTableProps<TData, TValue> {
   handlePlaySong?: (row: Row<TData>) => void
   columnFilter?: ColumnFilter[]
   showPagination?: boolean
+  paginationPageSizeOptions?: number[]
+  initialPageSize?: number
   showSearch?: boolean
   searchColumn?: string
   noRowsMessage?: string
@@ -98,6 +100,8 @@ export function DataTable<TData, TValue>({
   handlePlaySong,
   columnFilter,
   showPagination = false,
+  paginationPageSizeOptions,
+  initialPageSize,
   showSearch = false,
   searchColumn,
   noRowsMessage,
@@ -176,6 +180,11 @@ export function DataTable<TData, TValue>({
       columnFilters: columnSearch,
       sorting,
       rowSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: initialPageSize ?? paginationPageSizeOptions?.[0] ?? 10,
+      },
     },
   })
 
@@ -473,7 +482,7 @@ export function DataTable<TData, TValue>({
   const tableContent = (
     <>
       {showSearch && searchColumn && (
-        <div className="flex items-center mb-4" data-testid="table-search">
+        <div className="mb-4 flex items-center" data-testid="table-search">
           <div className="w-72 relative">
             <Input
               placeholder={t('sidebar.search')}
@@ -486,6 +495,7 @@ export function DataTable<TData, TValue>({
               autoCorrect="false"
               autoCapitalize="false"
               spellCheck="false"
+              className="h-9 rounded-[var(--radius-control)] border-border/35 bg-background-foreground"
             />
             {inputValue !== '' && inputValue !== undefined && (
               <Button
@@ -503,12 +513,12 @@ export function DataTable<TData, TValue>({
         </div>
       )}
 
-      <div className={clsx(isClassic && 'rounded-md border')}>
+      <div className={clsx(isClassic && 'rounded-[var(--radius-surface)] border border-border/35 bg-card/70 p-1')}>
         <div
           ref={tableRef}
           className={clsx(
-            'relative w-full overflow-hidden rounded-md cursor-default caption-bottom text-sm',
-            isClassic ? 'bg-background' : 'bg-transparent',
+            'relative w-full overflow-hidden rounded-[var(--radius-surface)] cursor-default caption-bottom text-sm',
+            isClassic ? 'bg-transparent' : 'bg-transparent',
           )}
           data-testid="data-table"
           role="table"
@@ -519,8 +529,8 @@ export function DataTable<TData, TValue>({
                 <div
                   key={headerGroup.id}
                   className={clsx(
-                    'w-full flex flex-row border-b',
-                    isModern && 'mb-2 border-foreground/20',
+                    'w-full flex flex-row border-b border-border/20',
+                    isModern && 'mb-2 px-1',
                   )}
                   role="row"
                 >
@@ -534,7 +544,7 @@ export function DataTable<TData, TValue>({
                       <div
                         key={header.id}
                         className={clsx(
-                          'p-2 h-12 flex items-center justify-start align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-4',
+                          'p-2 h-11 flex items-center justify-start align-middle text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground/80 [&:has([role=checkbox])]:pr-4',
                           columnDef.className,
                         )}
                         style={columnDef.style}
@@ -559,7 +569,12 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      {showPagination && <DataTablePagination table={table} />}
+      {showPagination && (
+        <DataTablePagination
+          table={table}
+          pageSizeOptions={paginationPageSizeOptions}
+        />
+      )}
     </>
   )
 

@@ -53,9 +53,9 @@ export default function RelatedArtistsList({
   }, [api])
 
   return (
-    <div className="w-full flex flex-col mb-4">
-      <div className="my-4 flex justify-between items-center">
-        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+    <div className="mb-4 flex w-full flex-col">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="sona-section-title scroll-m-20">
           {title}
         </h3>
         <div className="flex gap-2">

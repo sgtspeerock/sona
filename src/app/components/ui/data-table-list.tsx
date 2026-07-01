@@ -350,7 +350,7 @@ export function DataTableList<TData, TValue>({
   return (
     <div className="h-full">
       <div
-        className="relative w-full h-full overflow-hidden cursor-default caption-bottom text-sm bg-transparent"
+        className="relative w-full h-full overflow-hidden cursor-default caption-bottom text-sm bg-transparent px-1"
         data-testid="data-table"
         role="table"
       >
@@ -358,7 +358,7 @@ export function DataTableList<TData, TValue>({
           {table.getHeaderGroups().map((headerGroup) => (
             <div
               key={headerGroup.id}
-              className="w-full flex flex-row border-b pr-[10px] bg-muted"
+              className="mb-2 flex w-[calc(100%-10px)] flex-row border-b border-border/20 bg-transparent pr-[10px]"
               role="row"
             >
               {headerGroup.headers.map((header) => (

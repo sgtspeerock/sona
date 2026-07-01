@@ -32,6 +32,7 @@ const favorites = {
 const song = {
   all: 'get-all-songs',
   random: 'get-random-songs',
+  sessionEnergy: 'get-session-energy-songs',
   info: 'get-song-info',
   count: 'get-song-count',
 }

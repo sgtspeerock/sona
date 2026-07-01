@@ -54,7 +54,7 @@ export function CommandAlbumResult({
             <CommandItem
               key={`album-${album.id}`}
               value={`album-${album.id}`}
-              className="border border-border/45 bg-card/55 rounded-[var(--radius-surface)] p-2 items-start cursor-pointer transition-[background-color,border-color,transform] duration-150 hover:bg-accent/35 hover:border-border/70 aria-selected:bg-accent/55"
+              className="sona-panel-soft p-2 items-start cursor-pointer transition-colors hover:border-primary/35 hover:bg-accent/35 aria-selected:bg-accent/55"
               onSelect={() => {
                 runCommand(() =>
                   navigateSafe(navigate, ROUTES.ALBUM.PAGE(album.id)),

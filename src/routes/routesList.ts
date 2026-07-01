@@ -14,7 +14,6 @@ const LIBRARY = {
   RADIOS: '/library/radios',
   DISCOVER_WEEKLY: '/library/discover-daily',
   THIS_IS_ARTIST: '/library/this-is-artist',
-  DAYPART_PLAYLIST: '/library/daypart-playlist',
   TOP_50_YEAR: '/library/top-50-year',
 }
 

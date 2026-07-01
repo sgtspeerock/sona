@@ -1,4 +1,3 @@
-import { Clock, Disc } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -7,22 +6,19 @@ import {
 } from '@/app/components/fallbacks/home-fallbacks'
 import AlbumHeader from '@/app/components/home/carousel/album-header'
 import { DiscoverWeeklyCard } from '@/app/components/home/discover-weekly-card'
-import GenreDiscovery, { DaypartMixCard } from '@/app/components/home/genre-discovery'
-import PreviewList from '@/app/components/home/preview-list'
+import GenreDiscovery, {
+  SessionEnergyCard,
+} from '@/app/components/home/genre-discovery'
+import { RecentAddedColumn } from '@/app/components/home/recent-added-column'
 import { ThisIsArtist } from '@/app/components/home/this-is-artist'
 import { PageState } from '@/app/components/ui/page-state'
 import { useGetLatestReleaseAlbum, useHomeDashboardData } from '@/app/hooks/use-home'
 import { useRenderCounter } from '@/app/hooks/use-render-counter'
-import { ROUTES } from '@/routes/routesList'
-import { useAppStore } from '@/store/app.store'
 
 
 export default function Home() {
   useRenderCounter('HomePage')
   const { t } = useTranslation()
-  const showThisIsArtist = useAppStore(
-    (state) => state.integrations.lastfm.showThisIsArtist,
-  )
 
   const {
     similarArtists,
@@ -77,15 +73,12 @@ export default function Home() {
     !recentlyPlayed.isLoading &&
     !recentlyAdded.isLoading &&
     !isGenresLoading
-  const showHeaderFallback =
-    (similarArtists.isLoading || similarArtists.isFetching) &&
-    !(similarArtists.data?.list?.length ?? 0)
-  const showRecentlyPlayedFallback =
-    (recentlyPlayed.isLoading || recentlyPlayed.isFetching) &&
-    !(recentlyPlayed.data?.list?.length ?? 0)
   const showRecentlyAddedFallback =
     (recentlyAdded.isLoading || recentlyAdded.isFetching) &&
     !(recentlyAdded.data?.list?.length ?? 0)
+  const showHeaderFallback =
+    (similarArtists.isLoading || similarArtists.isFetching) &&
+    !(similarArtists.data?.list?.length ?? 0)
 
   if (allLoaded && !hasAnyHomeContent) {
     return (
@@ -97,73 +90,61 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-      <div className="mx-auto w-full max-w-[3400px] space-y-5 sm:space-y-6 xl:space-y-7">
-        {showThisIsArtist ? (
-          <section className="-mt-1 grid grid-cols-12 gap-4 min-[2100px]:gap-5">
-            <div className="col-span-8 h-[min(52vh,424px)] min-[1700px]:h-[min(56vh,468px)] min-[2600px]:h-[min(60vh,520px)]">
-              {showHeaderFallback ? (
-                <HeaderFallback />
-              ) : (
-                <AlbumHeader albums={heroAlbums} newReleaseAlbumId={latestReleasedAlbum?.id} />
-              )}
-            </div>
-
-            <div className="col-span-4 grid h-[min(52vh,424px)] grid-rows-2 gap-4 min-[1700px]:h-[min(56vh,468px)] min-[2600px]:h-[min(60vh,520px)] min-[2100px]:gap-5">
-              <div className="h-full">
-                <DiscoverWeeklyCard />
-              </div>
-              <div className="h-full">
-                <DaypartMixCard />
-              </div>
-            </div>
-          </section>
-        ) : (
-          <section>
+    <div className="relative min-h-full w-full overflow-hidden px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-52 rounded-full bg-primary/[0.035] blur-3xl" />
+      <div className="mx-auto grid w-full max-w-[1380px] min-w-0 gap-5">
+        <main className="grid min-w-0 content-start gap-5">
+          <section className="h-[249px] min-w-0 min-[1700px]:h-[267px]">
             {showHeaderFallback ? (
               <HeaderFallback />
             ) : (
-              <AlbumHeader albums={heroAlbums} newReleaseAlbumId={latestReleasedAlbum?.id} />
+              <AlbumHeader
+                albums={heroAlbums}
+                newReleaseAlbumId={latestReleasedAlbum?.id}
+                compact
+              />
             )}
           </section>
-        )}
 
-        {/* Genre Discovery */}
-        <section>
-          <GenreDiscovery
-            genres={genres}
-            isLoading={isGenresLoading}
-            thirdCard={showThisIsArtist ? <ThisIsArtist /> : undefined}
-          />
-        </section>
+          {/* Primary playlists */}
+          <section className="min-w-0">
+            <div className="mb-3 flex items-end justify-between gap-4 px-1">
+              <div>
+                <h2 className="text-base font-semibold tracking-[-0.01em] text-foreground">
+                  Für dich
+                </h2>
+              </div>
+            </div>
+            <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 [&>*]:h-[172px]">
+              <DiscoverWeeklyCard />
+              <SessionEnergyCard />
+            </div>
+          </section>
 
-        {/* Recently Played */}
-        <section>
-          {showRecentlyPlayedFallback && <PreviewListFallback />}
-          {recentlyPlayed.data?.list && (
-            <PreviewList
-              title={t('home.recentlyPlayed')}
-              icon={<Clock className="h-5 w-5 text-muted-foreground" />}
-              moreRoute={ROUTES.ALBUMS.RECENTLY_PLAYED}
-              list={recentlyPlayed.data.list}
-              showAlbumYearInSubtitle
-            />
-          )}
-        </section>
-
-        {/* Recently Added */}
-        <section>
-          {showRecentlyAddedFallback && <PreviewListFallback />}
-          {recentlyAdded.data?.list && (
-            <PreviewList
-              title={t('home.recentlyAdded')}
-              icon={<Disc className="h-5 w-5 text-muted-foreground" />}
-              moreRoute={ROUTES.ALBUMS.RECENTLY_ADDED}
-              list={recentlyAdded.data.list}
-              showAlbumYearInSubtitle
-            />
-          )}
-        </section>
+          {/* Secondary playlists */}
+          <section className="grid min-w-0 items-stretch gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
+            {recentlyAdded.data?.list && (
+              <RecentAddedColumn albums={recentlyAdded.data.list} />
+            )}
+            <div className="min-w-0">
+              <div className="mb-3 flex items-end justify-between gap-4 px-1">
+                <div>
+                  <h2 className="text-base font-semibold tracking-[-0.01em] text-foreground">
+                    Weitere Vorschläge
+                  </h2>
+                </div>
+              </div>
+              <GenreDiscovery
+                genres={genres.slice(0, 2)}
+                isLoading={isGenresLoading}
+                thirdCard={<ThisIsArtist />}
+                includeAnniversary
+                maxGenres={2}
+              />
+              {showRecentlyAddedFallback && <PreviewListFallback />}
+            </div>
+          </section>
+        </main>
       </div>
     </div>
   )

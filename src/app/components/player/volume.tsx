@@ -16,9 +16,10 @@ import { PopoverVolume } from './popover-volume'
 
 interface PlayerVolumeProps {
   disabled: boolean
+  allowWheel?: boolean
 }
 
-export function PlayerVolume({ disabled }: PlayerVolumeProps) {
+export function PlayerVolume({ disabled, allowWheel = true }: PlayerVolumeProps) {
   const { t } = useTranslation()
   const { volume, handleVolumeWheel } = usePlayerVolume()
   const { useAudioHotkeys } = usePlayerHotkeys()
@@ -42,7 +43,7 @@ export function PlayerVolume({ disabled }: PlayerVolumeProps) {
       <div className="hidden xl:flex gap-2 pr-2 items-center">
         <SimpleTooltip text={tooltipText} disabled={disabled}>
           <div className="h-10 flex items-center">
-            <MuteButton disabled={disabled}>
+            <MuteButton disabled={disabled} allowWheel={allowWheel}>
               <div className="text-secondary-foreground">
                 <VolumeIcon volume={volume} size={18} />
               </div>
@@ -51,6 +52,7 @@ export function PlayerVolume({ disabled }: PlayerVolumeProps) {
         </SimpleTooltip>
         <VolumeSlider
           disabled={disabled}
+          allowWheel={allowWheel}
           className="player-volume-slider-bar"
         />
       </div>
@@ -58,9 +60,15 @@ export function PlayerVolume({ disabled }: PlayerVolumeProps) {
   )
 }
 
-type MuteButtonProps = ComponentPropsWithoutRef<typeof Button>
+type MuteButtonProps = ComponentPropsWithoutRef<typeof Button> & {
+  allowWheel?: boolean
+}
 
-export function MuteButton({ className, ...props }: MuteButtonProps) {
+export function MuteButton({
+  allowWheel = true,
+  className,
+  ...props
+}: MuteButtonProps) {
   const { volume, setVolume, handleVolumeWheel } = usePlayerVolume()
   const lastVolumeRef = useRef<number>(0)
 
@@ -89,14 +97,17 @@ export function MuteButton({ className, ...props }: MuteButtonProps) {
       size="icon"
       className={cn('p-1 w-7 h-7 hover:bg-transparent', className)}
       onClick={handleMuteClick}
-      onWheel={handleWheel}
+      onWheel={allowWheel ? handleWheel : undefined}
     />
   )
 }
 
-type VolumeSliderProps = ComponentPropsWithoutRef<typeof Slider>
+type VolumeSliderProps = ComponentPropsWithoutRef<typeof Slider> & {
+  allowWheel?: boolean
+}
 
 export function VolumeSlider({
+  allowWheel = true,
   disabled,
   className,
   ...props
@@ -125,7 +136,7 @@ export function VolumeSlider({
       step={step}
       disabled={disabled}
       onValueChange={([value]) => setVolume(value)}
-      onWheel={handleWheel}
+      onWheel={allowWheel ? handleWheel : undefined}
     />
   )
 }

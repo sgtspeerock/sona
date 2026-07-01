@@ -25,7 +25,7 @@ export function CollapsibleInfo({
   return (
     <Collapsible open={useStateInfo ? showInfoPanel : true}>
       <CollapsibleContent>
-        <div className="mb-6">
+        <div className="mb-5 mt-1">
           {bio && (
             <InfoPanel
               title={title}

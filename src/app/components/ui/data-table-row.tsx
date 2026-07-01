@@ -78,15 +78,16 @@ export function TableRow<TData>({
           isModern &&
             row.getIsSelected() &&
             !isPrevRowSelected(index) &&
-            'rounded-t-md',
+            'rounded-t-[var(--radius-control)]',
           isModern &&
             row.getIsSelected() &&
             !isNextRowSelected(index) &&
-            'rounded-b-md',
-          isModern && !row.getIsSelected() && 'rounded-md',
-          'hover:bg-foreground/20 data-[state=selected]:bg-foreground/30',
+            'rounded-b-[var(--radius-control)]',
+          isModern &&
+            'mb-1 rounded-[var(--radius-control)] border border-transparent bg-background-foreground/70 hover:border-border/25 hover:bg-foreground/[0.075] data-[state=selected]:border-border/35 data-[state=selected]:bg-foreground/[0.11]',
+          !isModern && 'hover:bg-foreground/20 data-[state=selected]:bg-foreground/30',
           isClassic && 'border-b',
-          isRowSongActive && isModern && 'row-active bg-foreground/20',
+          isRowSongActive && isModern && 'row-active border-primary/30 bg-primary/10',
           isHighlighted &&
             'bg-primary/18 ring-1 ring-inset ring-primary/45 hover:bg-primary/22',
           isSortable && isDragging && 'opacity-30',

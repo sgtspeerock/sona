@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { SearchIcon } from 'lucide-react'
+import { Disc3, Heart, Library, ListMusic, Mic2, SearchIcon } from 'lucide-react'
 import { KeyboardEvent, useCallback, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useDebouncedCallback } from 'use-debounce'
 import { Keyboard } from '@/app/components/command/keyboard-key'
 import { Button } from '@/app/components/ui/button'
@@ -14,6 +15,7 @@ import {
   CommandList,
 } from '@/app/components/ui/command'
 import { useMainSidebar } from '@/app/components/ui/main-sidebar'
+import { ROUTES } from '@/routes/routesList'
 import { subsonic } from '@/service/subsonic'
 import { useAppStore } from '@/store/app.store'
 import { Albums } from '@/types/responses/album'
@@ -21,6 +23,7 @@ import { ISimilarArtist } from '@/types/responses/artist'
 import { ISong } from '@/types/responses/song'
 import { byteLength } from '@/utils/byteLength'
 import { convertMinutesToMs } from '@/utils/convertSecondsToTime'
+import { navigateSafe } from '@/utils/navigateSafe'
 import { queryKeys } from '@/utils/queryKeys'
 import { CommandAlbumResult } from './album-result'
 import { CommandArtistResult } from './artist-result'
@@ -39,6 +42,7 @@ const SEARCH_CANDIDATE_LIMIT = 25
 
 export default function CommandMenu({ compact = false }: CommandMenuProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { state: sidebarState } = useMainSidebar()
   const { open, setOpen } = useAppStore((state) => state.command)
 
@@ -124,6 +128,38 @@ export default function CommandMenu({ compact = false }: CommandMenuProps) {
   }
 
   const sidebarOpen = sidebarState === 'expanded'
+  const quickActions = [
+    {
+      label: t('sidebar.albums'),
+      description: t('home.recentlyAdded'),
+      icon: Library,
+      route: ROUTES.LIBRARY.ALBUMS,
+    },
+    {
+      label: t('sidebar.artists'),
+      description: t('sidebar.library'),
+      icon: Mic2,
+      route: ROUTES.LIBRARY.ARTISTS,
+    },
+    {
+      label: t('sidebar.playlists'),
+      description: t('sidebar.playlists'),
+      icon: ListMusic,
+      route: ROUTES.LIBRARY.PLAYLISTS,
+    },
+    {
+      label: t('sidebar.favorites'),
+      description: t('home.mostPlayed'),
+      icon: Heart,
+      route: ROUTES.LIBRARY.FAVORITES,
+    },
+    {
+      label: t('sidebar.songs'),
+      description: t('sidebar.library'),
+      icon: Disc3,
+      route: ROUTES.LIBRARY.SONGS,
+    },
+  ]
 
   return (
     <>
@@ -183,6 +219,38 @@ export default function CommandMenu({ compact = false }: CommandMenuProps) {
             onValueChange={(value) => handleSearchChange(value)}
             onKeyDown={handleInputKeyDown}
           />
+          {!hasInput && (
+            <CommandList className="px-3 pb-4 pt-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {quickActions.map((action) => {
+                  const Icon = action.icon
+                  return (
+                    <button
+                      key={action.route}
+                      type="button"
+                      className="sona-panel-soft flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:border-primary/35 hover:bg-accent/35"
+                      onClick={() =>
+                        runCommand(() => navigateSafe(navigate, action.route))
+                      }
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-primary/12 text-primary">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold text-foreground">
+                          {action.label}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {action.description}
+                        </span>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </CommandList>
+          )}
+
           {hasInput && (
             <CommandList>
               {!enableQuery && (

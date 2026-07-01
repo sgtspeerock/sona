@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Rabbit } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Actions } from '@/app/components/actions'
+import { useRabbitHole } from '@/app/hooks/use-rabbit-hole'
 import { useSongList } from '@/app/hooks/use-song-list'
 import { subsonic } from '@/service/subsonic'
 import { useAppPages } from '@/store/app.store'
@@ -24,6 +26,7 @@ export function ArtistButtons({
   const { setSongList } = usePlayerActions()
   const { showInfoPanel, toggleShowInfoPanel } = useAppPages()
   const { getArtistAllSongs } = useSongList()
+  const { startRabbitHole, isLoading: rabbitHoleLoading } = useRabbitHole()
 
   const isArtistStarred = artist.starred !== undefined
 
@@ -54,6 +57,14 @@ export function ArtistButtons({
     }
   }
 
+  function handleRabbitHole() {
+    startRabbitHole({
+      type: 'artist',
+      artistName: artist.name,
+      artistId: artist.id,
+    })
+  }
+
   const buttonsTooltips = {
     play: t('playlist.buttons.play', { name: artist.name }),
     shuffle: t('playlist.buttons.shuffle', { name: artist.name }),
@@ -66,6 +77,7 @@ export function ArtistButtons({
     info: () => {
       return showInfoPanel ? t('generic.hideDetails') : t('generic.showDetails')
     },
+    rabbitHole: t('rabbitHole.tooltip'),
   }
 
   if (isArtistEmpty) {
@@ -80,6 +92,7 @@ export function ArtistButtons({
         onClick={() => handlePlayArtistRadio()}
       >
         <Actions.PlayIcon />
+        <span>{t('player.tooltips.play', 'Play')}</span>
       </Actions.Button>
 
       <Actions.Button
@@ -87,6 +100,14 @@ export function ArtistButtons({
         onClick={() => handlePlayArtistRadio(true)}
       >
         <Actions.ShuffleIcon />
+      </Actions.Button>
+
+      <Actions.Button
+        tooltip={buttonsTooltips.rabbitHole}
+        onClick={handleRabbitHole}
+        disabled={rabbitHoleLoading}
+      >
+        <Rabbit className="h-5 w-5" />
       </Actions.Button>
 
       <Actions.Button

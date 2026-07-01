@@ -19,7 +19,6 @@ import {
 } from '@/app/components/fallbacks/song-fallbacks'
 // Direct imports (not lazy) to avoid suspense issues
 import BaseLayout from '@/app/layout/base'
-import DaypartPlaylistPage from '@/app/pages/daypart-playlist'
 import DiscoverWeekly from '@/app/pages/discover-weekly'
 import ErrorPage from '@/app/pages/error-page'
 import ThisIsArtistPage from '@/app/pages/this-is-artist'
@@ -83,12 +82,6 @@ export const router = createHashRouter(
           path: ROUTES.LIBRARY.THIS_IS_ARTIST,
           errorElement: <ErrorPage />,
           element: <ThisIsArtistPage />,
-        },
-        {
-          id: 'daypart-playlist',
-          path: ROUTES.LIBRARY.DAYPART_PLAYLIST,
-          errorElement: <ErrorPage />,
-          element: <DaypartPlaylistPage />,
         },
         {
           id: 'artists',

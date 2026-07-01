@@ -45,6 +45,7 @@ interface PlayerControlsProps {
   radio: Radio
   podcast: EpisodeWithPodcast
   audioRef: RefObject<HTMLAudioElement>
+  layout?: 'default' | 'rail'
 }
 
 export function PlayerControls({
@@ -52,6 +53,7 @@ export function PlayerControls({
   radio,
   podcast,
   audioRef,
+  layout = 'default',
 }: PlayerControlsProps) {
   const { t } = useTranslation()
   const { isSong, isPodcast } = usePlayerMediaType()
@@ -175,6 +177,118 @@ export function PlayerControls({
 
   const cannotGotoNextSong = !hasNext && loopState !== LoopState.All
   const disableButtons = !song && !radio && !podcast
+
+  if (layout === 'rail') {
+    return (
+      <div className="mb-1 grid w-full grid-cols-[72px,minmax(0,1fr),72px] items-center gap-2">
+        <div className="flex justify-start">
+          {isSong && (
+            <PlayerButton
+              className="night-player-side-button"
+              disabled={!song || isPlayingOneSong()}
+              onClick={toggleShuffle}
+              data-testid="player-button-shuffle"
+              tooltip={shuffleTooltip}
+            >
+              <Shuffle
+                className={clsx(
+                  'night-player-side-icon',
+                  isShuffleActive ? 'text-primary' : 'text-secondary-foreground',
+                )}
+              />
+            </PlayerButton>
+          )}
+        </div>
+
+        <div className="flex items-center justify-center gap-2">
+          <PlayerButton
+            className="night-player-side-button"
+            disabled={disableButtons || !hasPrev}
+            onClick={playPrevSong}
+            data-testid="player-button-prev"
+            tooltip={previousTooltip}
+          >
+            <SkipBack className="night-player-side-icon text-secondary-foreground fill-secondary-foreground" />
+          </PlayerButton>
+
+          {isPodcast && (
+            <PlayerButton
+              className="night-player-side-button"
+              onClick={() => handleSeekAction(-15)}
+              data-testid="player-button-skip-backward"
+              tooltip={skipRewindTooltip}
+            >
+              <span className="text-secondary-foreground font-light text-[8px] absolute">
+                15
+              </span>
+              <RotateCcwIcon className="night-player-side-icon text-secondary-foreground" />
+            </PlayerButton>
+          )}
+
+          <PlayerButton
+            variant="default"
+            disabled={!song && !radio && !isPodcast}
+            onClick={togglePlayPause}
+            data-testid={`player-button-${isPlaying ? 'pause' : 'play'}`}
+            tooltip={playTooltip}
+            className="play-button-accent-glow size-12 [&_svg]:size-[20px]"
+          >
+            {isPlaying ? (
+              <Pause className="fill-primary-foreground" />
+            ) : (
+              <Play className="fill-primary-foreground" />
+            )}
+          </PlayerButton>
+
+          {isPodcast && (
+            <PlayerButton
+              className="night-player-side-button"
+              onClick={() => handleSeekAction(30)}
+              data-testid="player-button-skip-forward"
+              tooltip={skipForwardTooltip}
+            >
+              <span className="text-secondary-foreground font-light text-[8px] absolute">
+                30
+              </span>
+              <RotateCwIcon className="night-player-side-icon text-secondary-foreground" />
+            </PlayerButton>
+          )}
+
+          <PlayerButton
+            className="night-player-side-button"
+            disabled={disableButtons || cannotGotoNextSong}
+            onClick={handleNextWithSoftCut}
+            data-testid="player-button-next"
+            tooltip={nextTooltip}
+          >
+            <SkipForward className="night-player-side-icon text-secondary-foreground fill-secondary-foreground" />
+          </PlayerButton>
+        </div>
+
+        <div className="flex justify-end">
+          {isSong && (
+            <PlayerButton
+              className="night-player-side-button"
+              disabled={!song}
+              onClick={toggleLoop}
+              data-testid="player-button-loop"
+              tooltip={repeatTooltip}
+            >
+              {loopState === LoopState.Off && (
+                <Repeat className="night-player-side-icon text-secondary-foreground" />
+              )}
+              {loopState === LoopState.All && (
+                <Repeat className="night-player-side-icon text-primary" />
+              )}
+              {loopState === LoopState.One && (
+                <RepeatOne className="night-player-side-icon text-primary" />
+              )}
+            </PlayerButton>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex w-full gap-1 justify-center items-center mb-1">

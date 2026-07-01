@@ -3,9 +3,17 @@
 @layer base {
   :root {
     --radius: 0.5rem;
+    --sona-gradient-a: 323 72% 48%;
+    --sona-gradient-b: 222 82% 48%;
+    --sona-gradient-c: 323 68% 52%;
+    --sona-gradient-d: 205 78% 38%;
   }
 
   .dark {
+    --sona-gradient-a: 160 84% 39%;
+    --sona-gradient-b: 204 86% 44%;
+    --sona-gradient-c: 184 78% 38%;
+    --sona-gradient-d: 148 70% 31%;
     --background: 224 71.4% 8.1%;
     --background-foreground: 222 47% 11%;
     --foreground: 210 20% 95%;
@@ -29,6 +37,10 @@
   }
 
   .reactive {
+    --sona-gradient-a: 323 72% 48%;
+    --sona-gradient-b: 222 82% 48%;
+    --sona-gradient-c: 323 68% 52%;
+    --sona-gradient-d: 205 78% 38%;
     --background: 222 14% 8%;
     --background-foreground: 222 12% 11%;
     --foreground: 210 14% 92%;
@@ -52,6 +64,10 @@
   }
 
   .ember-dusk {
+    --sona-gradient-a: 8 84% 58%;
+    --sona-gradient-b: 24 92% 47%;
+    --sona-gradient-c: 350 74% 43%;
+    --sona-gradient-d: 38 86% 41%;
     --background: 8 26% 10%;
     --background-foreground: 8 24% 12%;
     --foreground: 18 34% 92%;
@@ -75,6 +91,10 @@
   }
 
   .verdant-pulse {
+    --sona-gradient-a: 142 68% 44%;
+    --sona-gradient-b: 168 78% 38%;
+    --sona-gradient-c: 112 58% 35%;
+    --sona-gradient-d: 190 64% 32%;
     --background: 145 28% 8%;
     --background-foreground: 145 24% 10%;
     --foreground: 142 22% 92%;
@@ -98,6 +118,10 @@
   }
 
   .black {
+    --sona-gradient-a: 0 0% 74%;
+    --sona-gradient-b: 220 12% 48%;
+    --sona-gradient-c: 255 10% 34%;
+    --sona-gradient-d: 210 18% 24%;
     --background: 240 10% 3.9%;
     --background-foreground: 240 5.9% 10%;
     --foreground: 0 0% 98%;
@@ -213,6 +237,10 @@
   }
 
   .catppuccin-mocha {
+    --sona-gradient-a: 267 84% 81%;
+    --sona-gradient-b: 316 72% 72%;
+    --sona-gradient-c: 226 64% 68%;
+    --sona-gradient-d: 189 58% 58%;
     --background: 240 21% 13%;
     --background-foreground: 240 21% 15%;
     --foreground: 226 64% 88%;
@@ -236,6 +264,10 @@
   }
 
   .nuclear-dark {
+    --sona-gradient-a: 331 100% 55%;
+    --sona-gradient-b: 214 92% 55%;
+    --sona-gradient-c: 286 86% 52%;
+    --sona-gradient-d: 184 94% 43%;
     --background: 213 30.3% 10.94%;
     --background-foreground: 213 30.3% 12.94%;
     --foreground: 90 40% 98.04%;
@@ -305,6 +337,10 @@
   }
 
   .discord {
+    --sona-gradient-a: 226 58% 65%;
+    --sona-gradient-b: 242 66% 59%;
+    --sona-gradient-c: 269 60% 54%;
+    --sona-gradient-d: 204 68% 46%;
     --background: 221 4% 15%;
     --background-foreground: 217.5 9.09% 17.25%;
     --foreground: 334 34% 98%;

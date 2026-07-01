@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DetailStickyHeader } from '@/app/components/detail-sticky-header'
 import { AlbumsFallback } from '@/app/components/fallbacks/album-fallbacks'
 import ListWrapper from '@/app/components/list-wrapper'
 import { DataTable } from '@/app/components/ui/data-table'
@@ -56,17 +57,10 @@ export default function GenresList() {
 
   return (
     <div className="w-full h-full">
-      {/* Header */}
-      <div className="w-full px-8 py-4 flex items-center justify-between border-b border-border/40">
-        <div>
-          <h1 className="text-2xl font-bold">
-            {t('sidebar.genres', 'Genres')}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {t('genres.count', { count: merged.length })}
-          </p>
-        </div>
-      </div>
+      <DetailStickyHeader
+        title={t('sidebar.genres', 'Genres')}
+        count={merged.length}
+      />
 
       <ListWrapper>
         {merged.length === 0 ? (

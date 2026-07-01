@@ -16,7 +16,15 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import clsx from 'clsx'
-import { GripVerticalIcon, MoonStarIcon, SparklesIcon } from 'lucide-react'
+import {
+  Disc3Icon,
+  GripVerticalIcon,
+  Mic2Icon,
+  MoonStarIcon,
+  MusicIcon,
+  SparklesIcon,
+  XIcon,
+} from 'lucide-react'
 import {
   CSSProperties,
   memo,
@@ -27,10 +35,18 @@ import {
   useState,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { ImageLoader } from '@/app/components/image-loader'
 import PlaySongButton from '@/app/components/table/play-button'
 import { QueueActions } from '@/app/components/table/queue-actions'
 import { TableSongTitle } from '@/app/components/table/song-title'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/app/components/ui/context-menu'
 import {
   ScrollArea,
   scrollAreaViewportSelector,
@@ -66,7 +82,8 @@ function QueueRowContentBase({
   dragListeners,
 }: RowContentProps) {
   const { t } = useTranslation()
-  const { setSongList } = usePlayerActions()
+  const navigate = useNavigate()
+  const { removeSongFromQueue, setSongList } = usePlayerActions()
   const { closeDrawer } = usePlayerStore.getState().actions
 
   const isActive = song.id === currentSongId
@@ -79,65 +96,113 @@ function QueueRowContentBase({
 
   if (compact) {
     return (
-      <div
-        className={clsx(
-          'group/tablerow relative w-full flex flex-row items-center rounded-md h-14 transition-colors select-none',
-          isDragging && !isOverlay
-            ? 'opacity-20 bg-foreground/5'
-            : 'hover:bg-foreground/20',
-          isOverlay &&
-            'shadow-xl border border-foreground/20 bg-popover cursor-grabbing',
-          isActive &&
-            !isDragging &&
-            'row-active bg-foreground/20 before:content-[\'\'] before:absolute before:left-0 before:inset-y-1 before:w-0.5 before:rounded-r before:bg-primary',
-        )}
-        onClick={() => {
-          if (song.id !== currentSongId) {
-            setSongList(songs, songIndex)
-          }
-        }}
-      >
-        <div className="w-8 shrink-0 ml-1 relative flex items-center justify-center">
-          {!isOverlay && song.queueSource === 'dj' && (
-            <SparklesIcon
-              className="absolute w-3.5 h-3.5 text-foreground/60 transition-opacity group-hover/tablerow:opacity-0"
-              title={sourceLabel ?? undefined}
-            />
-          )}
-          {!isOverlay && song.queueSource === 'session' && (
-            <MoonStarIcon
-              className="absolute w-3.5 h-3.5 text-foreground/60 transition-opacity group-hover/tablerow:opacity-0"
-              title={sourceLabel ?? undefined}
-            />
-          )}
-          {sortingEnabled && (
-            <div
-              {...(isOverlay ? {} : { ...dragAttributes, ...dragListeners })}
-              className={clsx(
-                'absolute flex items-center justify-center text-foreground/40 hover:text-foreground/70',
-                isOverlay
-                  ? 'cursor-grabbing'
-                  : 'cursor-grab active:cursor-grabbing opacity-0 group-hover/tablerow:opacity-100 transition-opacity',
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <div
+            {...(sortingEnabled && !isOverlay
+              ? { ...dragAttributes, ...dragListeners }
+              : {})}
+            className={clsx(
+              'group/tablerow relative w-full flex flex-row items-center rounded-md h-14 transition-colors select-none',
+              sortingEnabled && !isOverlay && 'cursor-grab active:cursor-grabbing',
+              isDragging && !isOverlay
+                ? 'opacity-20 bg-foreground/5'
+                : 'hover:bg-foreground/20',
+              isOverlay &&
+                'shadow-xl border border-foreground/20 bg-popover cursor-grabbing',
+              isActive &&
+                !isDragging &&
+                'row-active bg-foreground/20',
+            )}
+            onClick={() => {
+              if (song.id !== currentSongId) {
+                setSongList(songs, songIndex)
+              }
+            }}
+          >
+            <div className="relative ml-2 h-10 w-10 min-w-10 overflow-hidden rounded-md border border-border/30 bg-muted">
+              {song.coverArt ? (
+                <ImageLoader id={song.coverArt} type="album" size="120">
+                  {(src) =>
+                    src ? (
+                      <img
+                        src={src}
+                        alt={song.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null
+                  }
+                </ImageLoader>
+              ) : null}
+              {!isOverlay && song.queueSource === 'dj' && (
+                <span className="absolute bottom-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-tl bg-background/85 text-foreground/70">
+                  <SparklesIcon className="h-3 w-3" title={sourceLabel ?? undefined} />
+                </span>
               )}
-            >
-              <GripVerticalIcon className="w-4 h-4" />
+              {!isOverlay && song.queueSource === 'session' && (
+                <span className="absolute bottom-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-tl bg-background/85 text-foreground/70">
+                  <MoonStarIcon className="h-3 w-3" title={sourceLabel ?? undefined} />
+                </span>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="w-8 min-w-8 text-sm text-foreground/65 text-center">
-          {songIndex + 1}
-        </div>
+            <div className="flex-1 min-w-0 px-2">
+              <p className="text-[13px] font-medium truncate">{song.title}</p>
+              <p className="text-[13px] text-foreground/65 truncate">{song.artist}</p>
+            </div>
 
-        <div className="flex-1 min-w-0 px-2">
-          <p className="text-sm font-medium truncate">{song.title}</p>
-          <p className="text-xs text-foreground/65 truncate">{song.artist}</p>
-        </div>
-
-        <div className="w-16 max-w-16 min-w-16 p-1.5 text-sm text-foreground/70 shrink-0 text-right">
-          {convertSecondsToTime(song.duration ?? 0)}
-        </div>
-      </div>
+            <div className="w-16 max-w-16 min-w-16 p-1.5 text-[13px] text-foreground/70 shrink-0 text-right">
+              {convertSecondsToTime(song.duration ?? 0)}
+            </div>
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-52">
+          <ContextMenuItem
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(ROUTES.ALBUM.PAGE(song.albumId, song.id))
+              closeDrawer()
+            }}
+          >
+            <MusicIcon className="mr-2 h-4 w-4" />
+            <span>Zum Song</span>
+          </ContextMenuItem>
+          <ContextMenuItem
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(ROUTES.ARTIST.PAGE(song.artistId))
+              closeDrawer()
+            }}
+          >
+            <Mic2Icon className="mr-2 h-4 w-4" />
+            <span>Zum Artist</span>
+          </ContextMenuItem>
+          <ContextMenuItem
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(ROUTES.ALBUM.PAGE(song.albumId))
+              closeDrawer()
+            }}
+          >
+            <Disc3Icon className="mr-2 h-4 w-4" />
+            <span>Zum Album</span>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem
+            className="cursor-pointer text-destructive focus:text-destructive"
+            onClick={(e) => {
+              e.stopPropagation()
+              removeSongFromQueue(song.id)
+            }}
+          >
+            <XIcon className="mr-2 h-4 w-4" />
+            <span>Aus Queue entfernen</span>
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     )
   }
 
@@ -152,7 +217,7 @@ function QueueRowContentBase({
           'shadow-xl border border-foreground/20 bg-popover cursor-grabbing',
         isActive &&
           !isDragging &&
-          'row-active bg-foreground/20 before:content-[\'\'] before:absolute before:left-0 before:inset-y-1 before:w-0.5 before:rounded-r before:bg-primary',
+          'row-active bg-foreground/20',
       )}
     >
       <div className="w-8 shrink-0 ml-1 relative flex items-center justify-center">

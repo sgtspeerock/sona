@@ -29,8 +29,9 @@ export function MiniSidebarSearch({
             asChild
             variant="ghost"
             className={cn(
-              'h-9 w-9 rounded-lg p-0 hover:bg-accent/70',
-              isActive(ROUTES.LIBRARY.HOME) && 'bg-accent/70',
+              'h-9 w-9 rounded-lg p-0 hover:bg-accent hover:text-accent-foreground',
+              isActive(ROUTES.LIBRARY.HOME) &&
+                'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
               className,
             )}
           >
@@ -49,7 +50,7 @@ export function MiniSidebarSearch({
           <Button
             variant="ghost"
             className={cn(
-              'h-9 w-9 rounded-lg p-0 hover:bg-accent/70',
+              'h-9 w-9 rounded-lg p-0 hover:bg-accent hover:text-accent-foreground',
               className,
             )}
             onClick={() => setOpen(true)}

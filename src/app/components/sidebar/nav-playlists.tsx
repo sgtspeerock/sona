@@ -87,16 +87,15 @@ export function NavPlaylists() {
     <div className="px-4 pb-4 pt-1">
       <div
         className={clsx(
-          'mb-2 mt-2 flex items-center justify-between',
+          'mb-2 mt-3 flex items-center justify-between',
           'transition-opacity group-data-[collapsible=icon]:opacity-0',
           'group-data-[collapsible=icon]:pointer-events-none',
         )}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-2 px-0">
-          <MainSidebarGroupLabel className="h-6 px-2.5 uppercase tracking-[0.14em] text-foreground/55">
+        <div className="min-w-0 flex-1 px-0">
+          <MainSidebarGroupLabel className="h-6 px-2.5 uppercase tracking-[0.1em] text-foreground/55">
             {t('sidebar.playlists')}
           </MainSidebarGroupLabel>
-          <div className="h-px flex-1 bg-border/55" />
         </div>
         <SidebarPlaylistButtons />
       </div>

@@ -16,6 +16,7 @@ import { subsonic } from '@/service/subsonic'
 import { usePlayerActions } from '@/store/player.store'
 import { Albums } from '@/types/responses/album'
 import { queryKeys } from '@/utils/queryKeys'
+import { scrollPageToTop } from '@/utils/scrollPageToTop'
 
 interface PreviewListProps {
   list: Albums[]
@@ -25,6 +26,7 @@ interface PreviewListProps {
   moreTitle?: string
   moreRoute?: string
   showAlbumYearInSubtitle?: boolean
+  compact?: boolean
 }
 
 export default function PreviewList({
@@ -35,6 +37,7 @@ export default function PreviewList({
   moreTitle,
   moreRoute,
   showAlbumYearInSubtitle = false,
+  compact = false,
 }: PreviewListProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [loadingAlbumId, setLoadingAlbumId] = useState<string | null>(null)
@@ -84,20 +87,32 @@ export default function PreviewList({
   }, [api])
 
   return (
-    <div className="mt-3 flex w-full flex-col sm:mt-4">
+    <div className="flex w-full flex-col">
       <div className="mb-2.5 flex items-center justify-between sm:mb-3">
         <div className="flex items-center gap-2">
-          {icon}
-          <h3
-            className="scroll-m-20 text-[1.1rem] font-semibold tracking-tight sm:text-xl"
-            data-testid="preview-list-title"
-          >
-            {title}
-          </h3>
+          {title || icon ? (
+            <>
+              {icon}
+              {title && (
+                <h3
+                  className="sona-section-title scroll-m-20 sm:text-[1.05rem]"
+                  data-testid="preview-list-title"
+                >
+                  {title}
+                </h3>
+              )}
+            </>
+          ) : null}
         </div>
         <div className="flex items-center gap-2.5 sm:gap-3">
           {showMore && moreRoute && (
-            <Link to={moreRoute} data-testid="preview-list-show-more">
+            <Link
+              to={moreRoute}
+              data-testid="preview-list-show-more"
+              onClick={() => {
+                requestAnimationFrame(() => scrollPageToTop())
+              }}
+            >
               <p className="truncate text-xs text-muted-foreground hover:text-primary hover:underline sm:text-sm">
                 {moreTitle}
               </p>
@@ -133,7 +148,11 @@ export default function PreviewList({
             {displayList.map((album, index) => (
               <CarouselItem
                 key={album.id}
-                className="basis-[clamp(168px,22vw,256px)]"
+                className={
+                  compact
+                    ? 'basis-[clamp(104px,9.5vw,136px)]'
+                    : 'basis-[clamp(168px,22vw,256px)]'
+                }
                 data-testid={`preview-list-carousel-item-${index}`}
               >
                 <PreviewCard.Root>

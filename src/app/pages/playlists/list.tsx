@@ -89,7 +89,7 @@ export default function PlaylistsPage() {
           <DataTable
             columns={columns}
             data={playlists}
-            showPagination={true}
+            showPagination={playlists.length > 10}
             showSearch={true}
             searchColumn="name"
             handlePlaySong={(row) => handlePlayPlaylist(row.original.id)}

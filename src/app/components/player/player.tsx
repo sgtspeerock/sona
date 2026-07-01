@@ -4,6 +4,7 @@ import { getProxyURL } from '@/api/podcastClient'
 import { SonaDjButton } from '@/app/components/fullscreen/sona-dj'
 import { RadioInfo } from '@/app/components/player/radio-info'
 import { TrackInfo } from '@/app/components/player/track-info'
+import { useMediaQuery } from '@/app/hooks/use-media-query'
 import { useRenderCounter } from '@/app/hooks/use-render-counter'
 import { podcasts } from '@/service/podcasts'
 import {
@@ -29,6 +30,7 @@ import { PlayerClearQueueButton } from './clear-queue-button'
 import { PlayerControls } from './controls'
 import { PlayerLikeButton } from './like-button'
 import { PlayerLyricsButton } from './lyrics-button'
+import { PlaybackRail } from './playback-rail'
 import { PodcastInfo } from './podcast-info'
 import { PodcastPlaybackRate } from './podcast-playback-rate'
 import { PlayerProgress } from './progress'
@@ -118,6 +120,7 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
   )
   const { replayGainType, replayGainPreAmp, replayGainDefaultGain } =
     useReplayGainState()
+  const useRightRailLayout = useMediaQuery('(min-width: 1500px)')
   const {
     enabled: crossfadeEnabled,
     durationSeconds: crossfadeDurationSetting,
@@ -796,7 +799,16 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
 
   return (
     <>
-      {!hideUi && (
+      {!hideUi && useRightRailLayout && (
+        <PlaybackRail
+          audioRef={getAudioRef()}
+          song={song}
+          radio={radio}
+          podcast={podcast}
+        />
+      )}
+
+      {!hideUi && !useRightRailLayout && (
         <footer className="border-t border-border/55 h-[--player-height] w-full flex items-center fixed bottom-0 left-0 right-0 z-40 bg-background overflow-hidden">
           {backgroundImage && (
             <div

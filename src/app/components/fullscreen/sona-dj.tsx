@@ -86,7 +86,7 @@ export function SonaDjButton({ variant = 'fullscreen' }: SonaDjButtonProps) {
           ? triggerStyles.fullscreen
           : triggerStyles.player,
         variant === 'fullscreen' && 'fullscreen-utility-button',
-        enabled && triggerStyles.active,
+        enabled && variant === 'fullscreen' && triggerStyles.active,
       )}
       data-fullscreen-panel-toggle={variant === 'fullscreen' ? 'dj' : undefined}
       onClick={() => {
