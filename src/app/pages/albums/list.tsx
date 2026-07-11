@@ -47,7 +47,9 @@ export default function AlbumsList() {
           visibleCount={displayAlbumsCount}
           onFirstPage={() => setPageIndex(0)}
           onPreviousPage={() => setPageIndex(Math.max(0, pageIndex - 1))}
-          onNextPage={() => setPageIndex(Math.min(pageCount - 1, pageIndex + 1))}
+          onNextPage={() =>
+            setPageIndex(Math.min(pageCount - 1, pageIndex + 1))
+          }
           onLastPage={() => setPageIndex(pageCount - 1)}
           className="mx-8 mb-8 mt-6"
         />

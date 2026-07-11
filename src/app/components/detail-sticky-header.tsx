@@ -26,10 +26,7 @@ export function DetailStickyHeader({
     <ShadowHeader
       fixed={fixed}
       showGlassEffect={showGlassEffect}
-      className={cn(
-        'w-full justify-between items-center',
-        className,
-      )}
+      className={cn('w-full justify-between items-center', className)}
     >
       <HeaderTitle title={title} count={count} loading={loading} />
       {rightSlot ? (

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { getGlobalAnalyser } from '@/app/hooks/use-audio-context'
 import { useVisualizerContext } from '@/app/components/fullscreen/settings'
+import { getGlobalAnalyser } from '@/app/hooks/use-audio-context'
 import { useSongColor } from '@/store/player.store'
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -96,8 +96,7 @@ export function WaveformTunnel() {
       const coverSecondary =
         palette?.muted ?? palette?.accent ?? palette?.dominant ?? null
       const c2 =
-        coverSecondary &&
-        coverSecondary.toLowerCase() !== c1.toLowerCase()
+        coverSecondary && coverSecondary.toLowerCase() !== c1.toLowerCase()
           ? coverSecondary
           : FALLBACK_SECONDARY
       ctx.clearRect(0, 0, w, h)
@@ -158,7 +157,9 @@ export function WaveformTunnel() {
         const t = BAR_COUNT > 1 ? barIndex / (BAR_COUNT - 1) : 0
         // Favor mids/highs slightly so lows do not dominate the full graph.
         const curved = Math.pow(t, 0.9)
-        const freqIdx = Math.round(rangeStart + curved * (rangeEnd - rangeStart))
+        const freqIdx = Math.round(
+          rangeStart + curved * (rangeEnd - rangeStart),
+        )
         const raw = smoothed[freqIdx] / 255
 
         // Reduce bass over-dominance, lift upper mids/highs a bit.
@@ -169,7 +170,9 @@ export function WaveformTunnel() {
         const gate = energyFloor * 0.55 + 0.04
         const range = Math.max(0.18, energyPeak - gate)
         const normalized = clamp01((weighted - gate) / range)
-        return Math.pow(normalized, 1.28) * warmup * densityLimiter * startLimiter
+        return (
+          Math.pow(normalized, 1.28) * warmup * densityLimiter * startLimiter
+        )
       }
 
       // Horizontal color gradient (vibrant on edges, accent in center)

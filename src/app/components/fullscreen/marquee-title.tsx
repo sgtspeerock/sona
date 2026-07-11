@@ -56,7 +56,7 @@ export function MarqueeTitle({ children, gap }: MarqueeTitleProps) {
     setIsFinished(false)
     setMarqueeKey(Math.random().toString())
     calculateOverflow()
-  }, [calculateOverflow, children])
+  }, [calculateOverflow])
 
   return (
     <div className="relative">

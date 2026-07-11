@@ -1,24 +1,38 @@
 import { clsx } from 'clsx'
-import { type ComponentProps, type PointerEvent as ReactPointerEvent, memo, useCallback, useEffect, useRef, useState } from 'react'
-import { WindowControlButtons } from '@/app/components/window-control-buttons'
-import { LyricsPanelView, QueuePanelView } from '@/app/components/player/panel-views'
+import { Minimize2 } from 'lucide-react'
+import {
+  type ComponentProps,
+  memo,
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  LyricsPanelView,
+  QueuePanelView,
+} from '@/app/components/player/panel-views'
+import { Button } from '@/app/components/ui/button'
 import { Drawer, DrawerContent, DrawerTitle } from '@/app/components/ui/drawer'
+import { WindowControlButtons } from '@/app/components/window-control-buttons'
 import { useAppWindow } from '@/app/hooks/use-app-window'
 import { useAlbumColorExtractor } from '@/app/hooks/useAlbumColorExtractor'
 import {
   useLyricsState,
   useMainDrawerState,
-  useQueueState,
   usePlayerStore,
+  useQueueState,
 } from '@/store/player.store'
 import { useFullscreenState } from '@/store/ui.store'
 import { isWindows } from '@/utils/desktop'
 import { setDesktopTitleBarColors } from '@/utils/theme'
 import { FullscreenBackdrop } from './backdrop'
 import { FullscreenDragHandler } from './drag-handler'
-import { FullscreenPlayer } from './player'
-import { shouldIgnoreFullscreenOutsideClick } from './panel-controller'
 import { FullscreenLuminanceProvider } from './luminance-context'
+import { shouldIgnoreFullscreenOutsideClick } from './panel-controller'
+import { FullscreenPlayer } from './player'
 import { VisualizerProvider } from './settings'
 import { FullscreenTabs } from './tabs'
 import { useFullscreenChromeVisibility } from './use-fullscreen-chrome-visibility'
@@ -28,6 +42,8 @@ const MemoQueuePanelView = memo(QueuePanelView)
 const MemoLyricsPanelView = memo(LyricsPanelView)
 
 function FullscreenScene() {
+  const { t } = useTranslation()
+  const { setOpen } = useFullscreenState()
   const { queueState } = useQueueState()
   const { lyricsState } = useLyricsState()
   const isPanelOpen = queueState || lyricsState
@@ -41,7 +57,10 @@ function FullscreenScene() {
     if (lastSongIdRef.current === currentSongId) return
     lastSongIdRef.current = currentSongId
     setIsSongTransitioning(true)
-    const timeoutId = window.setTimeout(() => setIsSongTransitioning(false), 260)
+    const timeoutId = window.setTimeout(
+      () => setIsSongTransitioning(false),
+      260,
+    )
     return () => window.clearTimeout(timeoutId)
   }, [currentSongId])
   useAlbumColorExtractor()
@@ -51,6 +70,28 @@ function FullscreenScene() {
       <MemoFullscreenBackdrop />
       <FullscreenDragHandler />
       <FullscreenWindowControls isChromeVisible={isChromeVisible} />
+
+      {/* Top Right Close Button aligned pixel-perfect with enter button in normal mode */}
+      <div
+        className={clsx(
+          'absolute right-6 z-40 transition-all duration-300',
+          isChromeVisible
+            ? 'opacity-100 pointer-events-auto translate-y-0'
+            : 'opacity-0 pointer-events-none -translate-y-2',
+        )}
+        style={{ top: 'calc(var(--header-height, 48px) + 24px)' }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setOpen(false)}
+          className="h-8 w-8 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200"
+          title={t('player.tooltips.close', 'Close')}
+        >
+          <Minimize2 className="w-4 h-4" />
+        </Button>
+      </div>
+
       <div
         className={clsx(
           'absolute inset-0 z-[18] pointer-events-none transition-opacity duration-260',
@@ -67,7 +108,9 @@ function FullscreenScene() {
         <div
           className={clsx(
             'w-full flex-1 min-h-0 px-8 2xl:px-16 transition-transform duration-300 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]',
-            isChromeVisible ? 'pt-1 2xl:pt-2 translate-y-0' : 'pt-1 translate-y-[51px]',
+            isChromeVisible
+              ? 'pt-1 2xl:pt-2 translate-y-0'
+              : 'pt-1 translate-y-[51px]',
           )}
         >
           <div className="min-h-[300px] h-full max-h-full">
@@ -86,10 +129,17 @@ function FullscreenScene() {
         <div
           className={clsx(
             'px-8 2xl:px-16 transition-none',
-            isChromeVisible ? 'h-[154px] min-h-[154px] py-2' : 'h-[102px] min-h-[102px] pt-0 pb-0',
+            isChromeVisible
+              ? 'h-[154px] min-h-[154px] py-2'
+              : 'h-[102px] min-h-[102px] pt-0 pb-0',
           )}
         >
-          <div className={clsx('flex h-full', isChromeVisible ? 'items-start' : 'items-end')}>
+          <div
+            className={clsx(
+              'flex h-full',
+              isChromeVisible ? 'items-start' : 'items-end',
+            )}
+          >
             <FullscreenPlayer isChromeVisible={isChromeVisible} />
           </div>
         </div>
@@ -111,7 +161,9 @@ function FullscreenIntegratedPanel({
   const panelRef = useRef<HTMLDivElement | null>(null)
   const activePanel = queueState ? 'queue' : lyricsState ? 'lyrics' : null
   const previousPanelRef = useRef<typeof activePanel>(activePanel)
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right')
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>(
+    'right',
+  )
 
   useEffect(() => {
     if (!activePanel) return
@@ -158,7 +210,9 @@ function FullscreenIntegratedPanel({
       ref={panelRef}
       className={clsx(
         'absolute left-8 right-8 2xl:left-16 2xl:right-16 top-0 z-30 transform-gpu transition-opacity duration-260',
-        isChromeVisible ? 'bottom-[170px] 2xl:bottom-[188px]' : 'bottom-[110px]',
+        isChromeVisible
+          ? 'bottom-[170px] 2xl:bottom-[188px]'
+          : 'bottom-[110px]',
         isOpen
           ? 'opacity-100 pointer-events-auto'
           : 'opacity-0 pointer-events-none',
@@ -175,7 +229,9 @@ function FullscreenIntegratedPanel({
                 : 'fullscreen-panel-slide-right'),
           )}
         >
-          {activePanel === 'queue' && <MemoQueuePanelView inFullscreenOverlay />}
+          {activePanel === 'queue' && (
+            <MemoQueuePanelView inFullscreenOverlay />
+          )}
           {activePanel === 'lyrics' && (
             <div className="w-full h-full">
               <MemoLyricsPanelView inFullscreenOverlay />
@@ -203,7 +259,9 @@ function FullscreenWindowControls({
     <div
       className={clsx(
         'absolute top-0 right-0 z-40 transition-opacity duration-200',
-        isChromeVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+        isChromeVisible
+          ? 'opacity-100 pointer-events-auto'
+          : 'opacity-0 pointer-events-none',
       )}
     >
       <div
@@ -266,10 +324,3 @@ function FullscreenDrawer(props: FullscreenDrawerProps) {
     </VisualizerProvider>
   )
 }
-
-
-
-
-
-
-

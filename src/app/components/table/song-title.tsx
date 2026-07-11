@@ -2,11 +2,14 @@ import { Link } from 'react-router-dom'
 import { CoverImage } from '@/app/components/table/cover-image'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/routes/routesList'
-import { useMainDrawerState } from '@/store/player.store'
+import { useMainDrawerState, usePlayerActions } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { ALBUM_ARTISTS_MAX_NUMBER } from '@/utils/multipleArtists'
 
 export function TableSongTitle({ song }: { song: ISong }) {
+  const { checkActiveSong } = usePlayerActions()
+  const isActive = checkActiveSong(song.id)
+
   return (
     <div className="flex w-full gap-2 items-center">
       <CoverImage
@@ -15,7 +18,14 @@ export function TableSongTitle({ song }: { song: ISong }) {
         altText={song.title}
       />
       <div className="flex flex-col w-full justify-center truncate">
-        <span className="text-sm font-medium truncate">{song.title}</span>
+        <span
+          className={cn(
+            'text-sm font-medium truncate transition-colors duration-150',
+            isActive ? 'text-primary font-semibold' : 'text-foreground',
+          )}
+        >
+          {song.title}
+        </span>
         <div className="flex items-center truncate">
           <TableArtists song={song} />
         </div>

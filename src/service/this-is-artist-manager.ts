@@ -140,52 +140,52 @@ export async function generateAndSavePlaylist(
   }
 
   generationInFlight = (async () => {
-  const today = getDateKey()
+    const today = getDateKey()
 
-  // Check if generation is needed (unless forced)
-  if (!force && !shouldGeneratePlaylist()) {
-    logger.info(
-      '[ThisIsArtist] Generation not needed, loading existing playlist',
-    )
-    const { playlist, metadata } = loadPlaylist()
-    if (metadata) {
-      return { playlist, metadata }
+    // Check if generation is needed (unless forced)
+    if (!force && !shouldGeneratePlaylist()) {
+      logger.info(
+        '[ThisIsArtist] Generation not needed, loading existing playlist',
+      )
+      const { playlist, metadata } = loadPlaylist()
+      if (metadata) {
+        return { playlist, metadata }
+      }
     }
-  }
 
-  logger.info(`[ThisIsArtist] Generating playlist for ${today}...`)
+    logger.info(`[ThisIsArtist] Generating playlist for ${today}...`)
 
-  // Generate playlist
-  const result = await generateThisIsArtist({
-    username: config.username,
-    apiKey: config.apiKey,
-  })
+    // Generate playlist
+    const result = await generateThisIsArtist({
+      username: config.username,
+      apiKey: config.apiKey,
+    })
 
-  // Create metadata
-  const metadata: PlaylistMetadata = {
-    generatedAt: new Date().toISOString(),
-    artist: result.artist,
-    totalSongs: result.playlist.length,
-    dateKey: today,
-  }
+    // Create metadata
+    const metadata: PlaylistMetadata = {
+      generatedAt: new Date().toISOString(),
+      artist: result.artist,
+      totalSongs: result.playlist.length,
+      dateKey: today,
+    }
 
-  // Save to localStorage
-  writeStoredPlaylist(
-    STORAGE_KEY,
-    STORAGE_KEY_METADATA,
-    result.playlist,
-    metadata,
-  )
-  writeStoredString(STORAGE_KEY_DATE_FLAG, today)
+    // Save to localStorage
+    writeStoredPlaylist(
+      STORAGE_KEY,
+      STORAGE_KEY_METADATA,
+      result.playlist,
+      metadata,
+    )
+    writeStoredString(STORAGE_KEY_DATE_FLAG, today)
 
-  logger.info(
-    `[ThisIsArtist] Playlist generated: This is ${result.artist.name} (${today})`,
-  )
+    logger.info(
+      `[ThisIsArtist] Playlist generated: This is ${result.artist.name} (${today})`,
+    )
 
-  return {
-    playlist: result.playlist,
-    metadata,
-  }
+    return {
+      playlist: result.playlist,
+      metadata,
+    }
   })()
 
   try {

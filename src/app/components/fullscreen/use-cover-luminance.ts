@@ -32,7 +32,10 @@ function getImageLuminanceFromElement(image: HTMLImageElement) {
   }
 }
 
-export function useCoverLuminance(coverArt?: string, size: '150' | '300' = '300') {
+export function useCoverLuminance(
+  coverArt?: string,
+  size: '150' | '300' = '300',
+) {
   const [luminance, setLuminance] = useState<number | null>(null)
 
   useEffect(() => {

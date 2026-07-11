@@ -171,7 +171,7 @@ export function useAudioContext(
     }
 
     setGlobalAnalyserNode(analyserRef.current)
-  }, [enableVisualizerTap, isSong, shouldEnableVisualizerBranch])
+  }, [isSong, shouldEnableVisualizerBranch])
 
   useEffect(() => {
     const filters =

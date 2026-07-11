@@ -10,8 +10,8 @@ import { ROUTES } from '@/routes/routesList'
 import { usePlayerStore } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { ALBUM_ARTISTS_MAX_NUMBER } from '@/utils/multipleArtists'
-import { FullscreenSongImage } from './song-image'
 import { useFullscreenLuminance } from './luminance-context'
+import { FullscreenSongImage } from './song-image'
 
 const MemoFullscreenSongImage = memo(FullscreenSongImage)
 
@@ -46,13 +46,12 @@ export function SongInfo({
     : 'text-foreground hover:text-foreground/95'
   const mutedToneClass = useDarkText ? 'text-black/70' : 'text-foreground/40'
   const chipToneClass = useDarkText
-    ? 'border-black/30 bg-white/42 text-black/90' : 'border-primary/30 bg-black/30 text-foreground/92'
+    ? 'border-black/15 bg-black/5 text-black/90'
+    : 'border-white/15 bg-white/5 text-foreground/92'
   const titleShadowClass = useDarkText
     ? ''
     : 'fullscreen-readable-shadow-strong'
-  const bodyShadowClass = useDarkText
-    ? ''
-    : 'fullscreen-readable-shadow-soft'
+  const bodyShadowClass = useDarkText ? '' : 'fullscreen-readable-shadow-soft'
 
   function handleTitleClick() {
     closeButtonRef.current?.click()
@@ -119,9 +118,18 @@ export function SongInfo({
               {currentSong.title}
             </h2>
           </MarqueeTitle>
-          <div className={cn('min-w-0 overflow-visible', useDarkText ? 'text-black/90' : 'text-foreground/74')}>
+          <div
+            className={cn(
+              'min-w-0 overflow-visible',
+              useDarkText ? 'text-black/90' : 'text-foreground/74',
+            )}
+          >
             <p
-              className={cn('inline-block text-xl 2xl:text-2xl transition-colors cursor-pointer', bodyToneClass, bodyShadowClass)}
+              className={cn(
+                'inline-block text-xl 2xl:text-2xl transition-colors cursor-pointer',
+                bodyToneClass,
+                bodyShadowClass,
+              )}
               onClick={handleAlbumClick}
             >
               {currentSong.album}
@@ -138,9 +146,16 @@ export function SongInfo({
             </div>
           </div>
           <div className="mt-2 2xl:mt-3 mb-[1px]">
-            <div className={cn('inline-flex items-center gap-2 rounded-md border-[1.5px] px-3 py-1.5 text-sm', chipToneClass)}>
+            <div
+              className={cn(
+                'inline-flex items-center gap-2 rounded-md border-[1.5px] px-3 py-1.5 text-sm',
+                chipToneClass,
+              )}
+            >
               {currentSong.genre && (
-                <span className="truncate max-w-[220px]">{currentSong.genre}</span>
+                <span className="truncate max-w-[220px]">
+                  {currentSong.genre}
+                </span>
               )}
               {currentSong.genre && currentSong.year && (
                 <span className={mutedToneClass}>•</span>

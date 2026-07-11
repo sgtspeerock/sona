@@ -22,10 +22,7 @@ export function SonaPanel({
   )
 }
 
-export function SonaSurface({
-  className,
-  ...props
-}: ComponentProps<'div'>) {
+export function SonaSurface({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(
@@ -68,10 +65,7 @@ export function SonaSection({
   )
 }
 
-export function SonaPill({
-  className,
-  ...props
-}: ComponentProps<'div'>) {
+export function SonaPill({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(

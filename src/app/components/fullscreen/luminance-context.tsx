@@ -7,10 +7,11 @@ type FullscreenLuminanceContextType = {
   useDarkForeground: boolean
 }
 
-const FullscreenLuminanceContext = createContext<FullscreenLuminanceContextType>({
-  luminance: null,
-  useDarkForeground: false,
-})
+const FullscreenLuminanceContext =
+  createContext<FullscreenLuminanceContextType>({
+    luminance: null,
+    useDarkForeground: false,
+  })
 
 export function FullscreenLuminanceProvider({
   children,
@@ -22,7 +23,9 @@ export function FullscreenLuminanceProvider({
   const useDarkForeground = luminance !== null && luminance >= 0.66
 
   return (
-    <FullscreenLuminanceContext.Provider value={{ luminance, useDarkForeground }}>
+    <FullscreenLuminanceContext.Provider
+      value={{ luminance, useDarkForeground }}
+    >
       {children}
     </FullscreenLuminanceContext.Provider>
   )

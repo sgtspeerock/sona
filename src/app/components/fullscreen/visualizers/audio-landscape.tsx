@@ -131,8 +131,7 @@ export function AudioLandscape() {
       const coverSecondary =
         palette?.muted ?? palette?.accent ?? palette?.dominant ?? null
       const c2 =
-        coverSecondary &&
-        coverSecondary.toLowerCase() !== c1.toLowerCase()
+        coverSecondary && coverSecondary.toLowerCase() !== c1.toLowerCase()
           ? coverSecondary
           : FALLBACK_SECONDARY
       let bassSum = 0

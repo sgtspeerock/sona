@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { getSimpleCoverArtUrl } from '@/api/httpClient'
 import ImageHeader from '@/app/components/album/image-header'
 import ArtistTopSongs from '@/app/components/artist/artist-top-songs'
 import { ArtistInfo } from '@/app/components/artist/info'
@@ -11,7 +12,9 @@ import { PreviewListFallback } from '@/app/components/fallbacks/home-fallbacks'
 import { TopSongsTableFallback } from '@/app/components/fallbacks/table-fallbacks'
 import { BadgesData } from '@/app/components/header-info'
 import PreviewList from '@/app/components/home/preview-list'
+import { ImageLoader } from '@/app/components/image-loader'
 import ListWrapper from '@/app/components/list-wrapper'
+import { Button } from '@/app/components/ui/button'
 import { PageState } from '@/app/components/ui/page-state'
 import { SonaPanel } from '@/app/components/ui/sona'
 import {
@@ -20,17 +23,23 @@ import {
   useGetArtists,
   useGetTopSongs,
 } from '@/app/hooks/use-artist'
+import { useScrollThreshold } from '@/app/hooks/use-scroll-threshold'
 import ErrorPage from '@/app/pages/error-page'
+import { cn } from '@/lib/utils'
 import { ROUTES } from '@/routes/routesList'
 import { lidarr } from '@/service/lidarr'
+import { subsonic } from '@/service/subsonic'
+import { useAppIntegrations } from '@/store/app.store'
+import { usePlayerActions } from '@/store/player.store'
 import { sortRecentAlbums } from '@/utils/album'
 import { dedupeAlbumsByIdentity } from '@/utils/albumDedup'
-import { useAppIntegrations } from '@/store/app.store'
 
 export default function Artist() {
   const { t } = useTranslation()
   const { artistId } = useParams() as { artistId: string }
   const [isLidarrRequesting, setIsLidarrRequesting] = useState(false)
+  const showStickyHeader = useScrollThreshold(240)
+  const { setSongList } = usePlayerActions()
 
   const {
     data: artist,
@@ -88,7 +97,9 @@ export default function Artist() {
     [artistsList, artistId],
   )
 
-  const { lidarr: lidarrConfig } = useAppIntegrations((state) => state.integrations)
+  const { lidarr: lidarrConfig } = useAppIntegrations(
+    (state) => state.integrations,
+  )
   const isLidarrConfigured = Boolean(lidarrConfig.url && lidarrConfig.apiKey)
 
   async function handleLidarrArtistRequest() {
@@ -99,7 +110,8 @@ export default function Artist() {
       await lidarr.addArtist(artist.name)
       toast.success(t('command.lidarr.success', { artist: artist.name }))
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Connection failed'
+      const message =
+        error instanceof Error ? error.message : 'Connection failed'
       toast.error(t('command.lidarr.error', { message }))
     } finally {
       setIsLidarrRequesting(false)
@@ -111,7 +123,6 @@ export default function Artist() {
     return <ErrorPage status={404} statusText="Not Found" />
   }
   if (!artist) return <AlbumFallback />
-
 
   function getSongCount() {
     if (!artist) return null
@@ -194,8 +205,63 @@ export default function Artist() {
     })
   }
 
+  const playArtist = async () => {
+    if (topSongs && topSongs.length > 0) {
+      setSongList(topSongs, 0)
+    } else {
+      const songs = await subsonic.artists.getArtistSongs(artistId)
+      if (songs && songs.length > 0) {
+        setSongList(songs, 0)
+      }
+    }
+  }
+
   return (
-    <div className="w-full">
+    <div className="w-full relative">
+      {/* Compact Sticky Header on Scroll */}
+      <div
+        className={cn(
+          'sticky top-0 left-0 right-0 z-30 h-14 border-b border-border/40 bg-background/80 backdrop-blur-md flex items-center justify-between px-8 transition-all duration-300 transform-gpu',
+          showStickyHeader
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 -translate-y-4 pointer-events-none absolute',
+        )}
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <ImageLoader id={headerCoverArt} type={headerCoverArtType} size="80">
+            {(src) => {
+              const fallbackSrc = getSimpleCoverArtUrl(
+                undefined,
+                headerCoverArtType,
+                '80',
+              )
+              return (
+                <img
+                  src={src || fallbackSrc}
+                  alt={artist.name}
+                  className="w-9 h-9 rounded-full object-cover border border-border/30"
+                />
+              )
+            }}
+          </ImageLoader>
+          <div className="min-w-0 flex flex-col justify-center">
+            <h2 className="text-sm font-bold truncate leading-tight">
+              {artist.name}
+            </h2>
+          </div>
+          {((topSongs && topSongs.length > 0) ||
+            (dedupedAlbums && dedupedAlbums.length > 0)) && (
+            <Button
+              size="sm"
+              onClick={playArtist}
+              className="h-8 rounded-full px-4 text-xs font-semibold shrink-0 ml-2"
+            >
+              {t('options.play', 'Play')}
+            </Button>
+          )}
+        </div>
+      </div>
+
       <ImageHeader
         type={t('artist.headline')}
         title={artist.name}

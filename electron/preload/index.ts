@@ -89,8 +89,8 @@ const api: IAonsokuAPI = {
     ipcRenderer.send(IpcChannels.SetMiniPlayerPinned, pinned)
   },
   clearAppCache: () => ipcRenderer.invoke(IpcChannels.ClearAppCache),
-  fetchExternalText: (url) =>
-    ipcRenderer.invoke(IpcChannels.FetchExternalText, url),
+  fetchExternalText: (url, headers) =>
+    ipcRenderer.invoke(IpcChannels.FetchExternalText, url, headers),
   fetchIcyMetadata: (url) =>
     ipcRenderer.invoke(IpcChannels.FetchIcyMetadata, url),
 }

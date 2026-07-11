@@ -35,6 +35,7 @@ const song = {
   sessionEnergy: 'get-session-energy-songs',
   info: 'get-song-info',
   count: 'get-song-count',
+  byArtist: 'get-artist-songs',
 }
 
 const radio = {

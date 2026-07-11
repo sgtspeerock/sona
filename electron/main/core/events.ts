@@ -141,22 +141,25 @@ export function setupIpcEvents(window: BrowserWindow | null) {
   })
 
   ipcMain.removeHandler(IpcChannels.FetchExternalText)
-  ipcMain.handle(IpcChannels.FetchExternalText, async (_, rawUrl: string) => {
-    try {
-      const url = String(rawUrl ?? '').trim()
-      if (!url) {
-        return { ok: false, status: 400, text: '', finalUrl: '' }
-      }
+  ipcMain.handle(
+    IpcChannels.FetchExternalText,
+    async (_, rawUrl: string, customHeaders?: Record<string, string>) => {
+      try {
+        const url = String(rawUrl ?? '').trim()
+        if (!url) {
+          return { ok: false, status: 400, text: '', finalUrl: '' }
+        }
 
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 6000)
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Sona/RadioMetadata',
-          'Icy-MetaData': '1',
-          Accept: 'application/json,text/plain,text/html,*/*',
-        },
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 15000)
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Sona/RadioMetadata',
+            'Icy-MetaData': '1',
+            Accept: 'application/json,text/plain,text/html,*/*',
+            ...(customHeaders || {}),
+          },
         redirect: 'follow',
         signal: controller.signal,
       })

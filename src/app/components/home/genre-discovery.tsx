@@ -3,14 +3,14 @@ import type { MouseEvent, ReactNode } from 'react'
 import { startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { ImageLoader } from '@/app/components/image-loader'
 import { SecondaryTileFrame } from '@/app/components/home/secondary-tile'
+import { ImageLoader } from '@/app/components/image-loader'
 import { Button } from '@/app/components/ui/button'
 import { Skeleton } from '@/app/components/ui/skeleton'
 import {
   GenreDiscoveryItem,
-  useGetAnniversaryRadio,
   useGetAlbumsByGenre,
+  useGetAnniversaryRadio,
   useGetGenreDiscovery,
   useGetSessionEnergy,
 } from '@/app/hooks/use-home'
@@ -125,10 +125,10 @@ export function GenreDiscovery({
           cardCount === 4
             ? 'grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2'
             : cardCount <= 2
-            ? 'grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2'
-            : thirdCard
-            ? 'grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 min-[1850px]:grid-cols-4'
-            : 'grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3'
+              ? 'grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2'
+              : thirdCard
+                ? 'grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 min-[1850px]:grid-cols-4'
+                : 'grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3'
         }
       >
         {visibleGenres.map((genre, index) => (

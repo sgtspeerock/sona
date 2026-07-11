@@ -55,9 +55,7 @@ export default function RelatedArtistsList({
   return (
     <div className="mb-4 flex w-full flex-col">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="sona-section-title scroll-m-20">
-          {title}
-        </h3>
+        <h3 className="sona-section-title scroll-m-20">{title}</h3>
         <div className="flex gap-2">
           <CarouselButton
             direction="prev"

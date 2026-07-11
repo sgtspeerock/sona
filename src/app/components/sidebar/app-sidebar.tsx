@@ -61,7 +61,11 @@ export function AppSidebar({
       </MainSidebarContent>
 
       <MainSidebarFooter className="border-t border-border/35 p-3">
-        <SimpleTooltip text={`${t('settings.label')} (Ctrl+,)`} side="right" delay={50}>
+        <SimpleTooltip
+          text={`${t('settings.label')} (Ctrl+,)`}
+          side="right"
+          delay={50}
+        >
           <Button
             variant="ghost"
             className="h-10 justify-start gap-2.5 rounded-lg px-2.5 text-muted-foreground hover:bg-accent/45 hover:text-foreground"

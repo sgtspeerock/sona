@@ -49,6 +49,8 @@ export function registerPlayerStoreSideEffects({
     discordRpc.sendCurrentSong()
   })
 
+  let plannerTimeout: ReturnType<typeof setTimeout> | null = null
+
   store.subscribe(
     (state) => [
       state.songlist.currentSongIndex,
@@ -57,8 +59,13 @@ export function registerPlayerStoreSideEffects({
       state.playerState.mediaType,
     ],
     () => {
-      ensureSonaDjNextTrack().catch(() => undefined)
-      ensureRuntimeShuffleNextTrack().catch(() => undefined)
+      if (plannerTimeout) {
+        clearTimeout(plannerTimeout)
+      }
+      plannerTimeout = setTimeout(() => {
+        ensureSonaDjNextTrack().catch(() => undefined)
+        ensureRuntimeShuffleNextTrack().catch(() => undefined)
+      }, 5000)
     },
     {
       equalityFn: shallow,

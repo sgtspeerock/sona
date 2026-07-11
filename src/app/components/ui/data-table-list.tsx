@@ -324,7 +324,11 @@ export function DataTableList<TData, TValue>({
   }, [virtualizer.scrollElement, debouncedHandleScroll])
 
   useEffect(() => {
-    if (!scrollToIndex || currentSongIndex === undefined || currentSongIndex < 0)
+    if (
+      !scrollToIndex ||
+      currentSongIndex === undefined ||
+      currentSongIndex < 0
+    )
       return
 
     virtualizer.scrollToIndex(currentSongIndex, {

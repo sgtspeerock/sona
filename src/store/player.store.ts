@@ -166,7 +166,8 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               gains: [...DEFAULT_EQ_GAINS],
               setGains: (value) => {
                 set((state) => {
-                  state.settings.equalizer.gains = normalizeEqualizerGains(value)
+                  state.settings.equalizer.gains =
+                    normalizeEqualizerGains(value)
                 })
               },
             },
@@ -605,7 +606,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
             },
             toggleShuffle: () => {
               const { isShuffleActive } = get().playerState
-              const { currentList, currentSongIndex } = get().songlist
+              const { currentList } = get().songlist
 
               const listLength = currentList.length
               const isPlayingOneOrLess = listLength <= 1
@@ -623,26 +624,23 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                   state.songlist.currentSongIndex = index
                   state.playerState.isShuffleActive = false
                 })
-                } else {
-                  const { currentList, currentSongIndex } = get().songlist
-                  const playedSegment = currentList.slice(
-                    0,
-                    currentSongIndex + 1,
-                  )
-                  const upcomingSegment = shuffleSongList(
-                    currentList.slice(currentSongIndex + 1),
-                    0,
-                    true,
-                  )
-                  const shuffledList = [...playedSegment, ...upcomingSegment]
+              } else {
+                const { currentList, currentSongIndex } = get().songlist
+                const playedSegment = currentList.slice(0, currentSongIndex + 1)
+                const upcomingSegment = shuffleSongList(
+                  currentList.slice(currentSongIndex + 1),
+                  0,
+                  true,
+                )
+                const shuffledList = [...playedSegment, ...upcomingSegment]
 
-                  set((state) => {
-                    state.songlist.shuffledList = shuffledList
-                    state.songlist.currentList = shuffledList
-                    state.songlist.currentSongIndex = currentSongIndex
-                    state.playerState.isShuffleActive = true
-                  })
-                }
+                set((state) => {
+                  state.songlist.shuffledList = shuffledList
+                  state.songlist.currentList = shuffledList
+                  state.songlist.currentSongIndex = currentSongIndex
+                  state.playerState.isShuffleActive = true
+                })
+              }
             },
             playNextSong: () => {
               const { loopState } = get().playerState
@@ -654,12 +652,19 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 set((state) => {
                   state.songlist.currentSongIndex += 1
                   state.playerState.isPlaying = true
+                  const nextIdx = state.songlist.currentSongIndex
+                  state.playerState.hasNext =
+                    nextIdx + 1 < state.songlist.currentList.length
+                  state.playerState.hasPrev = nextIdx > 0
                 })
               } else if (loopState === LoopState.All) {
                 resetProgress()
                 playFirstSongInQueue()
                 set((state) => {
                   state.playerState.isPlaying = true
+                  state.playerState.hasNext =
+                    state.songlist.currentList.length > 1
+                  state.playerState.hasPrev = false
                 })
               }
             },
@@ -671,11 +676,18 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 set((state) => {
                   state.songlist.currentSongIndex += 1
                   state.playerState.isPlaying = true
+                  const nextIdx = state.songlist.currentSongIndex
+                  state.playerState.hasNext =
+                    nextIdx + 1 < state.songlist.currentList.length
+                  state.playerState.hasPrev = nextIdx > 0
                 })
               } else if (loopState === LoopState.All) {
                 playFirstSongInQueue()
                 set((state) => {
                   state.playerState.isPlaying = true
+                  state.playerState.hasNext =
+                    state.songlist.currentList.length > 1
+                  state.playerState.hasPrev = false
                 })
               }
             },
@@ -685,6 +697,10 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 set((state) => {
                   state.songlist.currentSongIndex -= 1
                   state.playerState.isPlaying = true
+                  const prevIdx = state.songlist.currentSongIndex
+                  state.playerState.hasNext =
+                    prevIdx + 1 < state.songlist.currentList.length
+                  state.playerState.hasPrev = prevIdx > 0
                 })
               }
             },
@@ -1306,6 +1322,9 @@ export const usePlayerSonglist = () =>
 export const usePlayerCurrentSong = () =>
   usePlayerStore((state) => state.songlist.currentSong)
 
+export const usePlayerCurrentSongId = () =>
+  usePlayerStore((state) => state.songlist.currentSong?.id)
+
 export const usePlayerCurrentSongIndex = () =>
   usePlayerStore((state) => state.songlist.currentSongIndex)
 
@@ -1390,10 +1409,13 @@ export const usePlayerLoop = () =>
   usePlayerStore((state) => state.playerState.loopState)
 
 export const usePlayerPrevAndNext = () =>
-  usePlayerStore((state) => ({
-    hasPrev: state.playerState.hasPrev,
-    hasNext: state.playerState.hasNext,
-  }), shallow)
+  usePlayerStore(
+    (state) => ({
+      hasPrev: state.playerState.hasPrev,
+      hasNext: state.playerState.hasNext,
+    }),
+    shallow,
+  )
 
 export const usePlayerRef = () =>
   usePlayerStore((state) => state.playerState.audioPlayerRef)
@@ -1401,27 +1423,36 @@ export const usePlayerRef = () =>
 export const getVolume = () => usePlayerStore.getState().playerState.volume
 
 export const useMainDrawerState = () =>
-  usePlayerStore((state) => ({
-    mainDrawerState: state.playerState.mainDrawerState,
-    setMainDrawerState: state.actions.setMainDrawerState,
-    setActiveDrawerPanel: state.actions.setActiveDrawerPanel,
-    toggleQueueAndLyrics: state.actions.toggleQueueAndLyrics,
-    closeDrawer: state.actions.closeDrawer,
-  }), shallow)
+  usePlayerStore(
+    (state) => ({
+      mainDrawerState: state.playerState.mainDrawerState,
+      setMainDrawerState: state.actions.setMainDrawerState,
+      setActiveDrawerPanel: state.actions.setActiveDrawerPanel,
+      toggleQueueAndLyrics: state.actions.toggleQueueAndLyrics,
+      closeDrawer: state.actions.closeDrawer,
+    }),
+    shallow,
+  )
 
 export const useQueueState = () =>
-  usePlayerStore((state) => ({
-    queueState: state.playerState.queueState,
-    setQueueState: state.actions.setQueueState,
-    toggleQueueAction: state.actions.toggleQueueAction,
-  }), shallow)
+  usePlayerStore(
+    (state) => ({
+      queueState: state.playerState.queueState,
+      setQueueState: state.actions.setQueueState,
+      toggleQueueAction: state.actions.toggleQueueAction,
+    }),
+    shallow,
+  )
 
 export const useLyricsState = () =>
-  usePlayerStore((state) => ({
-    lyricsState: state.playerState.lyricsState,
-    setLyricsState: state.actions.setLyricsState,
-    toggleLyricsAction: state.actions.toggleLyricsAction,
-  }), shallow)
+  usePlayerStore(
+    (state) => ({
+      lyricsState: state.playerState.lyricsState,
+      setLyricsState: state.actions.setLyricsState,
+      toggleLyricsAction: state.actions.toggleLyricsAction,
+    }),
+    shallow,
+  )
 
 export const useSongColor = () =>
   usePlayerStore((state) => {
@@ -1462,10 +1493,9 @@ export const useVisualizerSettingsStore = () =>
     preset: state.settings.visualizer.preset,
     autoQualityEnabled: state.settings.visualizer.autoQualityEnabled,
     setVisualizerPreset: state.actions.setVisualizerPreset,
-    setVisualizerAutoQualityEnabled: state.actions.setVisualizerAutoQualityEnabled,
+    setVisualizerAutoQualityEnabled:
+      state.actions.setVisualizerAutoQualityEnabled,
   }))
 
 export const usePlayerCurrentList = () =>
   usePlayerStore((state) => state.songlist.currentList)
-
-

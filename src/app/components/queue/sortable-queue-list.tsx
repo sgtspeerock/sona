@@ -37,6 +37,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { ImageLoader } from '@/app/components/image-loader'
+import { TableActionButton } from '@/app/components/table/action-button'
 import PlaySongButton from '@/app/components/table/play-button'
 import { QueueActions } from '@/app/components/table/queue-actions'
 import { TableSongTitle } from '@/app/components/table/song-title'
@@ -47,6 +48,10 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/app/components/ui/context-menu'
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/app/components/ui/dropdown-menu'
 import {
   ScrollArea,
   scrollAreaViewportSelector,
@@ -103,16 +108,16 @@ function QueueRowContentBase({
               ? { ...dragAttributes, ...dragListeners }
               : {})}
             className={clsx(
-              'group/tablerow relative w-full flex flex-row items-center rounded-md h-14 transition-colors select-none',
-              sortingEnabled && !isOverlay && 'cursor-grab active:cursor-grabbing',
+              'group/tablerow relative w-full flex flex-row items-center rounded-md h-14 transition-colors select-none px-3',
+              sortingEnabled &&
+                !isOverlay &&
+                'cursor-grab active:cursor-grabbing',
               isDragging && !isOverlay
                 ? 'opacity-20 bg-foreground/5'
                 : 'hover:bg-foreground/20',
               isOverlay &&
                 'shadow-xl border border-foreground/20 bg-popover cursor-grabbing',
-              isActive &&
-                !isDragging &&
-                'row-active bg-foreground/20',
+              isActive && !isDragging && 'row-active bg-foreground/20',
             )}
             onClick={() => {
               if (song.id !== currentSongId) {
@@ -120,7 +125,7 @@ function QueueRowContentBase({
               }
             }}
           >
-            <div className="relative ml-2 h-10 w-10 min-w-10 overflow-hidden rounded-md border border-border/30 bg-muted">
+            <div className="relative h-10 w-10 min-w-10 overflow-hidden rounded-md border border-border/30 bg-muted">
               {song.coverArt ? (
                 <ImageLoader id={song.coverArt} type="album" size="120">
                   {(src) =>
@@ -136,23 +141,91 @@ function QueueRowContentBase({
               ) : null}
               {!isOverlay && song.queueSource === 'dj' && (
                 <span className="absolute bottom-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-tl bg-background/85 text-foreground/70">
-                  <SparklesIcon className="h-3 w-3" title={sourceLabel ?? undefined} />
+                  <SparklesIcon
+                    className="h-3 w-3"
+                    title={sourceLabel ?? undefined}
+                  />
                 </span>
               )}
               {!isOverlay && song.queueSource === 'session' && (
                 <span className="absolute bottom-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-tl bg-background/85 text-foreground/70">
-                  <MoonStarIcon className="h-3 w-3" title={sourceLabel ?? undefined} />
+                  <MoonStarIcon
+                    className="h-3 w-3"
+                    title={sourceLabel ?? undefined}
+                  />
                 </span>
               )}
             </div>
 
             <div className="flex-1 min-w-0 px-2">
               <p className="text-[13px] font-medium truncate">{song.title}</p>
-              <p className="text-[13px] text-foreground/65 truncate">{song.artist}</p>
+              <p className="text-[13px] text-foreground/65 truncate">
+                {song.artist}
+              </p>
             </div>
 
-            <div className="w-16 max-w-16 min-w-16 p-1.5 text-[13px] text-foreground/70 shrink-0 text-right">
-              {convertSecondsToTime(song.duration ?? 0)}
+            <div className="w-16 max-w-16 min-w-16 p-1.5 flex items-center justify-end shrink-0 relative">
+              <div className="group-hover/tablerow:opacity-0 transition-opacity duration-200">
+                <span className="text-[13px] text-foreground/70">
+                  {convertSecondsToTime(song.duration ?? 0)}
+                </span>
+              </div>
+              <div className="absolute right-1 opacity-0 group-hover/tablerow:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                <TableActionButton
+                  optionsMenuItems={
+                    <>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(ROUTES.ALBUM.PAGE(song.albumId, song.id))
+                          closeDrawer()
+                        }}
+                      >
+                        <MusicIcon className="mr-2 h-4 w-4" />
+                        <span>{t('song.actions.goToSong', 'Zum Song')}</span>
+                      </DropdownMenuItem>
+                      {song.artistId && (
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigate(ROUTES.ARTIST.PAGE(song.artistId))
+                            closeDrawer()
+                          }}
+                        >
+                          <Mic2Icon className="mr-2 h-4 w-4" />
+                          <span>
+                            {t('song.actions.goToArtist', 'Zum Artist')}
+                          </span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(ROUTES.ALBUM.PAGE(song.albumId))
+                          closeDrawer()
+                        }}
+                      >
+                        <Disc3Icon className="mr-2 h-4 w-4" />
+                        <span>{t('song.actions.goToAlbum', 'Zum Album')}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          removeSongFromQueue(song.id)
+                        }}
+                      >
+                        <XIcon className="mr-2 h-4 w-4" />
+                        <span>{t('queue.remove', 'Aus Queue entfernen')}</span>
+                      </DropdownMenuItem>
+                    </>
+                  }
+                />
+              </div>
             </div>
           </div>
         </ContextMenuTrigger>
@@ -215,9 +288,7 @@ function QueueRowContentBase({
           : 'hover:bg-foreground/20',
         isOverlay &&
           'shadow-xl border border-foreground/20 bg-popover cursor-grabbing',
-        isActive &&
-          !isDragging &&
-          'row-active bg-foreground/20',
+        isActive && !isDragging && 'row-active bg-foreground/20',
       )}
     >
       <div className="w-8 shrink-0 ml-1 relative flex items-center justify-center">
@@ -488,7 +559,10 @@ export function SortableQueueList({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+      <SortableContext
+        items={sortableIds}
+        strategy={verticalListSortingStrategy}
+      >
         <ScrollArea
           ref={parentRef}
           type="always"

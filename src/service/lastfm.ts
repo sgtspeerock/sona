@@ -50,7 +50,11 @@ async function makeRequest<T>(
   url.searchParams.append('format', 'json')
 
   Object.entries(params).forEach(([key, value]) => {
-    url.searchParams.append(key, String(value))
+    let strValue = String(value)
+    if ((key === 'artist' || key === 'track') && strValue.includes('+')) {
+      strValue = strValue.replace(/\+/g, '%2B')
+    }
+    url.searchParams.append(key, strValue)
   })
 
   const response = await fetch(url.toString())

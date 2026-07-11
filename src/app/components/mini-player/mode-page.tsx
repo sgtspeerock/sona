@@ -29,11 +29,11 @@ import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
 import { useTimeoutController } from '@/app/hooks/use-timeout-controller'
 import {
   usePlayerActions,
-  usePlayerSonglist,
   usePlayerCurrentSong,
   usePlayerIsPlaying,
   usePlayerLoop,
   usePlayerPrevAndNext,
+  usePlayerSonglist,
   usePlayerSongStarred,
   usePlayerVolume,
   useSongColor,
@@ -67,9 +67,7 @@ export function MiniPlayerModePage() {
   }, [])
   const [viewportHeight, setViewportHeight] = useState(() => {
     if (typeof window === 'undefined') return 198
-    return (
-      window.innerHeight || document.documentElement?.clientHeight || 198
-    )
+    return window.innerHeight || document.documentElement?.clientHeight || 198
   })
 
   const syncViewportHeight = useCallback(() => {
@@ -325,17 +323,17 @@ export function MiniPlayerModePage() {
         {hasSong && coverSource ? (
           <ImageLoader id={coverSource.id} type={coverSource.type} size={500}>
             {(src) => (
-                <LazyLoadImage
-                  src={src}
-                  width="100%"
-                  height="100%"
-                  loading="eager"
-                  effect="opacity"
-                  className="h-full w-full object-cover object-center"
-                  alt={`${resolvedSong?.artist ?? ''} - ${resolvedSong?.title ?? ''}`}
-                />
-              )}
-            </ImageLoader>
+              <LazyLoadImage
+                src={src}
+                width="100%"
+                height="100%"
+                loading="eager"
+                effect="opacity"
+                className="h-full w-full object-cover object-center"
+                alt={`${resolvedSong?.artist ?? ''} - ${resolvedSong?.title ?? ''}`}
+              />
+            )}
+          </ImageLoader>
         ) : (
           <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/35 via-background/70 to-background text-white/85">
             <Music2Icon className="h-10 w-10 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)]" />

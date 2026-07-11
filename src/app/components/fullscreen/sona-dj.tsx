@@ -39,9 +39,10 @@ export function SonaDjButton({ variant = 'fullscreen' }: SonaDjButtonProps) {
       gradient: 'from-purple-500/12 to-pink-500/12',
       border: 'border-purple-300/25',
       hover: 'hover:border-purple-300/55',
-      activeBorder: 'border-primary/70',
+      activeBorder: 'border-primary/80',
       activeRing: 'ring-primary/45',
-      activeGlow: 'shadow-[0_0_24px_hsl(var(--primary)/0.35)]',
+      activeGlow:
+        'shadow-[0_0_30px_hsl(var(--primary)/0.5),_0_0_12px_hsl(var(--primary)/0.3)]',
       activeBackground:
         'bg-[hsl(var(--primary)/0.22)] from-[hsl(var(--primary)/0.46)] to-[hsl(var(--primary)/0.18)]',
     },
@@ -53,9 +54,10 @@ export function SonaDjButton({ variant = 'fullscreen' }: SonaDjButtonProps) {
       gradient: 'from-purple-500/12 to-pink-500/12',
       border: 'border-purple-300/25',
       hover: 'hover:border-purple-300/55',
-      activeBorder: 'border-primary/70',
+      activeBorder: 'border-primary/80',
       activeRing: 'ring-primary/45',
-      activeGlow: 'shadow-[0_0_24px_hsl(var(--primary)/0.35)]',
+      activeGlow:
+        'shadow-[0_0_30px_hsl(var(--primary)/0.5),_0_0_12px_hsl(var(--primary)/0.3)]',
       activeBackground:
         'bg-[hsl(var(--primary)/0.22)] from-[hsl(var(--primary)/0.46)] to-[hsl(var(--primary)/0.18)]',
     },
@@ -67,9 +69,10 @@ export function SonaDjButton({ variant = 'fullscreen' }: SonaDjButtonProps) {
       gradient: 'from-purple-500/12 to-pink-500/12',
       border: 'border-purple-300/25',
       hover: 'hover:border-purple-300/55',
-      activeBorder: 'border-primary/70',
+      activeBorder: 'border-primary/80',
       activeRing: 'ring-primary/45',
-      activeGlow: 'shadow-[0_0_24px_hsl(var(--primary)/0.35)]',
+      activeGlow:
+        'shadow-[0_0_30px_hsl(var(--primary)/0.5),_0_0_12px_hsl(var(--primary)/0.3)]',
       activeBackground:
         'bg-[hsl(var(--primary)/0.22)] from-[hsl(var(--primary)/0.46)] to-[hsl(var(--primary)/0.18)]',
     },
@@ -139,7 +142,7 @@ export function SonaDjButton({ variant = 'fullscreen' }: SonaDjButtonProps) {
                   seedSonaDjTrack(dj.mode).catch(() => undefined)
                 }}
               >
-                <DjModeIcon fileName={dj.icon} />
+                <DjModeIcon fileName={dj.icon} isActive={isActive} />
                 <div className="min-w-0">
                   <p className="font-semibold">{dj.name}</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -167,13 +170,24 @@ export function SonaDjButton({ variant = 'fullscreen' }: SonaDjButtonProps) {
   )
 }
 
-function DjModeIcon({ fileName }: { fileName: string }) {
+function DjModeIcon({
+  fileName,
+  isActive,
+}: {
+  fileName: string
+  isActive: boolean
+}) {
   const iconPath = `${import.meta.env.BASE_URL}icons/${fileName}`
 
   return (
     <span
       aria-hidden
-      className="inline-block w-6 h-6 bg-white shrink-0"
+      className={clsx(
+        'inline-block w-8 h-8 shrink-0 transition-all duration-700',
+        isActive
+          ? 'bg-primary drop-shadow-[0_0_8px_hsl(var(--primary))]'
+          : 'bg-white/70 hover:bg-white',
+      )}
       style={{
         WebkitMaskImage: `url('${iconPath}')`,
         WebkitMaskRepeat: 'no-repeat',
@@ -217,5 +231,3 @@ function SonaDjIcon({
     />
   )
 }
-
-

@@ -33,7 +33,7 @@ const Slider = React.forwardRef<
     <SliderPrimitive.Root
       ref={ref}
       className={cn(
-        'relative h-3 flex w-full touch-none select-none items-center cursor-pointer',
+        'group relative h-3 flex w-full touch-none select-none items-center cursor-pointer',
         className,
       )}
       onMouseEnter={() => setShowTooltip(true)}
@@ -42,7 +42,7 @@ const Slider = React.forwardRef<
     >
       <SliderPrimitive.Track
         className={clsx(
-          'slider-track relative h-1 w-full grow overflow-hidden rounded-full select-none',
+          'slider-track relative h-1 w-full grow overflow-hidden rounded-full select-none transition-[height] duration-150 group-hover:h-1.5',
           variant === 'default' && 'bg-secondary',
           variant === 'secondary' && 'bg-muted-foreground/70',
         )}
@@ -66,11 +66,12 @@ const Slider = React.forwardRef<
       >
         <SliderPrimitive.Thumb
           className={clsx(
-            'block opacity-0 h-3 w-3 cursor-pointer select-none rounded-full',
-            'border-2 ring-offset-background transition-[background-color,opacity]',
+            'block opacity-0 scale-0 h-3.5 w-3.5 cursor-pointer select-none rounded-full',
+            'border-2 ring-offset-background transition-[background-color,opacity,transform] duration-150 transform-gpu',
             'focus-visible:outline-none focus-visible:ring-transparent',
-            'disabled:pointer-events-none disabled:opacity-50 transform-gpu',
-            showTooltip && 'opacity-100',
+            'disabled:pointer-events-none disabled:opacity-50',
+            'group-hover:opacity-100 group-hover:scale-100 focus-visible:opacity-100 focus-visible:scale-100',
+            showTooltip && 'opacity-100 scale-100',
             variant === 'default' && 'bg-foreground border-foreground',
             variant === 'secondary' &&
               'bg-secondary-foreground border-secondary-foreground',
@@ -282,7 +283,7 @@ export function ProgressSlider(props: ProgressSliderProps) {
     <SliderPrimitive.Root
       ref={sliderRef}
       className={cn(
-        'relative h-3 flex w-full touch-none select-none items-center cursor-pointer',
+        'group relative h-3 flex w-full touch-none select-none items-center cursor-pointer',
         className,
       )}
       onMouseOver={handleMouseOver}
@@ -301,7 +302,7 @@ export function ProgressSlider(props: ProgressSliderProps) {
       >
         <SliderPrimitive.Track
           className={clsx(
-            'slider-track relative h-1 w-full grow overflow-hidden rounded-full select-none',
+            'slider-track relative h-1 w-full grow overflow-hidden rounded-full select-none transition-[height] duration-150 group-hover:h-1.5',
             variant === 'default' && 'bg-secondary',
             variant === 'secondary' && 'bg-muted-foreground/70',
           )}
@@ -321,11 +322,12 @@ export function ProgressSlider(props: ProgressSliderProps) {
 
       <SliderPrimitive.Thumb
         className={clsx(
-          'block opacity-0 h-3 w-3 cursor-pointer select-none rounded-full',
-          'border-2 transition-[background-color,opacity]',
+          'block opacity-0 scale-0 h-3.5 w-3.5 cursor-pointer select-none rounded-full',
+          'border-2 transition-[background-color,opacity,transform] duration-150 transform-gpu',
           'focus-visible:outline-none focus-visible:ring-transparent',
-          'disabled:pointer-events-none disabled:opacity-50 transform-gpu',
-          showTooltip && 'opacity-100',
+          'disabled:pointer-events-none disabled:opacity-50',
+          'group-hover:opacity-100 group-hover:scale-100 focus-visible:opacity-100 focus-visible:scale-100',
+          showTooltip && 'opacity-100 scale-100',
           variant === 'default' && 'bg-foreground border-foreground',
           variant === 'secondary' &&
             'bg-secondary-foreground border-secondary-foreground',

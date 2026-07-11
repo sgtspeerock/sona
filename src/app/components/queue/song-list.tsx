@@ -37,7 +37,9 @@ export function QueueSongList({
       <DialogTitle className="sr-only">{t('queue.title')}</DialogTitle>
       <div className="flex items-center justify-between h-8 mb-2 pl-3 lg:pl-4">
         <div className="flex gap-2 h-6 items-center text-foreground/70">
-          <p className="text-sm font-medium text-foreground">{t('queue.title')}</p>
+          <p className="text-sm font-medium text-foreground">
+            {t('queue.title')}
+          </p>
           <p>{'•'}</p>
           <p className="text-sm">
             {t('playlist.songCount', { count: trackListCount })}
@@ -60,9 +62,11 @@ export function QueueSongList({
         </div>
       </div>
       <div
-        className={inFullscreenOverlay
-          ? 'w-full h-full overflow-auto pl-3 lg:pl-4 pr-2 lg:pr-3'
-          : 'w-full h-full overflow-auto pl-3 lg:pl-4'}
+        className={
+          inFullscreenOverlay
+            ? 'w-full h-full overflow-auto pl-3 lg:pl-4 pr-2 lg:pr-3'
+            : 'w-full h-full overflow-auto pl-3 lg:pl-4'
+        }
       >
         <SortableQueueList
           songs={currentList}

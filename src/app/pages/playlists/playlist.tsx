@@ -4,15 +4,20 @@ import { DragEvent, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { getSimpleCoverArtUrl } from '@/api/httpClient'
 import ImageHeader from '@/app/components/album/image-header'
 import { PlaylistFallback } from '@/app/components/fallbacks/playlist-fallbacks'
 import { BadgesData } from '@/app/components/header-info'
+import { ImageLoader } from '@/app/components/image-loader'
 import ListWrapper from '@/app/components/list-wrapper'
 import { PlaylistButtons } from '@/app/components/playlist/buttons'
 import { RemoveSongFromPlaylistDialog } from '@/app/components/playlist/remove-song-dialog'
+import { Button } from '@/app/components/ui/button'
 import { DataTable } from '@/app/components/ui/data-table'
+import { useScrollThreshold } from '@/app/hooks/use-scroll-threshold'
 import ErrorPage from '@/app/pages/error-page'
 import { songsColumns } from '@/app/tables/songs-columns'
+import { cn } from '@/lib/utils'
 import { subsonic } from '@/service/subsonic'
 import { usePlayerActions } from '@/store/player.store'
 import { ColumnFilter } from '@/types/columnFilter'
@@ -111,6 +116,7 @@ function scoreCandidate(
 export default function Playlist() {
   const { playlistId } = useParams() as { playlistId: string }
   const { t } = useTranslation()
+  const showStickyHeader = useScrollThreshold(240)
   const columns = songsColumns({ showHeartInSelect: false })
   const { setSongList } = usePlayerActions()
   const queryClient = useQueryClient()
@@ -370,13 +376,57 @@ export default function Playlist() {
 
   return (
     <div
-      className="w-full"
+      className="w-full relative"
       key={playlist.id}
       onDragOver={onDragOver}
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
+      {/* Compact Sticky Header on Scroll */}
+      <div
+        className={cn(
+          'sticky top-0 left-0 right-0 z-30 h-14 border-b border-border/40 bg-background/80 backdrop-blur-md flex items-center justify-between px-8 transition-all duration-300 transform-gpu',
+          showStickyHeader
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 -translate-y-4 pointer-events-none absolute',
+        )}
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <ImageLoader id={coverArt} type="album" size="80">
+            {(src) => {
+              const fallbackSrc = getSimpleCoverArtUrl(undefined, 'album', '80')
+              return (
+                <img
+                  src={src || fallbackSrc}
+                  alt={playlist.name}
+                  className="w-9 h-9 rounded-md object-cover border border-border/30"
+                />
+              )
+            }}
+          </ImageLoader>
+          <div className="min-w-0 flex flex-col justify-center">
+            <h2 className="text-sm font-bold truncate leading-tight">
+              {playlist.name}
+            </h2>
+            {playlist.comment && (
+              <p className="text-xs text-muted-foreground truncate leading-tight mt-0.5">
+                {playlist.comment}
+              </p>
+            )}
+          </div>
+          {playlist.entry && playlist.entry.length > 0 && (
+            <Button
+              size="sm"
+              onClick={() => setSongList(playlist.entry, 0)}
+              className="h-8 rounded-full px-4 text-xs font-semibold shrink-0 ml-2"
+            >
+              {t('options.play', 'Play')}
+            </Button>
+          )}
+        </div>
+      </div>
+
       <ImageHeader
         type={t('playlist.headline')}
         title={playlist.name}

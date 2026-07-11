@@ -16,10 +16,7 @@ export function SidebarMainSubItem({ item }: { item: ISidebarItem }) {
 
   return (
     <MainSidebarMenuSubItem>
-      <MainSidebarMenuSubButton
-        asChild
-        isActive={isItemActive}
-      >
+      <MainSidebarMenuSubButton asChild isActive={isItemActive}>
         <Link
           to={item.route}
           className={clsx(isItemExactActive && 'pointer-events-none')}

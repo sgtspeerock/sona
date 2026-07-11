@@ -41,7 +41,7 @@ export function AudioPlayer({
   const { t } = useTranslation()
   const { replayGainEnabled, replayGainError } = useReplayGainState()
   const { isSong, isRadio, isPodcast } = usePlayerMediaType()
-  const { setPlayingState } = usePlayerActions()
+  const { setPlayingState, setAudioPlayerRef } = usePlayerActions()
   const { setReplayGainEnabled, setReplayGainError } = useReplayGainActions()
   const { volume } = usePlayerVolume()
   const isPlaying = usePlayerIsPlaying()
@@ -80,7 +80,13 @@ export function AudioPlayer({
 
   useEffect(() => {
     replayGainRecoveryTriedRef.current = false
-  }, [src])
+  }, [])
+
+  useEffect(() => {
+    if (shouldPlay && audioElement) {
+      setAudioPlayerRef(audioElement)
+    }
+  }, [shouldPlay, audioElement, setAudioPlayerRef])
 
   const clearPauseFade = useCallback(() => {
     if (fadeIntervalRef.current) {
@@ -149,7 +155,8 @@ export function AudioPlayer({
     })
 
     const shouldTryReplayGainRecovery =
-      !replayGainRecoveryTriedRef.current && (replayGainEnabled || !replayGainError)
+      !replayGainRecoveryTriedRef.current &&
+      (replayGainEnabled || !replayGainError)
 
     if (shouldTryReplayGainRecovery) {
       replayGainRecoveryTriedRef.current = true

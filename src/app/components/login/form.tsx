@@ -62,7 +62,11 @@ const loginSchema = z.object({
 type FormData = z.infer<typeof loginSchema>
 
 const defaultUrl = isDesktop() ? 'http://' : 'https://'
-const url = window.SERVER_URL || defaultUrl
+const rawServerUrl =
+  window.SERVER_URL && window.SERVER_URL !== '${SERVER_URL}'
+    ? window.SERVER_URL
+    : undefined
+const url = rawServerUrl || defaultUrl
 const urlIsValid = url !== defaultUrl
 
 export function LoginForm() {
@@ -144,10 +148,11 @@ export function LoginForm() {
                         {...field}
                         id="url"
                         type="text"
-                        placeholder={t('login.form.urlDescription')}
+                        placeholder={t('login.form.urlPlaceholder')}
                         autoCorrect="false"
                         autoCapitalize="false"
                         spellCheck="false"
+                        onFocus={(e) => e.target.select()}
                       />
                     </FormControl>
                     <FormDescription>
@@ -176,6 +181,7 @@ export function LoginForm() {
                         autoCorrect="false"
                         autoCapitalize="false"
                         spellCheck="false"
+                        onFocus={(e) => e.target.select()}
                       />
                     </FormControl>
                     <FormMessage />
@@ -192,7 +198,11 @@ export function LoginForm() {
                       {t('login.form.password')}
                     </FormLabel>
                     <FormControl>
-                      <Password {...field} value={field.value ?? ''} />
+                      <Password
+                        {...field}
+                        value={field.value ?? ''}
+                        onFocus={(e) => e.target.select()}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

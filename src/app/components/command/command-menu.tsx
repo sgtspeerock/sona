@@ -1,5 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { Disc3, Heart, Library, ListMusic, Mic2, SearchIcon } from 'lucide-react'
+import {
+  Disc3,
+  Heart,
+  Library,
+  ListMusic,
+  Mic2,
+  SearchIcon,
+} from 'lucide-react'
 import { KeyboardEvent, useCallback, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
@@ -260,7 +267,10 @@ export default function CommandMenu({ compact = false }: CommandMenuProps) {
               )}
 
               {enableQuery && showArtistGroup && (
-                <CommandArtistResult artists={artists} runCommand={runCommand} />
+                <CommandArtistResult
+                  artists={artists}
+                  runCommand={runCommand}
+                />
               )}
 
               {enableQuery && showAlbumGroup && (
@@ -290,10 +300,7 @@ export default function CommandMenu({ compact = false }: CommandMenuProps) {
   )
 }
 
-function mergeArtists(
-  primary?: ISimilarArtist[],
-  fallback?: ISimilarArtist[],
-) {
+function mergeArtists(primary?: ISimilarArtist[], fallback?: ISimilarArtist[]) {
   const merged = [...(primary ?? []), ...(fallback ?? [])]
   const byId = new Map<string, ISimilarArtist>()
   const byName = new Map<string, ISimilarArtist>()
@@ -367,7 +374,8 @@ function getTextMatchScore(value: string | undefined, query: string) {
   if (!text || !normalizedQuery) return 0
   if (text === normalizedQuery) return 40
   if (text.startsWith(normalizedQuery)) return 30
-  if (text.split(' ').some((part) => part.startsWith(normalizedQuery))) return 20
+  if (text.split(' ').some((part) => part.startsWith(normalizedQuery)))
+    return 20
   if (text.includes(normalizedQuery)) return 10
   return 0
 }

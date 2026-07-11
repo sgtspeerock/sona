@@ -173,8 +173,7 @@ export function FrequencyCircle() {
       const coverSecondary =
         palette?.muted ?? palette?.accent ?? palette?.dominant ?? null
       const c2 =
-        coverSecondary &&
-        coverSecondary.toLowerCase() !== c1.toLowerCase()
+        coverSecondary && coverSecondary.toLowerCase() !== c1.toLowerCase()
           ? coverSecondary
           : FALLBACK_SECONDARY
       const cdom = palette?.dominant ?? c1
@@ -237,7 +236,9 @@ export function FrequencyCircle() {
       const getBandNorm = (barIndex: number) => {
         const t = BAR_COUNT > 1 ? barIndex / (BAR_COUNT - 1) : 0
         const curved = Math.pow(t, 0.9)
-        const freqIdx = Math.round(rangeStart + curved * (rangeEnd - rangeStart))
+        const freqIdx = Math.round(
+          rangeStart + curved * (rangeEnd - rangeStart),
+        )
         const raw = smoothed[freqIdx] / 255
         const lowWeight = freqIdx < 16 ? 0.68 : freqIdx < 32 ? 0.84 : 1
         const highWeight = freqIdx > 80 ? 0.65 + highPresence * 0.65 : 1
@@ -245,7 +246,9 @@ export function FrequencyCircle() {
         const gate = energyFloor * 0.55 + 0.04
         const range = Math.max(0.18, energyPeak - gate)
         const normalized = clamp01((weighted - gate) / range)
-        return Math.pow(normalized, 1.28) * warmup * densityLimiter * startLimiter
+        return (
+          Math.pow(normalized, 1.28) * warmup * densityLimiter * startLimiter
+        )
       }
 
       // Bass average for center pulse

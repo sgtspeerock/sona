@@ -71,8 +71,11 @@ function getAlbumReleaseTimestamp(album: Albums): number {
   const fromReleaseDate = parseReleaseLikeDate(album.releaseDate)
   if (typeof fromReleaseDate === 'number') return fromReleaseDate
 
-  const fromOriginalReleaseDate = parseReleaseLikeDate(album.originalReleaseDate)
-  if (typeof fromOriginalReleaseDate === 'number') return fromOriginalReleaseDate
+  const fromOriginalReleaseDate = parseReleaseLikeDate(
+    album.originalReleaseDate,
+  )
+  if (typeof fromOriginalReleaseDate === 'number')
+    return fromOriginalReleaseDate
 
   if (typeof album.year === 'number' && Number.isFinite(album.year)) {
     return Date.UTC(album.year, 0, 1)
@@ -227,7 +230,10 @@ export const useGetSessionEnergy = () => {
     sourceAlbums.slice(0, 12).forEach((album, index) => {
       const weight = Math.max(1, 12 - index)
       if (album.genre) {
-        genreCounts.set(album.genre, (genreCounts.get(album.genre) ?? 0) + weight)
+        genreCounts.set(
+          album.genre,
+          (genreCounts.get(album.genre) ?? 0) + weight,
+        )
       }
       if (album.artist) {
         artistCounts.set(
@@ -237,8 +243,12 @@ export const useGetSessionEnergy = () => {
       }
     })
 
-    const genre = Array.from(genreCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0]
-    const artist = Array.from(artistCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0]
+    const genre = Array.from(genreCounts.entries()).sort(
+      (a, b) => b[1] - a[1],
+    )[0]?.[0]
+    const artist = Array.from(artistCounts.entries()).sort(
+      (a, b) => b[1] - a[1],
+    )[0]?.[0]
 
     return { genre, artist }
   }, [mostPlayed?.list, recentlyPlayed?.list])
@@ -422,14 +432,9 @@ export const useHomeDashboardData = () => {
     })
   }, [
     feed.recentlyAdded.data?.list?.length,
-    feed.recentlyAdded.isLoading,
     feed.recentlyPlayed.data?.list?.length,
-    feed.recentlyPlayed.isLoading,
     feed.similarArtists.data?.list?.length,
-    feed.similarArtists.isLoading,
-    feed.mostPlayed.isLoading,
     genres.length,
-    genresQuery.isLoading,
     homeLoading,
   ])
 

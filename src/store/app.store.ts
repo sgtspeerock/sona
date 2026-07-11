@@ -93,44 +93,7 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
               },
             },
           },
-          podcasts: {
-            active: false,
-            setActive: (value) => {
-              set((state) => {
-                state.podcasts.active = value
-              })
-            },
-            serviceUrl: '',
-            setServiceUrl: (value) => {
-              set((state) => {
-                state.podcasts.serviceUrl = value
-              })
-            },
-            useDefaultUser: true,
-            setUseDefaultUser: (value) => {
-              set((state) => {
-                state.podcasts.useDefaultUser = value
-              })
-            },
-            customUser: '',
-            setCustomUser: (value) => {
-              set((state) => {
-                state.podcasts.customUser = value
-              })
-            },
-            customUrl: '',
-            setCustomUrl: (value) => {
-              set((state) => {
-                state.podcasts.customUrl = value
-              })
-            },
-            collapsibleState: false,
-            setCollapsibleState: (value) => {
-              set((state) => {
-                state.podcasts.collapsibleState = value
-              })
-            },
-          },
+
           pages: {
             showInfoPanel: true,
             toggleShowInfoPanel: () => {
@@ -362,15 +325,11 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                 state.pages.showInfoPanel = true
                 state.pages.hideRadiosSection = HIDE_RADIOS_SECTION ?? false
                 state.pages.artistsPageViewType = 'table'
-                state.pages.imagesCacheLayerEnabled = IMAGE_CACHE_ENABLED ?? true
+                state.pages.imagesCacheLayerEnabled =
+                  IMAGE_CACHE_ENABLED ?? true
                 state.pages.listDensity = 'default'
                 state.pages.hiddenGenres = []
                 state.pages.genreAliases = {}
-                state.podcasts.active = false
-                state.podcasts.serviceUrl = ''
-                state.podcasts.useDefaultUser = true
-                state.podcasts.customUser = ''
-                state.podcasts.customUrl = ''
               })
             },
             setLogoutDialogState: (value) => {
@@ -396,8 +355,7 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
 
             if (persisted && persisted.pages) {
               hideRadiosSection = persisted.pages.hideRadiosSection ?? false
-              enableImageCache =
-                persisted.pages.imagesCacheLayerEnabled ?? true
+              enableImageCache = persisted.pages.imagesCacheLayerEnabled ?? true
             }
             if (HIDE_RADIOS_SECTION !== undefined) {
               hideRadiosSection = HIDE_RADIOS_SECTION
@@ -497,12 +455,6 @@ export const useAppData = () => useAppStore((state) => state.data)
 export const useAppAccounts = () => useAppStore((state) => state.accounts)
 export const useAppIntegrations = () =>
   useAppStore((state) => state.integrations)
-export const useAppPodcasts = () => useAppStore((state) => state.podcasts)
-export const useAppPodcastCollapsibleState = () =>
-  useAppStore((state) => ({
-    collapsibleState: state.podcasts.collapsibleState,
-    setCollapsibleState: state.podcasts.setCollapsibleState,
-  }))
 export const useAppPages = () => useAppStore((state) => state.pages)
 export const useAppListDensity = () =>
   useAppStore((state) => ({

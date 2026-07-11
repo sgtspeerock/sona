@@ -82,4 +82,3 @@ export function useFullscreenState<T = IUiContext['fullscreen']>(
     selector ? selector(state.fullscreen) : (state.fullscreen as unknown as T),
   )
 }
-

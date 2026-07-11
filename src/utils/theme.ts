@@ -37,5 +37,3 @@ export function getValidThemeFromEnv(): Theme | null {
 
   return null
 }
-
-

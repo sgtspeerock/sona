@@ -63,9 +63,7 @@ export default function ArtistsList() {
     const query = artistSearch.trim().toLowerCase()
     if (!query) return artists
 
-    return artists.filter((artist) =>
-      artist.name.toLowerCase().includes(query),
-    )
+    return artists.filter((artist) => artist.name.toLowerCase().includes(query))
   }, [artistSearch, artists])
 
   if (isLoading) return <ArtistsFallback />

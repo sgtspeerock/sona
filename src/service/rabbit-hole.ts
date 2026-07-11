@@ -140,7 +140,10 @@ class RabbitHoleService {
   private async getSimilarArtists(
     artistName: string,
   ): Promise<Array<{ name: string; match: string }>> {
-    const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artistName)}&api_key=${this.apiKey}&format=json&limit=15`
+    const cleanArtist = artistName.includes('+')
+      ? artistName.replace(/\+/g, '%2B')
+      : artistName
+    const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(cleanArtist)}&api_key=${this.apiKey}&format=json&limit=15`
 
     const response = await fetch(url)
     if (!response.ok) {
@@ -155,7 +158,13 @@ class RabbitHoleService {
     artistName: string,
     trackName: string,
   ): Promise<Array<{ name: string; artist: { name: string } }>> {
-    const url = `https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=${encodeURIComponent(artistName)}&track=${encodeURIComponent(trackName)}&api_key=${this.apiKey}&format=json&limit=50`
+    const cleanArtist = artistName.includes('+')
+      ? artistName.replace(/\+/g, '%2B')
+      : artistName
+    const cleanTrack = trackName.includes('+')
+      ? trackName.replace(/\+/g, '%2B')
+      : trackName
+    const url = `https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=${encodeURIComponent(cleanArtist)}&track=${encodeURIComponent(cleanTrack)}&api_key=${this.apiKey}&format=json&limit=50`
 
     const response = await fetch(url)
     if (!response.ok) {

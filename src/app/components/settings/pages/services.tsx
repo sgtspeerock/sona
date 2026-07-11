@@ -18,10 +18,7 @@ import { Switch } from '@/app/components/ui/switch'
 import { useDebouncedFormSync } from '@/app/hooks/use-debounced-form-sync'
 import { useAppIntegrations } from '@/store/app.store'
 import { useLrcLibSettings } from '@/store/player.store'
-import {
-  ScrobbleStatus,
-  useScrobbleStatus,
-} from '@/store/scrobble.store'
+import { ScrobbleStatus, useScrobbleStatus } from '@/store/scrobble.store'
 
 const { DISABLE_LRCLIB } = window
 
@@ -79,7 +76,9 @@ export function ServicesPage() {
     lastScrobbleFailedAt,
     lastScrobbleSucceededAt,
   } = useScrobbleStatus()
-  const [lastfmUsernameInput, setLastfmUsernameInput] = useState(lastfm.username)
+  const [lastfmUsernameInput, setLastfmUsernameInput] = useState(
+    lastfm.username,
+  )
   const [lastfmApiKeyInput, setLastfmApiKeyInput] = useState(lastfm.apiKey)
 
   useEffect(() => {
@@ -435,10 +434,7 @@ function getScrobbleIndicator(
 
   if (status === 'now-failed' || status === 'failed') {
     return {
-      label: t(
-        'settings.integrations.lastfm.scrobbleStatus.failed',
-        'Failed',
-      ),
+      label: t('settings.integrations.lastfm.scrobbleStatus.failed', 'Failed'),
       dotClass: 'bg-red-500',
       textClass: 'text-red-500',
       borderClass: 'border-red-500/40',

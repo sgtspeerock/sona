@@ -2,12 +2,12 @@ import { ListMusic } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ImageLoader } from '@/app/components/image-loader'
 import { ScrollArea } from '@/app/components/ui/scroll-area'
+import { ROUTES } from '@/routes/routesList'
 import {
   usePlayerDuration,
   usePlayerProgress,
   usePlayerSonglist,
 } from '@/store/player.store'
-import { ROUTES } from '@/routes/routesList'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 
 export function NowPlayingRail() {
@@ -85,7 +85,9 @@ export function NowPlayingRail() {
           </div>
           <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground">
             <span>{convertSecondsToTime(progress || 0)}</span>
-            <span>{convertSecondsToTime(duration || currentSong.duration || 0)}</span>
+            <span>
+              {convertSecondsToTime(duration || currentSong.duration || 0)}
+            </span>
           </div>
         </div>
       </div>
@@ -108,7 +110,9 @@ export function NowPlayingRail() {
                     key={`${song.id}-${index}`}
                     className={[
                       'grid grid-cols-[36px,minmax(0,1fr),auto] items-center gap-2 rounded-lg px-2 py-1.5',
-                      isActive ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted',
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background hover:bg-muted',
                     ].join(' ')}
                   >
                     <div className="h-9 w-9 overflow-hidden rounded-md bg-muted">

@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react'
 import { ProgressSlider } from '@/app/components/ui/slider'
-import { podcasts } from '@/service/podcasts'
+
 import { subsonic } from '@/service/subsonic'
 import {
   usePlayerActions,
@@ -22,6 +22,7 @@ import { useScrobbleStatusStore } from '@/store/scrobble.store'
 import { useFullscreenState } from '@/store/ui.store'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 import { logger } from '@/utils/logger'
+import { MiniWaveform } from './mini-waveform'
 
 interface PlayerProgressProps {
   audioRef: RefObject<HTMLAudioElement>
@@ -37,12 +38,10 @@ export function PlayerProgress({
   const [visualProgress, setVisualProgress] = useState(progress)
   const currentDuration = usePlayerDuration()
   const isPlaying = usePlayerIsPlaying()
-  const { currentSong, currentList, podcastList, currentSongIndex } =
-    usePlayerSonglist()
+  const { currentSong, currentList } = usePlayerSonglist()
   const isFullscreenOpen = useFullscreenState((state) => state.open)
-  const { isSong, isPodcast } = usePlayerMediaType()
-  const { setProgress, setUpdatePodcastProgress, getCurrentPodcastProgress } =
-    usePlayerActions()
+  const { isSong } = usePlayerMediaType()
+  const { setProgress } = usePlayerActions()
   const isScrobbleSentRef = useRef(false)
   const isNowPlayingSentRef = useRef(false)
   const isNowPlayingSendingRef = useRef(false)
@@ -78,7 +77,7 @@ export function PlayerProgress({
     }, 1800)
 
     return () => clearTimeout(timeoutId)
-  }, [localProgress])
+  }, [])
 
   const handleSeeked = useCallback(
     (amount: number) => {
@@ -142,13 +141,15 @@ export function PlayerProgress({
   const lastProgressRef = useRef(0)
   const isScrobbleSendingRef = useRef(false)
   const lastScrobbleAttemptAtRef = useRef(0)
-  const lastSavedPodcastProgressRef = useRef(0)
+  const _lastSavedPodcastProgressRef = useRef(0)
   const SCROBBLE_RETRY_COOLDOWN_MS = 10000
 
   const shouldSendFullScrobble = useCallback(
     (listenedSeconds: number, durationSeconds: number) => {
-      if (!Number.isFinite(listenedSeconds) || listenedSeconds <= 0) return false
-      if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) return false
+      if (!Number.isFinite(listenedSeconds) || listenedSeconds <= 0)
+        return false
+      if (!Number.isFinite(durationSeconds) || durationSeconds <= 0)
+        return false
 
       const thresholdSeconds = 150
       return (
@@ -167,7 +168,7 @@ export function PlayerProgress({
     listenedSecondsRef.current = 0
     lastProgressRef.current = 0
     lastScrobbleAttemptAtRef.current = 0
-  }, [currentSong.id])
+  }, [])
 
   useEffect(() => {
     if (!isSong || !isPlaying || !currentSong.id) return
@@ -182,7 +183,7 @@ export function PlayerProgress({
     isNowPlayingSendingRef.current = true
     setScrobbleStatus('sending-now', currentSong.id)
 
-    void sendNowPlaying(currentSong.id)
+    sendNowPlaying(currentSong.id)
       .then(() => {
         isNowPlayingSendingRef.current = false
         isNowPlayingSentRef.current = true
@@ -224,7 +225,7 @@ export function PlayerProgress({
         isScrobbleSendingRef.current = true
         lastScrobbleAttemptAtRef.current = Date.now()
         setScrobbleStatus('sending', currentSong.id)
-        void sendScrobble(currentSong.id)
+        sendScrobble(currentSong.id)
           .then(() => {
             isScrobbleSentRef.current = true
             isScrobbleSendingRef.current = false
@@ -248,64 +249,6 @@ export function PlayerProgress({
     shouldSendFullScrobble,
   ])
 
-  useEffect(() => {
-    if (!isPodcast) {
-      lastSavedPodcastProgressRef.current = 0
-      return
-    }
-
-    const podcast = podcastList[currentSongIndex] ?? null
-    if (!podcast) {
-      lastSavedPodcastProgressRef.current = 0
-      return
-    }
-
-    const existingProgress = getCurrentPodcastProgress()
-    lastSavedPodcastProgressRef.current = Math.max(
-      0,
-      Math.floor(existingProgress || 0),
-    )
-  }, [currentSongIndex, getCurrentPodcastProgress, isPodcast, podcastList])
-
-  // Used to save listening progress to backend every 30 seconds
-  useEffect(() => {
-    if (!isPodcast || !podcastList) return
-    if (progress === 0) return
-
-    const podcast = podcastList[currentSongIndex] ?? null
-    if (!podcast) return
-
-    const currentProgress = Math.floor(progress)
-    if (currentProgress - lastSavedPodcastProgressRef.current < 30) return
-
-    const podcastProgress = getCurrentPodcastProgress()
-    if (progress === podcastProgress) return
-
-    lastSavedPodcastProgressRef.current = currentProgress
-    setUpdatePodcastProgress(progress)
-
-    podcasts
-      .saveEpisodeProgress(podcast.id, progress)
-      .then(() => {
-        logger.info('Progress sent:', progress)
-      })
-      .catch((error) => {
-        // Allow retry on the next interval-sized progress increase.
-        lastSavedPodcastProgressRef.current = Math.max(
-          0,
-          currentProgress - 30,
-        )
-        logger.error('Error sending progress', error)
-      })
-  }, [
-    currentSongIndex,
-    getCurrentPodcastProgress,
-    isPodcast,
-    podcastList,
-    progress,
-    setUpdatePodcastProgress,
-  ])
-
   const currentTime = convertSecondsToTime(activeProgress)
 
   const isProgressLarge = useMemo(() => {
@@ -323,16 +266,19 @@ export function PlayerProgress({
         isEmpty && 'opacity-50',
       )}
     >
-      <small
-        className={clsx(
-          'text-xs text-muted-foreground text-right',
-          isProgressLarge ? 'min-w-14' : 'min-w-10',
-        )}
-        data-testid="player-current-time"
-      >
-        {currentTime}
-      </small>
-      {!isEmpty || isPodcast ? (
+      <div className="flex items-center gap-1.5 text-muted-foreground select-none">
+        <MiniWaveform isPlaying={isPlaying} />
+        <small
+          className={clsx(
+            'text-xs text-right',
+            isProgressLarge ? 'min-w-14' : 'min-w-10',
+          )}
+          data-testid="player-current-time"
+        >
+          {currentTime}
+        </small>
+      </div>
+      {!isEmpty ? (
         <ProgressSlider
           defaultValue={[0]}
           value={[activeProgress]}

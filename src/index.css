@@ -567,4 +567,76 @@ div[data-test-id="table-row"]:hover {
   }
 }
 
+/* Mini Waveform Visualizer Animations */
+.mini-eq-bar {
+  @apply transform-gpu will-change-transform origin-bottom;
+}
+.mini-eq-bar--1 {
+  animation: mini-eq-1 0.7s ease-in-out infinite alternate;
+}
+.mini-eq-bar--2 {
+  animation: mini-eq-2 0.75s ease-in-out infinite alternate;
+}
+.mini-eq-bar--3 {
+  animation: mini-eq-3 0.68s ease-in-out infinite alternate;
+}
 
+@keyframes mini-eq-1 {
+  0% {
+    transform: scaleY(0.25);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes mini-eq-2 {
+  0% {
+    transform: scaleY(0.45);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes mini-eq-3 {
+  0% {
+    transform: scaleY(0.35);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+/* Fullscreen Ambient Cover Art Pulse */
+@keyframes ambient-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.96) translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+}
+
+/* Progressive Lyrics Scroll Edge Fader */
+.maskImage-big-player-lyrics {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.45) 8%,
+    black 22%,
+    black 78%,
+    rgba(0, 0, 0, 0.45) 92%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.45) 8%,
+    black 22%,
+    black 78%,
+    rgba(0, 0, 0, 0.45) 92%,
+    transparent 100%
+  );
+}

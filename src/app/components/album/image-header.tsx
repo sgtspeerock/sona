@@ -190,10 +190,9 @@ export default function ImageHeader({
                     <div
                       className="absolute inset-0 pointer-events-none transition-opacity duration-500"
                       style={{
-                        background:
-                          isArtistVariant
-                            ? 'linear-gradient(90deg, hsl(var(--background) / 0.9) 0%, hsl(var(--background) / var(--sona-header-overlay-mid)) 54%, hsl(var(--background) / 0.46) 100%), radial-gradient(circle at 74% 22%, hsl(var(--primary) / 0.18), transparent 42%)'
-                            : 'linear-gradient(90deg, hsl(var(--background) / 0.92) 0%, hsl(var(--background) / var(--sona-header-overlay-mid)) 46%, hsl(var(--background) / 0.34) 100%), linear-gradient(180deg, hsl(var(--primary) / 0.16) 0%, transparent 58%)',
+                        background: isArtistVariant
+                          ? 'linear-gradient(90deg, hsl(var(--background) / 0.9) 0%, hsl(var(--background) / var(--sona-header-overlay-mid)) 54%, hsl(var(--background) / 0.46) 100%), radial-gradient(circle at 74% 22%, hsl(var(--primary) / 0.18), transparent 42%)'
+                          : 'linear-gradient(90deg, hsl(var(--background) / 0.92) 0%, hsl(var(--background) / var(--sona-header-overlay-mid)) 46%, hsl(var(--background) / 0.34) 100%), linear-gradient(180deg, hsl(var(--primary) / 0.16) 0%, transparent 58%)',
                         // CSS custom prop keeps style readable and allows smooth updates.
                         ['--sona-header-overlay-mid' as string]:
                           overlayOpacity.toFixed(2),
@@ -219,7 +218,8 @@ export default function ImageHeader({
                         ? 'rounded-full'
                         : 'rounded-[var(--radius-surface-lg)]',
                       'group overflow-hidden border border-border/40 bg-background/70',
-                      isArtistVariant && 'border-primary/35 shadow-[0_0_0_6px_hsl(var(--primary)/0.08)]',
+                      isArtistVariant &&
+                        'border-primary/35 shadow-[0_0_0_6px_hsl(var(--primary)/0.08)]',
                       'transition-transform duration-150 ease-out',
                       'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
                     )}

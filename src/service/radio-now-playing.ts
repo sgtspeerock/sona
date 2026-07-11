@@ -569,8 +569,14 @@ async function resolveLastFmCover(
     url.searchParams.set('method', 'track.getInfo')
     url.searchParams.set('api_key', apiKey)
     url.searchParams.set('format', 'json')
-    url.searchParams.set('artist', artist)
-    url.searchParams.set('track', track)
+    url.searchParams.set(
+      'artist',
+      artist.includes('+') ? artist.replace(/\+/g, '%2B') : artist,
+    )
+    url.searchParams.set(
+      'track',
+      track.includes('+') ? track.replace(/\+/g, '%2B') : track,
+    )
     url.searchParams.set('autocorrect', '1')
 
     const response = await fetch(url.toString())

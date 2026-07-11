@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query'
+import { AudioLines, ListMusic, Maximize2, MicVocal } from 'lucide-react'
 import {
   ComponentPropsWithoutRef,
   ReactNode,
@@ -6,13 +8,11 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { AudioLines, ListMusic, Maximize2, MicVocal } from 'lucide-react'
+import { isSafari } from 'react-device-detect'
 import { useTranslation } from 'react-i18next'
 import { Lrc, useRecoverAutoScrollImmediately } from 'react-lrc'
 import { Link } from 'react-router-dom'
 import { SonaDjButton } from '@/app/components/fullscreen/sona-dj'
-import { getGlobalAnalyser } from '@/app/hooks/use-audio-context'
 import { ImageLoader } from '@/app/components/image-loader'
 import { PlayerControls } from '@/app/components/player/controls'
 import { PlayerLikeButton } from '@/app/components/player/like-button'
@@ -21,18 +21,20 @@ import { PlayerVolume } from '@/app/components/player/volume'
 import { SortableQueueList } from '@/app/components/queue/sortable-queue-list'
 import { Button } from '@/app/components/ui/button'
 import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
+import { getGlobalAnalyser } from '@/app/hooks/use-audio-context'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/routes/routesList'
 import { subsonic } from '@/service/subsonic'
 import {
   useLyricsSettings,
+  usePlayerCurrentSong,
   usePlayerIsPlaying,
   usePlayerMediaType,
   usePlayerRef,
   usePlayerSonglist,
 } from '@/store/player.store'
 import { useFullscreenState } from '@/store/ui.store'
-import { EpisodeWithPodcast } from '@/types/responses/podcasts'
+
 import { Radio } from '@/types/responses/radios'
 import { ILyric, ISong } from '@/types/responses/song'
 
@@ -42,17 +44,11 @@ interface PlaybackRailProps {
   audioRef: RefObject<HTMLAudioElement>
   song: ISong
   radio: Radio
-  podcast: EpisodeWithPodcast
 }
 
-export function PlaybackRail({
-  audioRef,
-  song,
-  radio,
-  podcast,
-}: PlaybackRailProps) {
+export function PlaybackRail({ audioRef, song, radio }: PlaybackRailProps) {
   const { currentList, currentSong, currentSongIndex } = usePlayerSonglist()
-  const { isSong, isPodcast } = usePlayerMediaType()
+  const { isSong } = usePlayerMediaType()
   const { t } = useTranslation()
   const [activePanel, setActivePanel] = useState<'queue' | 'lyrics'>('queue')
   const [railVisualizerOpen, setRailVisualizerOpen] = useState(false)
@@ -61,7 +57,7 @@ export function PlaybackRail({
     setVisualizerActive: setFullscreenVisualizerActive,
   } = useFullscreenState()
   const hasSong = Boolean(currentSong?.id)
-  const hasPlayable = Boolean(song || radio || podcast)
+  const hasPlayable = Boolean(song || radio)
 
   const openFullscreen = (withVisualizer = false) => {
     setFullscreenVisualizerActive(withVisualizer)
@@ -69,9 +65,7 @@ export function PlaybackRail({
   }
 
   return (
-    <aside
-      className="fixed bottom-0 right-0 top-[--header-height] z-30 hidden w-[420px] overflow-y-auto overflow-x-hidden border-l border-border/55 bg-background/48 backdrop-blur-sm min-[1500px]:flex min-[1700px]:w-[450px]"
-    >
+    <aside className="fixed bottom-0 right-0 top-[--header-height] z-30 w-[420px] overflow-y-auto overflow-x-hidden border-l border-border/55 bg-background/48 backdrop-blur-sm flex min-[1700px]:w-[450px]">
       <div className="flex min-h-[760px] w-full flex-col p-3">
         <div className="shrink-0 rounded-xl border border-border/30 bg-background/72 p-3 shadow-[0_18px_70px_hsl(var(--background)/0.28)]">
           <div className="mb-3 flex items-center justify-between">
@@ -156,7 +150,7 @@ export function PlaybackRail({
             )}
           </div>
 
-          {(isSong || isPodcast) && (
+          {isSong && (
             <div className="mt-3">
               <PlayerProgress audioRef={audioRef} layout="rail" />
             </div>
@@ -166,7 +160,6 @@ export function PlaybackRail({
             <PlayerControls
               song={song}
               radio={radio}
-              podcast={podcast}
               audioRef={audioRef}
               layout="rail"
             />
@@ -207,9 +200,7 @@ export function PlaybackRail({
                 : t('fullscreen.lyrics')}
             </p>
             <span className="text-[12px] text-muted-foreground">
-              {activePanel === 'queue'
-                ? `${currentList.length} Songs`
-                : ''}
+              {activePanel === 'queue' ? `${currentList.length} Songs` : ''}
             </span>
           </div>
 
@@ -236,11 +227,7 @@ export function PlaybackRail({
   )
 }
 
-function RailCoverVisualizer({
-  title,
-}: {
-  title: string
-}) {
+function RailCoverVisualizer({ title }: { title: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const isPlaying = usePlayerIsPlaying()
 
@@ -348,14 +335,17 @@ function RailCoverVisualizer({
         Math.max(avg, energyPeak * 0.955),
       )
       highPresence = hiCount > 0 ? hiSum / hiCount : 0
-      const warmup = analyser && isPlaying ? Math.min(1, startFrames / 18) : 0.42
+      const warmup =
+        analyser && isPlaying ? Math.min(1, startFrames / 18) : 0.42
       const densityLimiter = 0.92
 
       const getBandNorm = (index: number) => {
         const t = bars <= 1 ? 0 : index / (bars - 1)
         // Keep the low end compact so sub/kick energy does not light up a whole quadrant.
         const curved = Math.pow(t, 1.04)
-        const freqIdx = Math.round(rangeStart + curved * (rangeEnd - rangeStart))
+        const freqIdx = Math.round(
+          rangeStart + curved * (rangeEnd - rangeStart),
+        )
         const raw = smoothedData[freqIdx] / 255
         const kickWeight = freqIdx < 5 ? 1.12 : freqIdx < 9 ? 1.04 : 1
         const lowWeight = freqIdx < 12 ? 0.78 : freqIdx < 28 ? 0.96 : 1
@@ -455,7 +445,7 @@ function PanelSwitchButton({
 }
 
 function RailLyricsPanel() {
-  const { currentSong } = usePlayerSonglist()
+  const currentSong = usePlayerCurrentSong()
   const { preferSyncedLyrics } = useLyricsSettings()
   const { t } = useTranslation()
   const playerRef = usePlayerRef()
@@ -486,12 +476,12 @@ function RailLyricsPanel() {
   useEffect(() => {
     if (!lyricsAreSynced) return
     recoverAutoScrollImmediately()
-  }, [id, lyricsAreSynced, recoverAutoScrollImmediately])
+  }, [lyricsAreSynced, recoverAutoScrollImmediately])
 
   useEffect(() => {
     if (lyricsAreSynced) return
     unsyncedLyricsRef.current?.scrollTo({ top: 0 })
-  }, [id, lyricsAreSynced])
+  }, [lyricsAreSynced])
 
   useEffect(() => {
     if (!lyricsAreSynced) return
@@ -499,7 +489,7 @@ function RailLyricsPanel() {
 
     const tick = () => {
       const next = (playerRef?.currentTime ?? 0) * 1000
-      setProgress((prev) => (Math.abs(prev - next) >= 80 ? next : prev))
+      setProgress((prev) => (Math.abs(prev - next) >= 1 ? next : prev))
       rafId = requestAnimationFrame(tick)
     }
 
@@ -508,9 +498,7 @@ function RailLyricsPanel() {
   }, [lyricsAreSynced, playerRef])
 
   if (isLoading) {
-    return (
-      <RailPanelMessage>{t('fullscreen.loadingLyrics')}</RailPanelMessage>
-    )
+    return <RailPanelMessage>{t('fullscreen.loadingLyrics')}</RailPanelMessage>
   }
 
   if (!lyrics?.value) {
@@ -519,13 +507,16 @@ function RailLyricsPanel() {
 
   if (lyricsAreSynced) {
     return (
-      <div className="min-h-0 max-w-full flex-1 overflow-hidden rounded-lg bg-background p-3">
+      <div className="min-h-0 max-w-full flex-1 overflow-hidden rounded-lg bg-background p-3 maskImage-big-player-lyrics">
         <Lrc
           lrc={lyrics.value}
           currentMillisecond={progress}
           recoverAutoScrollInterval={1500}
-          recoverAutoScrollSingal={signal}
-          className="h-full max-w-full overflow-y-auto overflow-x-hidden text-center text-[15px] font-semibold leading-8 [&_*]:max-w-full [&_*]:overflow-x-hidden"
+          recoverAutoScrollSignal={signal}
+          className={cn(
+            'h-full max-w-full overflow-y-auto overflow-x-hidden text-center text-[15px] font-semibold leading-8 [&_*]:max-w-full [&_*]:overflow-x-hidden',
+            !isSafari && 'scroll-smooth',
+          )}
           style={{ overflowX: 'hidden' }}
           verticalSpace
           lineRenderer={({ active, line }) => (

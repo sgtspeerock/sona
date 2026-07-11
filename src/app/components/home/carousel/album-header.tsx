@@ -98,22 +98,22 @@ function AlbumHeaderItem({
           </Link>
 
           {!compact && (
-          <div className="w-[210px] min-[1700px]:w-[230px] min-[2600px]:w-[250px]">
-            <div
-              className={cn(
-                'inline-flex w-full items-center justify-center gap-2 rounded-md border px-2.5 py-1.5 text-center text-xs font-medium text-foreground/[0.82]',
-                isNewRelease
-                  ? 'border-primary/45 bg-primary/12'
-                  : 'border-border/45 bg-background',
-              )}
-            >
-              {album.genre && <span className="truncate">{album.genre}</span>}
-              {album.genre && album.year && (
-                <span className="text-foreground/40">&bull;</span>
-              )}
-              {album.year && <span>{album.year}</span>}
+            <div className="w-[210px] min-[1700px]:w-[230px] min-[2600px]:w-[250px]">
+              <div
+                className={cn(
+                  'inline-flex w-full items-center justify-center gap-2 rounded-md border px-2.5 py-1.5 text-center text-xs font-medium text-foreground/[0.82]',
+                  isNewRelease
+                    ? 'border-primary/45 bg-primary/12'
+                    : 'border-border/45 bg-background',
+                )}
+              >
+                {album.genre && <span className="truncate">{album.genre}</span>}
+                {album.genre && album.year && (
+                  <span className="text-foreground/40">&bull;</span>
+                )}
+                {album.year && <span>{album.year}</span>}
+              </div>
             </div>
-          </div>
           )}
         </div>
 
@@ -173,7 +173,7 @@ export default function AlbumHeader({
   compact = false,
 }: AlbumHeaderProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [manualResetToken, setManualResetToken] = useState(0)
+  const [_manualResetToken, setManualResetToken] = useState(0)
   const { data: onRepeat, isLoading: onRepeatLoading } = useOnRepeat()
 
   const carouselItems = useMemo(() => {
@@ -189,7 +189,13 @@ export default function AlbumHeader({
       })
     }
 
-    const maxAlbums = compact ? (onRepeat?.song ? 3 : 4) : onRepeat?.song ? 5 : 6
+    const maxAlbums = compact
+      ? onRepeat?.song
+        ? 3
+        : 4
+      : onRepeat?.song
+        ? 5
+        : 6
     const limitedAlbums = albums.slice(0, maxAlbums)
     limitedAlbums.forEach((album) => {
       items.push({
@@ -200,7 +206,7 @@ export default function AlbumHeader({
     })
 
     return items
-  }, [albums, newReleaseAlbumId, onRepeat])
+  }, [albums, newReleaseAlbumId, onRepeat, compact])
 
   useEffect(() => {
     if (carouselItems.length <= 1) return
@@ -210,7 +216,7 @@ export default function AlbumHeader({
     return () => {
       clearInterval(timer)
     }
-  }, [carouselItems.length, manualResetToken])
+  }, [carouselItems.length])
 
   if (carouselItems.length === 0 && !onRepeatLoading) return null
 

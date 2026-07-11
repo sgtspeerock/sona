@@ -3,14 +3,20 @@ import { useEffect, useRef, useState } from 'react'
 import { useVisualizerContext } from '@/app/components/fullscreen/settings'
 import { VISUALIZERS } from '@/app/components/fullscreen/visualizers'
 import { ImageLoader } from '@/app/components/image-loader'
-import { usePlayerStore, useSessionModeSettings } from '@/store/player.store'
+import {
+  usePlayerStore,
+  useSessionModeSettings,
+  useSongColor,
+} from '@/store/player.store'
 import { useFullscreenState } from '@/store/ui.store'
 
 interface FullscreenSongImageProps {
   isChromeVisible?: boolean
 }
 
-export function FullscreenSongImage({ isChromeVisible = true }: FullscreenSongImageProps) {
+export function FullscreenSongImage({
+  isChromeVisible = true,
+}: FullscreenSongImageProps) {
   const { coverArt, artist, title } = usePlayerStore(({ songlist }) => {
     return songlist.currentSong
   })
@@ -35,8 +41,14 @@ export function FullscreenSongImage({ isChromeVisible = true }: FullscreenSongIm
     (state) => state.setVisualizerActive,
   ) as ((active: boolean) => void) | undefined
   const { mode } = useSessionModeSettings()
+  const { currentSongColor } = useSongColor()
   const [isCoverSwapping, setIsCoverSwapping] = useState(false)
   const lastCoverRef = useRef<string | undefined>(coverArt)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handlePointerLeave = () => {
+    setIsHovered(false)
+  }
 
   useEffect(() => {
     if (lastCoverRef.current === coverArt) return
@@ -45,10 +57,6 @@ export function FullscreenSongImage({ isChromeVisible = true }: FullscreenSongIm
     const timeoutId = window.setTimeout(() => setIsCoverSwapping(false), 240)
     return () => window.clearTimeout(timeoutId)
   }, [coverArt])
-
-  const handleClick = () => {
-    setShowVisualizer(!showVisualizer)
-  }
 
   const VisualizerComponent = VISUALIZERS[preset]
 
@@ -140,12 +148,37 @@ export function FullscreenSongImage({ isChromeVisible = true }: FullscreenSongIm
         !isChromeVisible && 'scale-[0.992]',
       )}
     >
+      {/* Ambient Canvas Glow */}
+      {currentSongColor && !showVisualizer && (
+        <div
+          className="absolute -inset-8 -z-10 rounded-full blur-[90px] pointer-events-none transition-all duration-1000 transform-gpu"
+          style={{
+            backgroundColor: currentSongColor,
+            animation: 'ambient-pulse 8s ease-in-out infinite',
+          }}
+        />
+      )}
+
       {mode === 'night' && !showVisualizer && (
         <div className="fullscreen-cover-glow pointer-events-none absolute -inset-3 z-0 rounded-[var(--radius-surface)]" />
       )}
       <div
-        className="relative z-10 w-full h-full rounded-xl overflow-hidden cursor-pointer fullscreen-cover-frame"
-        onClick={handleClick}
+        className={clsx(
+          'relative z-10 w-full h-full cursor-pointer transition-all duration-200 ease-out transform-gpu',
+          !showVisualizer &&
+            'rounded-xl overflow-hidden fullscreen-cover-frame',
+        )}
+        style={{
+          transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+          boxShadow: !showVisualizer
+            ? isHovered && currentSongColor
+              ? `0 35px 70px -15px ${currentSongColor}77`
+              : '0 20px 40px -20px rgba(0,0,0,0.5)'
+            : 'none',
+        }}
+        onPointerEnter={() => setIsHovered(true)}
+        onPointerLeave={handlePointerLeave}
+        onClick={() => setShowVisualizer(!showVisualizer)}
       >
         <div
           className={clsx(
@@ -181,4 +214,3 @@ export function FullscreenSongImage({ isChromeVisible = true }: FullscreenSongIm
     </div>
   )
 }
-

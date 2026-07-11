@@ -1,4 +1,3 @@
-import randomCSSHexColor from '@chriscodesthings/random-css-hex-color'
 import { AudioLines, Maximize2 } from 'lucide-react'
 import { useCallback } from 'react'
 import { Fragment } from 'react/jsx-runtime'
@@ -19,6 +18,11 @@ import { getAverageColor } from '@/utils/getAverageColor'
 import { logger } from '@/utils/logger'
 import { ALBUM_ARTISTS_MAX_NUMBER } from '@/utils/multipleArtists'
 
+const getRandomHexColor = () =>
+  `#${Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, '0')}`
+
 export function TrackInfo({ song }: { song: ISong | undefined }) {
   const { t } = useTranslation()
   const { setCurrentSongColor, currentSongColor } = useSongColor()
@@ -37,7 +41,7 @@ export function TrackInfo({ song }: { song: ISong | undefined }) {
     const img = getImageElement()
     if (!img) return
 
-    let color = randomCSSHexColor(true)
+    let color = getRandomHexColor()
 
     try {
       color = (await getAverageColor(img)).hex
@@ -86,7 +90,16 @@ export function TrackInfo({ song }: { song: ISong | undefined }) {
             data-coach-id="fullscreen-cover"
             onClick={() => setFullscreenOpen(true)}
           >
-            <div className="w-full h-full aspect-square bg-cover bg-center bg-skeleton rounded-lg overflow-hidden shadow-md">
+            {currentSongColor && (
+              <div
+                className="absolute inset-1.5 -z-10 rounded-lg blur-[10px] opacity-75 transition-all duration-500 scale-95 group-hover:scale-105 group-hover:blur-[12px] group-hover:opacity-90"
+                style={{
+                  backgroundColor: currentSongColor,
+                  boxShadow: `0 8px 16px ${currentSongColor}66`,
+                }}
+              />
+            )}
+            <div className="w-full h-full aspect-square bg-cover bg-center bg-skeleton rounded-lg overflow-hidden shadow-md relative z-10">
               <ImageLoader id={song.coverArt} type="song" size={400}>
                 {(src) => (
                   <LazyLoadImage
@@ -106,7 +119,7 @@ export function TrackInfo({ song }: { song: ISong | undefined }) {
                 )}
               </ImageLoader>
             </div>
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition-opacity duration-150 group-hover:bg-black/35">
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-lg bg-black/0 transition-opacity duration-150 group-hover:bg-black/35">
               <Maximize2 className="h-4 w-4 text-white/80 opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
             </div>
           </div>
@@ -187,4 +200,3 @@ function ArtistLink({ id, name, onClick }: ArtistLinkProps) {
     </Link>
   )
 }
-

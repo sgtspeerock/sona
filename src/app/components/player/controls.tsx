@@ -3,8 +3,6 @@ import {
   Pause,
   Play,
   Repeat,
-  RotateCcwIcon,
-  RotateCwIcon,
   Shuffle,
   SkipBack,
   SkipForward,
@@ -22,9 +20,9 @@ import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
 import { usePlayerHotkeys } from '@/app/hooks/use-audio-hotkeys'
 import { cn } from '@/lib/utils'
 import {
+  useCrossfadeSettings,
   usePlayerActions,
   usePlayerCurrentSong,
-  useCrossfadeSettings,
   usePlayerDuration,
   usePlayerIsPlaying,
   usePlayerLoop,
@@ -34,7 +32,7 @@ import {
   usePlayerShuffle,
 } from '@/store/player.store'
 import { LoopState } from '@/types/playerContext'
-import { EpisodeWithPodcast } from '@/types/responses/podcasts'
+
 import { Radio } from '@/types/responses/radios'
 import { ISong } from '@/types/responses/song'
 import { rememberSongSkip } from '@/utils/listening-memory'
@@ -43,7 +41,6 @@ import { manageMediaSession } from '@/utils/setMediaSession'
 interface PlayerControlsProps {
   song: ISong
   radio: Radio
-  podcast: EpisodeWithPodcast
   audioRef: RefObject<HTMLAudioElement>
   layout?: 'default' | 'rail'
 }
@@ -51,12 +48,11 @@ interface PlayerControlsProps {
 export function PlayerControls({
   song,
   radio,
-  podcast,
   audioRef,
   layout = 'default',
 }: PlayerControlsProps) {
   const { t } = useTranslation()
-  const { isSong, isPodcast } = usePlayerMediaType()
+  const { isSong } = usePlayerMediaType()
   const isShuffleActive = usePlayerShuffle()
   const { hasPrev, hasNext } = usePlayerPrevAndNext()
   const loopState = usePlayerLoop()
@@ -84,7 +80,7 @@ export function PlayerControls({
   useAudioHotkeys('mod+s', toggleShuffle)
   useAudioHotkeys('mod+r', toggleLoop)
 
-  const handleSeekAction = useCallback(
+  const _handleSeekAction = useCallback(
     (value: number) => {
       const audio = audioRef.current
       if (!audio) return
@@ -113,14 +109,14 @@ export function PlayerControls({
       return
     }
 
-    const startVolume = audio.volume
+    const startVolume = Math.min(1, audio.volume)
     const fadeMs = 100
     const startTs = performance.now()
 
     await new Promise<void>((resolve) => {
       const step = (now: number) => {
         const progress = Math.min(1, (now - startTs) / fadeMs)
-        audio.volume = Math.max(0, startVolume * (1 - progress))
+        audio.volume = Math.min(1, Math.max(0, startVolume * (1 - progress)))
 
         if (progress < 1) {
           requestAnimationFrame(step)
@@ -132,6 +128,8 @@ export function PlayerControls({
       requestAnimationFrame(step)
     })
 
+    ;(audio as HTMLAudioElement & { isSkipping?: boolean }).isSkipping = true
+    audio.pause()
     audio.volume = startVolume
     playNextSong()
   }, [
@@ -147,12 +145,8 @@ export function PlayerControls({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: isPlaying needed to trigger
   useEffect(() => {
-    if (isPodcast) {
-      manageMediaSession.setPodcastHandlers({ handleSeekAction })
-    } else {
-      manageMediaSession.setHandlers()
-    }
-  }, [handleSeekAction, isPodcast, isPlaying])
+    manageMediaSession.setHandlers()
+  }, [isPlaying])
 
   const shuffleTooltip = isShuffleActive
     ? t('player.tooltips.shuffle.disable')
@@ -161,8 +155,8 @@ export function PlayerControls({
   const previousTooltip = t('player.tooltips.previous')
   const nextTooltip = t('player.tooltips.next')
 
-  const skipRewindTooltip = t('player.tooltips.rewind', { amount: 15 })
-  const skipForwardTooltip = t('player.tooltips.forward', { amount: 30 })
+  const _skipRewindTooltip = t('player.tooltips.rewind', { amount: 15 })
+  const _skipForwardTooltip = t('player.tooltips.forward', { amount: 30 })
 
   const playTooltip = isPlaying
     ? t('player.tooltips.pause')
@@ -176,7 +170,7 @@ export function PlayerControls({
   const repeatTooltip = repeatTooltips[loopState]
 
   const cannotGotoNextSong = !hasNext && loopState !== LoopState.All
-  const disableButtons = !song && !radio && !podcast
+  const disableButtons = !song && !radio
 
   if (layout === 'rail') {
     return (
@@ -193,7 +187,9 @@ export function PlayerControls({
               <Shuffle
                 className={clsx(
                   'night-player-side-icon',
-                  isShuffleActive ? 'text-primary' : 'text-secondary-foreground',
+                  isShuffleActive
+                    ? 'text-primary'
+                    : 'text-secondary-foreground',
                 )}
               />
             </PlayerButton>
@@ -211,23 +207,9 @@ export function PlayerControls({
             <SkipBack className="night-player-side-icon text-secondary-foreground fill-secondary-foreground" />
           </PlayerButton>
 
-          {isPodcast && (
-            <PlayerButton
-              className="night-player-side-button"
-              onClick={() => handleSeekAction(-15)}
-              data-testid="player-button-skip-backward"
-              tooltip={skipRewindTooltip}
-            >
-              <span className="text-secondary-foreground font-light text-[8px] absolute">
-                15
-              </span>
-              <RotateCcwIcon className="night-player-side-icon text-secondary-foreground" />
-            </PlayerButton>
-          )}
-
           <PlayerButton
             variant="default"
-            disabled={!song && !radio && !isPodcast}
+            disabled={!song && !radio}
             onClick={togglePlayPause}
             data-testid={`player-button-${isPlaying ? 'pause' : 'play'}`}
             tooltip={playTooltip}
@@ -239,20 +221,6 @@ export function PlayerControls({
               <Play className="fill-primary-foreground" />
             )}
           </PlayerButton>
-
-          {isPodcast && (
-            <PlayerButton
-              className="night-player-side-button"
-              onClick={() => handleSeekAction(30)}
-              data-testid="player-button-skip-forward"
-              tooltip={skipForwardTooltip}
-            >
-              <span className="text-secondary-foreground font-light text-[8px] absolute">
-                30
-              </span>
-              <RotateCwIcon className="night-player-side-icon text-secondary-foreground" />
-            </PlayerButton>
-          )}
 
           <PlayerButton
             className="night-player-side-button"
@@ -322,23 +290,9 @@ export function PlayerControls({
         <SkipBack className="night-player-side-icon text-secondary-foreground fill-secondary-foreground" />
       </PlayerButton>
 
-      {isPodcast && (
-        <PlayerButton
-          className="night-player-side-button"
-          onClick={() => handleSeekAction(-15)}
-          data-testid="player-button-skip-backward"
-          tooltip={skipRewindTooltip}
-        >
-          <span className="text-secondary-foreground font-light text-[8px] absolute">
-            15
-          </span>
-          <RotateCcwIcon className="night-player-side-icon text-secondary-foreground" />
-        </PlayerButton>
-      )}
-
       <PlayerButton
         variant="default"
-        disabled={!song && !radio && !isPodcast}
+        disabled={!song && !radio}
         onClick={togglePlayPause}
         data-testid={`player-button-${isPlaying ? 'pause' : 'play'}`}
         tooltip={playTooltip}
@@ -350,20 +304,6 @@ export function PlayerControls({
           <Play className="fill-primary-foreground" />
         )}
       </PlayerButton>
-
-      {isPodcast && (
-        <PlayerButton
-          className="night-player-side-button"
-          onClick={() => handleSeekAction(30)}
-          data-testid="player-button-skip-forward"
-          tooltip={skipForwardTooltip}
-        >
-          <span className="text-secondary-foreground font-light text-[8px] absolute">
-            30
-          </span>
-          <RotateCwIcon className="night-player-side-icon text-secondary-foreground" />
-        </PlayerButton>
-      )}
 
       <PlayerButton
         className="night-player-side-button"
@@ -411,7 +351,7 @@ function PlayerButton({ className, tooltip, ...props }: PlayerButtonProps) {
       <Button
         variant="ghost"
         className={cn(
-          'relative rounded-full size-10 p-0 [&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0',
+          'relative rounded-full size-10 p-0 [&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0 transition-transform active:scale-[0.9] hover:scale-[1.08] duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]',
           className,
         )}
         {...props}

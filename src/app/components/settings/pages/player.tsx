@@ -47,16 +47,10 @@ export function PlayerPage() {
   const [equalizerOpen, setEqualizerOpen] = useState(false)
 
   // Replay Gain
-  const {
-    replayGainEnabled,
-    replayGainType,
-    replayGainError,
-  } = useReplayGainState()
-  const {
-    setReplayGainEnabled,
-    setReplayGainType,
-    setReplayGainError,
-  } = useReplayGainActions()
+  const { replayGainEnabled, replayGainType, replayGainError } =
+    useReplayGainState()
+  const { setReplayGainEnabled, setReplayGainType, setReplayGainError } =
+    useReplayGainActions()
 
   // Crossfade
   const {
@@ -235,9 +229,7 @@ export function PlayerPage() {
         </Header>
         <Content>
           <ContentItem>
-            <ContentItemTitle
-              info={t('settings.audio.replayGain.enabledInfo')}
-            >
+            <ContentItemTitle info={t('settings.audio.replayGain.enabledInfo')}>
               {t('settings.audio.replayGain.enabled', 'Normalize volume')}
             </ContentItemTitle>
             <ContentItemForm>

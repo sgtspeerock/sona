@@ -43,8 +43,13 @@ export const useGetArtistInfo = (artistId: string) => {
 export const useGetTopSongs = (artistName?: string) => {
   return useQuery({
     queryKey: [queryKeys.artist.topSongs, artistName],
-    queryFn: async () =>
-      (await subsonic.songs.getTopSongs(artistName ?? '')) ?? [],
+    queryFn: async () => {
+      const serverSongs =
+        (await subsonic.songs.getTopSongs(artistName ?? '')) ?? []
+      if (serverSongs.length > 0) return serverSongs
+      if (!artistName) return []
+      return (await subsonic.artists.getTopSongsFallback(artistName)) ?? []
+    },
     enabled: !!artistName,
   })
 }

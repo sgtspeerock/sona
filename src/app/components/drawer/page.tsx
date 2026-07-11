@@ -3,7 +3,10 @@ import { ChevronDownIcon } from 'lucide-react'
 import { ComponentPropsWithoutRef, useMemo } from 'react'
 import { getSimpleCoverArtUrl } from '@/api/httpClient'
 import { QueueSettings } from '@/app/components/fullscreen/settings'
-import { LyricsPanelView, QueuePanelView } from '@/app/components/player/panel-views'
+import {
+  LyricsPanelView,
+  QueuePanelView,
+} from '@/app/components/player/panel-views'
 import { Button } from '@/app/components/ui/button'
 import { Drawer, DrawerContent } from '@/app/components/ui/drawer'
 import { cn } from '@/lib/utils'

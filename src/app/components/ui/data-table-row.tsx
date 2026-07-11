@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { GripVerticalIcon } from 'lucide-react'
 import { ComponentPropsWithoutRef, memo, ReactNode, useMemo } from 'react'
 import { ContextMenuProvider } from '@/app/components/table/context-menu'
-import { usePlayerCurrentSong } from '@/store/player.store'
+import { usePlayerCurrentSongId } from '@/store/player.store'
 import { ColumnDefType } from '@/types/react-table/columnDef'
 
 interface RowProps<TData> extends ComponentPropsWithoutRef<'div'> {
@@ -35,7 +35,7 @@ export function TableRow<TData>({
   isHighlighted = false,
   ...props
 }: RowProps<TData>) {
-  const currentSong = usePlayerCurrentSong()
+  const currentSongId = usePlayerCurrentSongId()
 
   const isClassic = variant === 'classic'
   const isModern = variant === 'modern'
@@ -54,8 +54,8 @@ export function TableRow<TData>({
     if (dataType !== 'song') return false
 
     // @ts-expect-error row type
-    return row.original.id === currentSong.id
-  }, [currentSong.id, dataType, row.original])
+    return row.original.id === currentSongId
+  }, [currentSongId, dataType, row.original])
 
   const sortableStyle = isSortable
     ? {
@@ -85,9 +85,12 @@ export function TableRow<TData>({
             'rounded-b-[var(--radius-control)]',
           isModern &&
             'mb-1 rounded-[var(--radius-control)] border border-transparent bg-background-foreground/70 hover:border-border/25 hover:bg-foreground/[0.075] data-[state=selected]:border-border/35 data-[state=selected]:bg-foreground/[0.11]',
-          !isModern && 'hover:bg-foreground/20 data-[state=selected]:bg-foreground/30',
+          !isModern &&
+            'hover:bg-foreground/20 data-[state=selected]:bg-foreground/30',
           isClassic && 'border-b',
-          isRowSongActive && isModern && 'row-active border-primary/30 bg-primary/10',
+          isRowSongActive &&
+            isModern &&
+            'row-active border-primary/30 bg-primary/10',
           isHighlighted &&
             'bg-primary/18 ring-1 ring-inset ring-primary/45 hover:bg-primary/22',
           isSortable && isDragging && 'opacity-30',

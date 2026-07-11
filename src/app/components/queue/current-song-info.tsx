@@ -3,14 +3,14 @@ import { ImageLoader } from '@/app/components/image-loader'
 import { LinkWithoutTo } from '@/app/components/song/artist-link'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/routes/routesList'
-import { useMainDrawerState, usePlayerSonglist } from '@/store/player.store'
+import { useMainDrawerState, usePlayerCurrentSong } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { ALBUM_ARTISTS_MAX_NUMBER } from '@/utils/multipleArtists'
 
 export function CurrentSongInfo() {
-  const { currentSong } = usePlayerSonglist()
+  const currentSong = usePlayerCurrentSong()
   const { closeDrawer } = useMainDrawerState()
-  const { title, album, albumId, artist, artistId, coverArt } = currentSong
+  const { title, album, albumId, artist, coverArt } = currentSong
 
   return (
     <div className="flex-shrink-0 w-64 flex flex-col gap-4">

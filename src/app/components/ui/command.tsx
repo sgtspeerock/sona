@@ -74,13 +74,13 @@ const CommandList = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, ...props }, ref) => (
-    <CommandPrimitive.List
-      ref={ref}
-      className={cn(
-        'min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-0 pt-1 pb-4',
-        className,
-      )}
-      {...props}
+  <CommandPrimitive.List
+    ref={ref}
+    className={cn(
+      'min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-0 pt-1 pb-4',
+      className,
+    )}
+    {...props}
   />
 ))
 

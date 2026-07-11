@@ -452,12 +452,10 @@ export function DataTable<TData, TValue>({
           isNextRowSelected={isNextRowSelected}
           variant={variant}
           dataType={dataType}
-          isHighlighted={
-            Boolean(
-              highlightRowId &&
-                (row.original as { id?: string })?.id === highlightRowId,
-            )
-          }
+          isHighlighted={Boolean(
+            highlightRowId &&
+              (row.original as { id?: string })?.id === highlightRowId,
+          )}
           sortableId={isDragReorderActive ? index.toString() : undefined}
           data-row-index={index}
           data-song-id={(row.original as { id?: string })?.id ?? ''}
@@ -513,7 +511,12 @@ export function DataTable<TData, TValue>({
         </div>
       )}
 
-      <div className={clsx(isClassic && 'rounded-[var(--radius-surface)] border border-border/35 bg-card/70 p-1')}>
+      <div
+        className={clsx(
+          isClassic &&
+            'rounded-[var(--radius-surface)] border border-border/35 bg-card/70 p-1',
+        )}
+      >
         <div
           ref={tableRef}
           className={clsx(

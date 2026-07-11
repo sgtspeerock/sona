@@ -222,8 +222,20 @@ const CANONICAL_GENRE_ALIASES: Record<string, string[]> = {
     'baltimore club',
   ],
   House: ['house', 'acid house', 'electro house', 'deep house', 'tech house'],
-  Techno: ['techno', 'minimal techno', 'minimal', 'detroit techno', 'hard techno'],
-  Trance: ['trance', 'progressive trance', 'uplifting trance', 'psytrance', 'goa trance'],
+  Techno: [
+    'techno',
+    'minimal techno',
+    'minimal',
+    'detroit techno',
+    'hard techno',
+  ],
+  Trance: [
+    'trance',
+    'progressive trance',
+    'uplifting trance',
+    'psytrance',
+    'goa trance',
+  ],
   Dubstep: ['dubstep', 'brostep'],
   'Drum & Bass': [
     'drum and bass',

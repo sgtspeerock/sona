@@ -44,7 +44,7 @@ export function useAlbumsListModel() {
     requestAnimationFrame(() => {
       scrollPageToTop()
     })
-  }, [artistId, currentFilter, genre, query, yearFilter])
+  }, [])
 
   function getYearRange() {
     if (yearFilter === YearSortOptions.Oldest) {
@@ -99,6 +99,7 @@ export function useAlbumsListModel() {
     ],
     queryFn: fetchAlbums,
     enabled: enableMainQuery(),
+    staleTime: 5 * 60 * 1000,
   })
 
   function getAlbums() {

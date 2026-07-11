@@ -9,7 +9,7 @@ import {
   StructuredLyricsResponse,
 } from '@/types/responses/song'
 import { lrclibClient } from '@/utils/appName'
-import { checkServerType, getServerExtensions } from '@/utils/servers'
+import { getServerExtensions } from '@/utils/servers'
 
 interface GetLyricsData {
   id: string
@@ -179,16 +179,13 @@ async function getLyrics(getLyricsData: GetLyricsData) {
 
 async function getLyricsFromLRCLib(getLyricsData: GetLyricsData) {
   const { lrclib } = usePlayerStore.getState().settings.privacy
-  const { isLms } = checkServerType()
 
   const { title, album, duration } = getLyricsData
 
-  // LMS server tends to join all artists into a single string
-  // Ex: "Cartoon, Jeja, Daniel Levi, Time To Talk"
-  // To LRCLIB work correctly, we have to send only one
-  const artist = isLms
-    ? getLyricsData.artist.split(',')[0]
-    : getLyricsData.artist
+  // Split artists by common separators (comma, slash, ampersand, feat) to query the main artist
+  const artist = getLyricsData.artist
+    .split(/[,/&]|\b(feat|featuring|ft)\b/i)[0]
+    .trim()
 
   if (!lrclib.enabled || window.DISABLE_LRCLIB) {
     return {
@@ -205,7 +202,7 @@ async function getLyricsFromLRCLib(getLyricsData: GetLyricsData) {
       defaultLrcLibUrl = `${lrclib.customUrl}/api/get`
     }
 
-  const response = await fetchBestLRCLibMatch(defaultLrcLibUrl, {
+    const response = await fetchBestLRCLibMatch(defaultLrcLibUrl, {
       artist,
       title,
       album,
@@ -279,22 +276,22 @@ async function fetchBestLRCLibMatch(
 }
 
 async function fetchLRCLibLyrics(url: URL): Promise<LRCLibResponse | null> {
-  try {
-    const browserResponse = await fetch(url.toString(), {
-      headers: {
-        'Lrclib-Client': lrclibClient,
-      },
-    })
+  // If running in Electron, always use main process fetch to bypass CORS and apply headers
+  if (window.api?.fetchExternalText) {
+    return fetchLRCLibLyricsFromMain(url)
+  }
 
+  // Fallback for web browser environment: fetch directly without custom headers to avoid CORS preflight OPTIONS request
+  try {
+    const browserResponse = await fetch(url.toString())
     if (browserResponse.ok) {
       return browserResponse.json()
     }
-  } catch {
-    // Installed Electron builds can hit CORS from file://; fall back to main.
+  } catch (error) {
+    console.warn('Direct browser lyrics fetch failed', error)
   }
 
-  const electronResponse = await fetchLRCLibLyricsFromMain(url)
-  return electronResponse
+  return null
 }
 
 async function fetchLRCLibLyricsFromMain(
@@ -302,7 +299,10 @@ async function fetchLRCLibLyricsFromMain(
 ): Promise<LRCLibResponse | null> {
   if (!window.api?.fetchExternalText) return null
 
-  const response = await window.api.fetchExternalText(url.toString())
+  const response = await window.api.fetchExternalText(url.toString(), {
+    'Lrclib-Client': lrclibClient,
+    'User-Agent': lrclibClient,
+  })
   if (!response.ok || !response.text) return null
 
   return JSON.parse(response.text) as LRCLibResponse
@@ -348,10 +348,14 @@ function isAcceptableLRCLibMatch(
     normalizeLyricsMatchText(response.trackName || response.name || ''),
     normalizeLyricsMatchText(data.title),
   )
-  const artistScore = getStringSimilarity(
-    normalizeLyricsMatchText(response.artistName),
-    normalizeLyricsMatchText(data.artist),
-  )
+  const cleanResponseArtist = normalizeLyricsMatchText(response.artistName)
+    .split(/[,/&]|\b(feat|featuring|ft)\b/i)[0]
+    .trim()
+  const cleanDataArtist = normalizeLyricsMatchText(data.artist)
+    .split(/[,/&]|\b(feat|featuring|ft)\b/i)[0]
+    .trim()
+
+  const artistScore = getStringSimilarity(cleanResponseArtist, cleanDataArtist)
   const albumScore = data.album
     ? getStringSimilarity(
         normalizeLyricsMatchText(response.albumName || ''),
@@ -383,7 +387,10 @@ function normalizeLyricsMatchText(value: string) {
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\b(feat|featuring|ft|remaster(ed)?|deluxe|edition|explicit|clean|mono|stereo|version|radio edit)\b/g, ' ')
+    .replace(
+      /\b(feat|featuring|ft|remaster(ed)?|deluxe|edition|explicit|clean|mono|stereo|version|radio edit)\b/g,
+      ' ',
+    )
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
 }

@@ -20,7 +20,7 @@ const Music2 = memo(Music2Icon)
 const Radio = memo(RadioIcon)
 const Home = memo(HomeIcon)
 const Library = memo(LibraryIcon)
-const Podcast = memo(PodcastIcon)
+const _Podcast = memo(PodcastIcon)
 const Heart = memo(HeartIcon)
 const Sparkles = memo(SparklesIcon)
 const Tags = memo(TagsIcon)
@@ -41,10 +41,7 @@ export enum SidebarItems {
   Genres = 'genres',
   Favorites = 'favorites',
   Playlists = 'playlists',
-  Podcasts = 'podcasts',
   Radios = 'radios',
-  PodcastAll = 'podcast-all',
-  PodcastLatest = 'podcast-latest',
   DiscoverWeekly = 'discover-daily',
   Top50Year = 'top-50-year',
 }
@@ -108,30 +105,9 @@ export const libraryItems = [
     icon: ListMusic,
   },
   {
-    id: SidebarItems.Podcasts,
-    title: 'sidebar.podcasts',
-    route: ROUTES.LIBRARY.PODCASTS,
-    icon: Podcast,
-  },
-  {
     id: SidebarItems.Radios,
     title: 'sidebar.radios',
     route: ROUTES.LIBRARY.RADIOS,
     icon: Radio,
-  },
-]
-
-export const podcastItems = [
-  {
-    id: SidebarItems.PodcastAll,
-    title: 'podcasts.form.all',
-    route: ROUTES.LIBRARY.PODCASTS,
-    icon: () => null,
-  },
-  {
-    id: SidebarItems.PodcastLatest,
-    title: 'podcasts.form.latestEpisodes',
-    route: ROUTES.EPISODES.LATEST,
-    icon: () => null,
   },
 ]

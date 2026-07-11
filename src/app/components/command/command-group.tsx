@@ -3,7 +3,9 @@ import { Button } from '@/app/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export function CustomGroup({ children }: { children: ReactNode }) {
-  return <div className="mx-3 mt-3 rounded-[var(--radius-surface)]">{children}</div>
+  return (
+    <div className="mx-3 mt-3 rounded-[var(--radius-surface)]">{children}</div>
+  )
 }
 
 export function CustomGroupHeader({ children }: { children: ReactNode }) {

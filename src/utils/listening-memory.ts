@@ -89,7 +89,10 @@ function loadSkips(): SkipEntry[] {
 
 function saveSkips(entries: SkipEntry[]) {
   try {
-    safeStorageSet(SKIP_STORAGE_KEY, JSON.stringify(entries.slice(-MAX_SKIP_ENTRIES)))
+    safeStorageSet(
+      SKIP_STORAGE_KEY,
+      JSON.stringify(entries.slice(-MAX_SKIP_ENTRIES)),
+    )
   } catch {
     // Keep runtime resilient on storage failures.
   }

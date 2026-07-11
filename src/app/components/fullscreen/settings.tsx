@@ -26,6 +26,7 @@ import { Slider } from '@/app/components/ui/slider'
 import { Switch } from '@/app/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { useSongColor, useVisualizerSettingsStore } from '@/store/player.store'
+import { useFullscreenState } from '@/store/ui.store'
 import type { VisualizerPreset } from '@/types/visualizer'
 import { buttonsStyle } from './controls'
 
@@ -49,7 +50,9 @@ export function useVisualizerContext() {
     if (import.meta.env.DEV) {
       console.warn('useVisualizerContext called outside VisualizerProvider')
     }
-    throw new Error('useVisualizerContext must be used within VisualizerProvider')
+    throw new Error(
+      'useVisualizerContext must be used within VisualizerProvider',
+    )
   }
   return context
 }
@@ -118,10 +121,32 @@ export function FullscreenSettings() {
         <div className="flex flex-col">
           <DynamicColorOption showSeparator={false} />
           <ColorIntensityOption />
+          <VisualizerToggleOption />
           <VisualizerPresetOption />
         </div>
       </PopoverContent>
     </Popover>
+  )
+}
+
+function VisualizerToggleOption() {
+  const { t } = useTranslation()
+  const { visualizerActive, setVisualizerActive } = useVisualizerContext()
+  const setFullscreenVisualizerActive = useFullscreenState(
+    (state) => state.setVisualizerActive,
+  ) as ((active: boolean) => void) | undefined
+
+  const handleToggle = (checked: boolean) => {
+    setVisualizerActive(checked)
+    if (typeof setFullscreenVisualizerActive === 'function') {
+      setFullscreenVisualizerActive(checked)
+    }
+  }
+
+  return (
+    <SettingWrapper text={t('fullscreen.visualizerLabel', 'Visualizer')}>
+      <Switch checked={visualizerActive} onCheckedChange={handleToggle} />
+    </SettingWrapper>
   )
 }
 
@@ -212,7 +237,9 @@ function VisualizerPresetOption({ showSeparator = true }: OptionProps) {
     <>
       {showSeparator && <Separator />}
       <div className="flex items-center gap-3 p-3">
-        <span className="text-sm shrink-0">{t('fullscreen.visualizerLabel')}</span>
+        <span className="text-sm shrink-0">
+          {t('fullscreen.visualizerLabel')}
+        </span>
         <Select
           value={preset}
           onValueChange={(value) => setPreset(value as VisualizerPreset)}

@@ -15,8 +15,14 @@ async function fetchLastFmCoverArt(
   try {
     const url = new URL('https://ws.audioscrobbler.com/2.0/')
     url.searchParams.set('method', 'album.getinfo')
-    url.searchParams.set('artist', artist)
-    url.searchParams.set('album', album)
+    url.searchParams.set(
+      'artist',
+      artist.includes('+') ? artist.replace(/\+/g, '%2B') : artist,
+    )
+    url.searchParams.set(
+      'album',
+      album.includes('+') ? album.replace(/\+/g, '%2B') : album,
+    )
     url.searchParams.set('api_key', apiKey)
     url.searchParams.set('format', 'json')
 

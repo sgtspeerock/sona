@@ -134,11 +134,7 @@ export function ThisIsArtist() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            onClick={handlePlay}
-            className="sona-card-action"
-            size="sm"
-          >
+          <Button onClick={handlePlay} className="sona-card-action" size="sm">
             <Play className="h-3.5 w-3.5" fill="currentColor" />
             {t('options.play')}
           </Button>

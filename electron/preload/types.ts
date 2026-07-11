@@ -111,6 +111,7 @@ export interface IAonsokuAPI {
   clearAppCache: () => Promise<boolean>
   fetchExternalText: (
     url: string,
+    headers?: Record<string, string>,
   ) => Promise<{ ok: boolean; status: number; text: string; finalUrl: string }>
   fetchIcyMetadata: (
     url: string,

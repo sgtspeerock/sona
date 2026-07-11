@@ -181,7 +181,51 @@ function mapLastFmArtistInfo(
   return hasArtistInfo(mapped) ? mapped : undefined
 }
 
+async function resolveMusicBrainzMbid(
+  artistName: string,
+): Promise<string | undefined> {
+  try {
+    const mbUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(artistName)}&fmt=json`
+    const mbResponse = await fetch(mbUrl, {
+      headers: {
+        'User-Agent': 'Sona/0.20.0 ( contact@sona.app )',
+      },
+    })
+    if (mbResponse.ok) {
+      const mbData = await mbResponse.json()
+      const firstArtist = mbData?.artists?.[0]
+      if (
+        firstArtist &&
+        (firstArtist.score >= 90 ||
+          firstArtist.name.toLowerCase() === artistName.toLowerCase())
+      ) {
+        return firstArtist.id || undefined
+      }
+    }
+  } catch (err) {
+    console.warn(
+      '[artists.resolveMusicBrainzMbid] fallback lookup failed:',
+      err,
+    )
+  }
+  return undefined
+}
+
 async function fetchLastFmArtistInfoByName(artistName: string, apiKey: string) {
+  const mbid = await resolveMusicBrainzMbid(artistName)
+  if (mbid) {
+    const byMbid = await fetchLastFmArtistInfoByMbid(mbid, apiKey)
+    if (byMbid) {
+      if (import.meta.env.DEV) {
+        console.info(
+          '[artists.fetchLastFmArtistInfoByName] resolved via MusicBrainz MBID:',
+          mbid,
+        )
+      }
+      return byMbid
+    }
+  }
+
   const endpoint = 'https://ws.audioscrobbler.com/2.0/'
 
   const getArtistInfo = async (name: string) => {
@@ -318,6 +362,84 @@ async function getInfo(id: string) {
   )
 
   const info2 = info2Response?.data.artistInfo2
+
+  const response = await httpClient<ArtistInfoResponse>('/getArtistInfo', {
+    method: 'GET',
+    query: {
+      id,
+    },
+  })
+
+  const info1 = response?.data.artistInfo
+
+  const hasSubsonicBio = Boolean(
+    info2?.biography?.trim() || info1?.biography?.trim(),
+  )
+  const apiKey = useAppStore.getState().integrations.lastfm.apiKey?.trim()
+
+  if (
+    apiKey &&
+    (!hasSubsonicBio || (!hasArtistInfo(info2) && !hasArtistInfo(info1)))
+  ) {
+    try {
+      const artist = await getOne(id)
+      const artistName = artist?.name?.trim()
+      const musicBrainzId = artist?.musicBrainzId?.trim()
+
+      let lastFmInfo: IArtistInfo | undefined
+
+      if (musicBrainzId) {
+        lastFmInfo = await fetchLastFmArtistInfoByMbid(musicBrainzId, apiKey)
+      }
+
+      if (!lastFmInfo && artistName) {
+        lastFmInfo = await fetchLastFmArtistInfoByName(artistName, apiKey)
+      }
+
+      if (lastFmInfo) {
+        if (import.meta.env.DEV) {
+          console.info(
+            '[artists.getInfo] enriched missing subsonic biography with Last.fm direct fetch for',
+            artistName,
+          )
+        }
+        return {
+          biography:
+            lastFmInfo.biography?.trim() ||
+            info2?.biography ||
+            info1?.biography,
+          lastFmUrl:
+            lastFmInfo.lastFmUrl?.trim() ||
+            info2?.lastFmUrl ||
+            info1?.lastFmUrl,
+          musicBrainzId:
+            lastFmInfo.musicBrainzId?.trim() ||
+            info2?.musicBrainzId ||
+            info1?.musicBrainzId ||
+            musicBrainzId ||
+            undefined,
+          smallImageUrl:
+            lastFmInfo.smallImageUrl ||
+            info2?.smallImageUrl ||
+            info1?.smallImageUrl,
+          mediumImageUrl:
+            lastFmInfo.mediumImageUrl ||
+            info2?.mediumImageUrl ||
+            info1?.mediumImageUrl,
+          largeImageUrl:
+            lastFmInfo.largeImageUrl ||
+            info2?.largeImageUrl ||
+            info1?.largeImageUrl,
+          similarArtist: lastFmInfo.similarArtist?.length
+            ? lastFmInfo.similarArtist
+            : info2?.similarArtist || info1?.similarArtist,
+        }
+      }
+    } catch (e) {
+      console.warn('[artists.getInfo] Failed to enrich with Last.fm:', e)
+    }
+  }
+
   if (hasArtistInfo(info2)) {
     if (import.meta.env.DEV) {
       console.info('[artists.getInfo] using info2', {
@@ -330,14 +452,6 @@ async function getInfo(id: string) {
     return info2
   }
 
-  const response = await httpClient<ArtistInfoResponse>('/getArtistInfo', {
-    method: 'GET',
-    query: {
-      id,
-    },
-  })
-
-  const info1 = response?.data.artistInfo
   if (hasArtistInfo(info1)) {
     if (import.meta.env.DEV) {
       console.info('[artists.getInfo] using info1', {
@@ -350,58 +464,114 @@ async function getInfo(id: string) {
     return info1
   }
 
-  const apiKey = useAppStore.getState().integrations.lastfm.apiKey?.trim()
-  if (!apiKey) {
-    try {
-      const artist = await getOne(id)
-      if (!artist) return info1
-      const fallback: IArtistInfo = {
-        musicBrainzId: artist.musicBrainzId?.trim() || undefined,
-        largeImageUrl: sanitizeImageUrl(artist.artistImageUrl),
-        mediumImageUrl: sanitizeImageUrl(artist.artistImageUrl),
-        smallImageUrl: sanitizeImageUrl(artist.artistImageUrl),
-      }
-      return hasArtistInfo(fallback) ? fallback : info1
-    } catch {
-      return info1
-    }
-  }
-
   try {
     const artist = await getOne(id)
-    const artistName = artist?.name?.trim()
-    const musicBrainzId = artist?.musicBrainzId?.trim()
-
-    if (musicBrainzId) {
-      const byMbid = await fetchLastFmArtistInfoByMbid(musicBrainzId, apiKey)
-      if (byMbid) return byMbid
+    if (!artist) return info1
+    const fallback: IArtistInfo = {
+      musicBrainzId: artist.musicBrainzId?.trim() || undefined,
+      largeImageUrl: sanitizeImageUrl(artist.artistImageUrl),
+      mediumImageUrl: sanitizeImageUrl(artist.artistImageUrl),
+      smallImageUrl: sanitizeImageUrl(artist.artistImageUrl),
     }
-
-    if (!artistName) return info1
-
-    const lastFmInfo = await fetchLastFmArtistInfoByName(artistName, apiKey)
-    if (lastFmInfo) {
-      if (import.meta.env.DEV) {
-        console.info('[artists.getInfo] using lastfm', {
-          id,
-          artistName,
-          largeImageUrl: lastFmInfo.largeImageUrl,
-          mediumImageUrl: lastFmInfo.mediumImageUrl,
-          smallImageUrl: lastFmInfo.smallImageUrl,
-        })
-      }
-      return lastFmInfo
-    }
-
-    const entityFallback: IArtistInfo = {
-      musicBrainzId: musicBrainzId || undefined,
-      largeImageUrl: sanitizeImageUrl(artist?.artistImageUrl),
-      mediumImageUrl: sanitizeImageUrl(artist?.artistImageUrl),
-      smallImageUrl: sanitizeImageUrl(artist?.artistImageUrl),
-    }
-    return hasArtistInfo(entityFallback) ? entityFallback : info1
+    return hasArtistInfo(fallback) ? fallback : info1
   } catch {
     return info1
+  }
+}
+
+async function fetchLastFmTopTracks(
+  artistName: string,
+  apiKey: string,
+  mbid?: string,
+): Promise<string[]> {
+  const endpoint = 'https://ws.audioscrobbler.com/2.0/'
+  const getTracks = async (params: Record<string, string>) => {
+    const url = new URL(endpoint)
+    url.searchParams.set('method', 'artist.gettoptracks')
+    for (const [k, v] of Object.entries(params)) {
+      url.searchParams.set(k, v)
+    }
+    url.searchParams.set('api_key', apiKey)
+    url.searchParams.set('format', 'json')
+    url.searchParams.set('limit', '50')
+    const response = await fetch(url.toString())
+    if (!response.ok) return []
+    const data = await response.json()
+    const trackList = data?.toptracks?.track
+    if (!trackList) return []
+    const arr = Array.isArray(trackList) ? trackList : [trackList]
+    return arr.map((t: any) => t.name).filter(Boolean)
+  }
+
+  if (mbid) {
+    const tracks = await getTracks({ mbid })
+    if (tracks.length > 0) return tracks
+  }
+
+  const variants = buildArtistNameVariants(artistName)
+  for (const variant of variants) {
+    const tracks = await getTracks({ artist: variant })
+    if (tracks.length > 0) return tracks
+  }
+  return []
+}
+
+async function getTopSongsFallback(artistName: string): Promise<any[]> {
+  const apiKey = useAppStore.getState().integrations.lastfm.apiKey?.trim()
+  if (!apiKey) return []
+
+  try {
+    const mbid = await resolveMusicBrainzMbid(artistName)
+    const trackNames = await fetchLastFmTopTracks(artistName, apiKey, mbid)
+    if (trackNames.length === 0) return []
+
+    // Fetch all local songs for this artist via search3
+    const localSongsResponse = await httpClient<{
+      searchResult2?: { song?: any[] }
+    }>('/search3', {
+      method: 'GET',
+      query: {
+        query: artistName,
+        songCount: 1000,
+        artistCount: 0,
+        albumCount: 0,
+      },
+    })
+    const localSongs = localSongsResponse?.data?.searchResult2?.song ?? []
+    if (localSongs.length === 0) return []
+
+    const matchedSongs: any[] = []
+    const normalizeString = (str: string) =>
+      str
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, ' ')
+
+    const artistNameNorm = normalizeString(artistName)
+
+    for (const trackName of trackNames) {
+      const trackNameNorm = normalizeString(trackName)
+      const match = localSongs.find((song) => {
+        const songArtistNorm = normalizeString(song.artist)
+        const songTitleNorm = normalizeString(song.title)
+        return (
+          (songArtistNorm === artistNameNorm ||
+            songArtistNorm.includes(artistNameNorm) ||
+            artistNameNorm.includes(songArtistNorm)) &&
+          (songTitleNorm === trackNameNorm ||
+            songTitleNorm.includes(trackNameNorm) ||
+            trackNameNorm.includes(songTitleNorm))
+        )
+      })
+      if (match) {
+        matchedSongs.push(match)
+      }
+    }
+    return matchedSongs
+  } catch (err) {
+    console.warn('[artists.getTopSongsFallback] failed:', err)
+    return []
   }
 }
 
@@ -409,4 +579,5 @@ export const artists = {
   getOne,
   getInfo,
   getAll,
+  getTopSongsFallback,
 }

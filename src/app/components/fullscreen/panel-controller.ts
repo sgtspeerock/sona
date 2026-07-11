@@ -9,7 +9,9 @@ export function getNextFullscreenPanel(
   return target
 }
 
-export function shouldIgnoreFullscreenOutsideClick(target: HTMLElement): boolean {
+export function shouldIgnoreFullscreenOutsideClick(
+  target: HTMLElement,
+): boolean {
   if (target.closest('[data-fullscreen-panel-toggle]')) return true
   if (target.closest('[data-fullscreen-control-surface]')) return true
   if (target.closest('[data-testid="fullscreen-close-button"]')) return true

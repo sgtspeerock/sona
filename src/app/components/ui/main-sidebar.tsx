@@ -258,7 +258,7 @@ function MainSidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          'fixed z-20 hidden top-header bottom-[--player-height] w-[--sidebar-width] transition-[left,right,width] duration-0 ease-linear md:flex min-[1500px]:bottom-0',
+          'fixed z-20 hidden top-header bottom-0 w-[--sidebar-width] transition-[left,right,width] duration-0 ease-linear md:flex',
           side === 'left'
             ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
             : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
@@ -624,7 +624,7 @@ function MainSidebarMenuAction({
         'peer-data-[size=lg]/menu-button:top-2.5',
         'group-data-[collapsible=icon]:hidden',
         showOnHover &&
-            'peer-data-[active=true]/menu-button:text-primary-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0',
+          'peer-data-[active=true]/menu-button:text-primary-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0',
         className,
       )}
       {...props}
@@ -642,7 +642,7 @@ function MainSidebarMenuBadge({
       data-sidebar="menu-badge"
       className={cn(
         'text-foreground pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-[var(--radius-control-sm)] px-1 text-xs font-medium tabular-nums select-none',
-          'peer-hover/menu-button:text-accent-foreground peer-data-[active=true]/menu-button:text-primary-foreground',
+        'peer-hover/menu-button:text-accent-foreground peer-data-[active=true]/menu-button:text-primary-foreground',
         'peer-data-[size=sm]/menu-button:top-1',
         'peer-data-[size=default]/menu-button:top-1.5',
         'peer-data-[size=lg]/menu-button:top-2.5',
@@ -748,7 +748,7 @@ function MainSidebarMenuSubButton({
       data-active={isActive}
       className={cn(
         'text-foreground/85 ring-ring hover:bg-accent/60 hover:text-accent-foreground active:bg-accent active:text-accent-foreground [&>svg]:text-accent-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-[var(--radius-control)] px-2 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
-          'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground',
+        'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground',
         size === 'sm' && 'text-xs',
         size === 'md' && 'text-sm',
         'group-data-[collapsible=icon]:hidden',

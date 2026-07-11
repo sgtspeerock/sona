@@ -48,7 +48,10 @@ export function CommandSongResult({
               className="sona-panel-soft p-2 items-start cursor-pointer transition-colors hover:border-primary/35 hover:bg-accent/35 aria-selected:bg-accent/55"
               onSelect={() => {
                 runCommand(() =>
-                  navigateSafe(navigate, ROUTES.ALBUM.PAGE(song.albumId, song.id)),
+                  navigateSafe(
+                    navigate,
+                    ROUTES.ALBUM.PAGE(song.albumId, song.id),
+                  ),
                 )
               }}
             >
@@ -65,4 +68,3 @@ export function CommandSongResult({
     </CustomGroup>
   )
 }
-

@@ -37,11 +37,6 @@ out
 _build-win-installer.cmd
 _dev-electron.cmd
 _github-upload.cmd
-
-# Local scratch / exports
-exchange/
-backup_changes.patch
-
 # Additional local secrets/config variants
 .env.*
 !.env.example

@@ -12,9 +12,11 @@ import GenreDiscovery, {
 import { RecentAddedColumn } from '@/app/components/home/recent-added-column'
 import { ThisIsArtist } from '@/app/components/home/this-is-artist'
 import { PageState } from '@/app/components/ui/page-state'
-import { useGetLatestReleaseAlbum, useHomeDashboardData } from '@/app/hooks/use-home'
+import {
+  useGetLatestReleaseAlbum,
+  useHomeDashboardData,
+} from '@/app/hooks/use-home'
 import { useRenderCounter } from '@/app/hooks/use-render-counter'
-
 
 export default function Home() {
   useRenderCounter('HomePage')
@@ -28,6 +30,18 @@ export default function Home() {
     isGenresLoading,
   } = useHomeDashboardData()
   const latestReleaseQuery = useGetLatestReleaseAlbum()
+  const latestReleasedAlbum = latestReleaseQuery.data
+
+  const heroAlbums = useMemo(() => {
+    const recommendedAlbums = similarArtists.data?.list || []
+    if (!latestReleasedAlbum) return recommendedAlbums
+
+    const dedupedRecommended = recommendedAlbums.filter(
+      (album) => album.id !== latestReleasedAlbum.id,
+    )
+
+    return [latestReleasedAlbum, ...dedupedRecommended]
+  }, [latestReleasedAlbum, similarArtists.data?.list])
 
   const hasCriticalError =
     similarArtists.isError && recentlyPlayed.isError && recentlyAdded.isError
@@ -56,18 +70,6 @@ export default function Home() {
     (recentlyAdded.data?.list?.length ?? 0) > 0 ||
     genres.length > 0
 
-  const latestReleasedAlbum = latestReleaseQuery.data
-
-  const heroAlbums = useMemo(() => {
-    const recommendedAlbums = similarArtists.data?.list || []
-    if (!latestReleasedAlbum) return recommendedAlbums
-
-    const dedupedRecommended = recommendedAlbums.filter(
-      (album) => album.id !== latestReleasedAlbum.id,
-    )
-
-    return [latestReleasedAlbum, ...dedupedRecommended]
-  }, [latestReleasedAlbum, similarArtists.data?.list])
   const allLoaded =
     !similarArtists.isLoading &&
     !recentlyPlayed.isLoading &&

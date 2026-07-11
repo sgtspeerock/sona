@@ -7,8 +7,8 @@ import { useRefreshFavorites } from '@/app/hooks/use-refresh-favorites'
 import { subsonic } from '@/service/subsonic'
 import {
   usePlayerActions,
+  usePlayerCurrentSong,
   usePlayerMediaType,
-  usePlayerSonglist,
   usePlayerSongStarred,
 } from '@/store/player.store'
 
@@ -24,7 +24,7 @@ export function TableLikeButton({
   type,
 }: TableLikeButtonProps) {
   const [isStarred, setIsStarred] = useState(starred)
-  const { currentSong } = usePlayerSonglist()
+  const currentSong = usePlayerCurrentSong()
   const isSongStarred = usePlayerSongStarred()
   const { isRadio, isSong } = usePlayerMediaType()
   const { starCurrentSong, starSongInQueue } = usePlayerActions()

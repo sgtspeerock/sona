@@ -13,11 +13,11 @@
     visibility 240ms ease !important;
 }
 
-.fullscreen-drawer-content[data-state='open'] {
+.fullscreen-drawer-content[data-state="open"] {
   opacity: 1;
 }
 
-.fullscreen-drawer-content[data-state='closed'] {
+.fullscreen-drawer-content[data-state="closed"] {
   opacity: 0;
 }
 
@@ -182,28 +182,32 @@
 .fullscreen-control-button,
 .fullscreen-control-button:hover,
 .fullscreen-control-button:focus-visible,
-.fullscreen-control-button[data-state='active'] {
+.fullscreen-control-button[data-state="active"] {
   box-shadow: none !important;
   filter: none !important;
 }
-
 
 /* Keep fullscreen control hover cheap even in session/night global button rules. */
 .fullscreen-drawer-content .fullscreen-control-button,
 .fullscreen-drawer-content .fullscreen-control-button:hover,
 .fullscreen-drawer-content .fullscreen-control-button:focus-visible,
-.fullscreen-drawer-content .fullscreen-control-button[data-state='active'] {
+.fullscreen-drawer-content .fullscreen-control-button[data-state="active"] {
   box-shadow: none !important;
   filter: none !important;
   text-shadow: none !important;
-  transition-property: background-color, color, border-color, opacity, transform !important;
+  transition-property:
+    background-color, color, border-color, opacity, transform !important;
   transition-duration: 140ms !important;
 }
 
 .session-mode-night .fullscreen-drawer-content .fullscreen-control-button,
 .session-mode-night .fullscreen-drawer-content .fullscreen-control-button:hover,
-.session-mode-night .fullscreen-drawer-content .fullscreen-control-button:focus-visible,
-.session-mode-night .fullscreen-drawer-content .fullscreen-control-button[data-state='active'] {
+.session-mode-night
+  .fullscreen-drawer-content
+  .fullscreen-control-button:focus-visible,
+.session-mode-night
+  .fullscreen-drawer-content
+  .fullscreen-control-button[data-state="active"] {
   animation: none !important;
   box-shadow: none !important;
   filter: none !important;
@@ -221,14 +225,15 @@
 
 [data-fullscreen-action-group] .fullscreen-utility-button svg,
 [data-fullscreen-action-group] button[data-fullscreen-panel-toggle] svg,
-[data-fullscreen-action-group] .fullscreen-utility-button [aria-hidden='true'] {
+[data-fullscreen-action-group] .fullscreen-utility-button [aria-hidden="true"] {
   width: 1.125rem !important;
   height: 1.125rem !important;
 }
 
 .fullscreen-backdrop-kenburns-lite {
   transform-origin: center center;
-  animation: fullscreen-backdrop-kenburns-lite 200s ease-in-out infinite alternate;
+  animation: fullscreen-backdrop-kenburns-lite 200s ease-in-out infinite
+    alternate;
   will-change: transform;
 }
 
@@ -293,7 +298,8 @@
 }
 
 .fullscreen-panel-readable-light-bg .row-active,
-.fullscreen-panel-readable-light-bg div[data-test-id='table-row'][data-state='selected'] {
+.fullscreen-panel-readable-light-bg
+  div[data-test-id="table-row"][data-state="selected"] {
   background: rgba(255, 255, 255, 0.32) !important;
 }
 

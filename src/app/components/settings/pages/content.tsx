@@ -1,6 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import clsx from 'clsx'
 import {
   ComponentPropsWithoutRef,
   useCallback,
@@ -8,9 +6,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
 import {
   Content,
   ContentItem,
@@ -28,12 +24,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/app/components/ui/dialog'
-import { Input } from '@/app/components/ui/input'
 import { Switch } from '@/app/components/ui/switch'
-import { useDebouncedFormSync } from '@/app/hooks/use-debounced-form-sync'
 import { cn } from '@/lib/utils'
 import { subsonic } from '@/service/subsonic'
-import { useAppIntegrations, useAppPodcasts } from '@/store/app.store'
+import { useAppIntegrations } from '@/store/app.store'
 import {
   DEFAULT_FOCUS_GENRES,
   DEFAULT_NIGHT_GENRES,
@@ -43,32 +37,7 @@ import {
 import { isGenreUsable, normalizeGenreName } from '@/utils/genreNormalization'
 import { queryKeys } from '@/utils/queryKeys'
 
-const podcastSchema = z
-  .object({
-    serviceUrl: z.string().url({ message: 'login.form.validations.url' }),
-    customUser: z.string().optional(),
-    customUrl: z
-      .string()
-      .url({ message: 'login.form.validations.url' })
-      .optional(),
-    useDefaultUser: z.boolean(),
-    active: z.boolean(),
-  })
-  .refine(
-    (data) => {
-      const customUser = data.customUser?.length ?? 0
-      const customUrl = data.customUrl?.length ?? 0
-      return data.useDefaultUser === true || (customUser > 0 && customUrl > 0)
-    },
-    {
-      message: 'settings.content.podcast.credentials.error',
-      path: ['useDefaultUser'],
-    },
-  )
-
-type PodcastSchemaType = z.infer<typeof podcastSchema>
-
-function ErrorMessage({
+function _ErrorMessage({
   className,
   children,
   ...rest
@@ -85,50 +54,6 @@ export function ContentPage() {
 
   // Lyrics
   const { preferSyncedLyrics, setPreferSyncedLyrics } = useLyricsSettings()
-
-  // Podcasts
-  const {
-    active,
-    setActive,
-    serviceUrl,
-    setServiceUrl,
-    useDefaultUser,
-    setUseDefaultUser,
-    customUser,
-    setCustomUser,
-    customUrl,
-    setCustomUrl,
-  } = useAppPodcasts()
-
-  const {
-    register,
-    watch,
-    setValue,
-    trigger,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(podcastSchema),
-    defaultValues: {
-      active,
-      serviceUrl: serviceUrl || 'http://',
-      useDefaultUser,
-      customUser,
-      customUrl,
-    },
-  })
-
-  useDebouncedFormSync(
-    watch,
-    (data: Partial<PodcastSchemaType>) => {
-      if (data.active !== undefined) setActive(data.active)
-      if (data.serviceUrl !== undefined) setServiceUrl(data.serviceUrl)
-      if (data.useDefaultUser !== undefined)
-        setUseDefaultUser(data.useDefaultUser)
-      if (data.customUser !== undefined) setCustomUser(data.customUser)
-      if (data.customUrl !== undefined) setCustomUrl(data.customUrl)
-    },
-    500,
-  )
 
   // Homepage Playlists
   const { lastfm } = useAppIntegrations()
@@ -295,138 +220,6 @@ export function ContentPage() {
                 />
               </ContentItemForm>
             </ContentItem>
-          </Content>
-        </Root>
-
-        {/* Podcasts */}
-        <Root>
-          <Header>
-            <HeaderTitle>
-              {t('settings.content.podcast.group', 'Podcasts')}
-            </HeaderTitle>
-          </Header>
-          <Content>
-            <ContentItem>
-              <ContentItemTitle>
-                {t('settings.content.podcast.enabled.label', 'Enable Podcasts')}
-              </ContentItemTitle>
-              <ContentItemForm>
-                <Switch
-                  {...register('active')}
-                  checked={watch('active')}
-                  onCheckedChange={(checked) => {
-                    setValue('active', checked)
-                    trigger('active')
-                  }}
-                />
-              </ContentItemForm>
-            </ContentItem>
-
-            {watch('active') && (
-              <>
-                <ContentItem>
-                  <ContentItemTitle>
-                    {t('settings.content.podcast.service.url', 'Service URL')}
-                    {errors.serviceUrl?.message && (
-                      <ErrorMessage>
-                        {t(errors.serviceUrl.message)}
-                      </ErrorMessage>
-                    )}
-                  </ContentItemTitle>
-                  <ContentItemForm>
-                    <Input
-                      {...register('serviceUrl')}
-                      className={clsx(
-                        'h-8',
-                        errors.serviceUrl && 'border-destructive',
-                      )}
-                      onChange={(e) => {
-                        setValue('serviceUrl', e.target.value, {
-                          shouldValidate: true,
-                        })
-                      }}
-                      autoCorrect="off"
-                      autoCapitalize="off"
-                      spellCheck={false}
-                      autoComplete="off"
-                    />
-                  </ContentItemForm>
-                </ContentItem>
-
-                <ContentItem>
-                  <ContentItemTitle>
-                    {t(
-                      'settings.content.podcast.credentials.label',
-                      'Use Default Credentials',
-                    )}
-                    {errors.useDefaultUser?.message && (
-                      <ErrorMessage>
-                        {t(errors.useDefaultUser.message)}
-                      </ErrorMessage>
-                    )}
-                  </ContentItemTitle>
-                  <ContentItemForm>
-                    <Switch
-                      {...register('useDefaultUser')}
-                      checked={watch('useDefaultUser')}
-                      onCheckedChange={(checked) => {
-                        setValue('useDefaultUser', checked)
-                        trigger('useDefaultUser')
-                      }}
-                    />
-                  </ContentItemForm>
-                </ContentItem>
-
-                {!watch('useDefaultUser') && (
-                  <>
-                    <ContentItem>
-                      <ContentItemTitle>
-                        {t(
-                          'settings.content.podcast.credentials.user',
-                          'Username',
-                        )}
-                      </ContentItemTitle>
-                      <ContentItemForm>
-                        <Input
-                          {...register('customUser')}
-                          className="h-8"
-                          onChange={(e) => {
-                            setValue('customUser', e.target.value, {
-                              shouldValidate: true,
-                            })
-                            trigger('useDefaultUser')
-                          }}
-                        />
-                      </ContentItemForm>
-                    </ContentItem>
-                    <ContentItem>
-                      <ContentItemTitle>
-                        {t(
-                          'settings.content.podcast.credentials.url',
-                          'Server URL',
-                        )}
-                      </ContentItemTitle>
-                      <ContentItemForm>
-                        <Input
-                          {...register('customUrl')}
-                          className="h-8"
-                          onChange={(e) => {
-                            setValue('customUrl', e.target.value, {
-                              shouldValidate: true,
-                            })
-                            trigger('useDefaultUser')
-                          }}
-                          autoCorrect="off"
-                          autoCapitalize="off"
-                          spellCheck={false}
-                          autoComplete="off"
-                        />
-                      </ContentItemForm>
-                    </ContentItem>
-                  </>
-                )}
-              </>
-            )}
           </Content>
         </Root>
 

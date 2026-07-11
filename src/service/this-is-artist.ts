@@ -50,7 +50,10 @@ async function getArtistTopTracks(
 ): Promise<LastFmTrack[]> {
   const url = new URL(LASTFM_API_URL)
   url.searchParams.append('method', 'artist.getTopTracks')
-  url.searchParams.append('artist', artistName)
+  url.searchParams.append(
+    'artist',
+    artistName.includes('+') ? artistName.replace(/\+/g, '%2B') : artistName,
+  )
   url.searchParams.append('api_key', apiKey)
   url.searchParams.append('format', 'json')
   url.searchParams.append('limit', String(limit))

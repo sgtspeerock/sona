@@ -1,9 +1,9 @@
 import { useLayoutEffect } from 'react'
 import { usePlayerCurrentSong, useSongColor } from '@/store/player.store'
 import { useTheme } from '@/store/theme.store'
+import { useFullscreenState } from '@/store/ui.store'
 import { Theme } from '@/types/themeContext'
 import { setDesktopTitleBarColors } from '@/utils/theme'
-import { useFullscreenState } from '@/store/ui.store'
 
 export const appThemes: Theme[] = Object.values(Theme)
 
@@ -154,9 +154,13 @@ export function ThemeObserver() {
     }
 
     setDesktopTitleBarColors(fullscreenOpen)
-  }, [theme, fullscreenOpen, currentSong?.id, currentSongColor, currentSongColorPalette])
+  }, [
+    theme,
+    fullscreenOpen,
+    currentSong?.id,
+    currentSongColor,
+    currentSongColorPalette,
+  ])
 
   return null
 }
-
-

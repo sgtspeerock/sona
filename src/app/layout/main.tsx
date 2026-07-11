@@ -16,7 +16,7 @@ export function MainRoutes() {
     <main className="sona-atmosphere relative flex h-full">
       <ScrollArea
         id="main-scroll-area"
-        className="w-full bg-transparent min-[1500px]:mr-[420px] min-[1700px]:mr-[450px]"
+        className="w-full bg-transparent mr-[420px] min-[1700px]:mr-[450px]"
       >
         <Outlet />
       </ScrollArea>

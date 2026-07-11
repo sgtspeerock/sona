@@ -1,4 +1,5 @@
-import { safeStorageGet, safeStorageSet } from '@/utils/safe-storage'
+import { del, get, set } from 'idb-keyval'
+import { safeStorageGet, safeStorageRemove } from '@/utils/safe-storage'
 
 const NEGATIVE_CACHE_TTL_MS = 20_000
 const STALE_WHILE_REVALIDATE_MS = 5 * 60 * 1000
@@ -116,30 +117,61 @@ async function withImageFetchSlot<T>(task: () => Promise<T>): Promise<T> {
   }
 }
 
-function loadMetadata() {
+let isMetadataLoaded = false
+const metadataLoadPromise = (async () => {
   try {
-    const raw = safeStorageGet(IMAGE_METADATA_STORAGE_KEY)
-    if (!raw) return
-    const parsed = JSON.parse(raw) as Record<string, number>
-    Object.entries(parsed).forEach(([key, value]) => {
-      if (Number.isFinite(value)) cacheMetadata.set(key, value)
-    })
-  } catch {
-    // Ignore invalid storage payload
+    let data = (await get(IMAGE_METADATA_STORAGE_KEY)) as
+      | Record<string, number>
+      | undefined
+
+    if (!data) {
+      const oldRaw = safeStorageGet(IMAGE_METADATA_STORAGE_KEY)
+      if (oldRaw) {
+        try {
+          data = JSON.parse(oldRaw) as Record<string, number>
+          await set(IMAGE_METADATA_STORAGE_KEY, data)
+          safeStorageRemove(IMAGE_METADATA_STORAGE_KEY)
+        } catch {
+          // ignore parsing error
+        }
+      }
+    }
+
+    if (data) {
+      Object.entries(data).forEach(([key, value]) => {
+        if (Number.isFinite(value)) cacheMetadata.set(key, value)
+      })
+    }
+  } catch (err) {
+    console.error('Failed to load image metadata from IndexedDB:', err)
+  } finally {
+    isMetadataLoaded = true
   }
-}
+})()
 
 function scheduleMetadataPersist() {
   if (metadataWriteTimer) return
   metadataWriteTimer = setTimeout(() => {
     metadataWriteTimer = null
-    try {
-      const payload = Object.fromEntries(cacheMetadata.entries())
-      safeStorageSet(IMAGE_METADATA_STORAGE_KEY, JSON.stringify(payload))
-    } catch {
-      // Ignore storage errors
-    }
+    const payload = Object.fromEntries(cacheMetadata.entries())
+    set(IMAGE_METADATA_STORAGE_KEY, payload).catch((err) => {
+      console.error('Failed to persist image metadata to IndexedDB:', err)
+    })
   }, 200)
+}
+
+export async function clearImageCacheMetadata() {
+  try {
+    await del(IMAGE_METADATA_STORAGE_KEY)
+    for (const objectUrl of objectUrlCache.values()) {
+      URL.revokeObjectURL(objectUrl)
+    }
+    objectUrlCache.clear()
+    objectUrlTimestamps.clear()
+    cacheMetadata.clear()
+  } catch (err) {
+    console.error('Failed to clear image cache metadata:', err)
+  }
 }
 
 function getImageIdentityKey(url: string) {
@@ -217,6 +249,9 @@ async function fetchAndCacheImage(url: string, cache: Cache, now: number) {
 }
 
 export async function getCachedImage(url: string): Promise<string> {
+  if (!isMetadataLoaded) {
+    await metadataLoadPromise
+  }
   const now = Date.now()
   const failedAt = failedFetches.get(url)
   if (failedAt && now - failedAt < NEGATIVE_CACHE_TTL_MS) {
@@ -282,6 +317,9 @@ export async function getCachedImage(url: string): Promise<string> {
 }
 
 export async function prefetchCachedImages(urls: string[]) {
+  if (!isMetadataLoaded) {
+    await metadataLoadPromise
+  }
   const deduped = [...new Set(urls.filter(Boolean))]
   for (const url of deduped) {
     if (Date.now() < rateLimitedUntil) {
@@ -294,6 +332,9 @@ export async function prefetchCachedImages(urls: string[]) {
 
 async function trimServiceWorkerCache(maxEntries = 600) {
   if (typeof caches === 'undefined') return
+  if (!isMetadataLoaded) {
+    await metadataLoadPromise
+  }
 
   try {
     const cache = await caches.open('images')
@@ -314,7 +355,6 @@ async function trimServiceWorkerCache(maxEntries = 600) {
   }
 }
 
-loadMetadata()
 applyAdaptivePrefetchProfile()
 subscribeToNetworkChanges()
 trimServiceWorkerCache()

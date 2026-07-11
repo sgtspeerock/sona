@@ -47,7 +47,9 @@ export function FullscreenControls() {
         variant="ghost"
         data-state={isShuffleActive && 'active'}
         className={clsx(
-          buttonsStyle.utility, 'fullscreen-control-button', isShuffleActive && buttonsStyle.activeDot,
+          buttonsStyle.utility,
+          'fullscreen-control-button',
+          isShuffleActive && buttonsStyle.activeDot,
         )}
         style={{ ...buttonsStyle.style }}
         onClick={() => toggleShuffle()}
@@ -95,18 +97,37 @@ export function FullscreenControls() {
         size="icon"
         variant="ghost"
         data-state={loopState !== LoopState.Off && 'active'}
-        className={clsx(buttonsStyle.utility, 'fullscreen-control-button', loopState !== LoopState.Off && buttonsStyle.activeDot)}
+        className={clsx(
+          buttonsStyle.utility,
+          'fullscreen-control-button',
+          loopState !== LoopState.Off && buttonsStyle.activeDot,
+        )}
         onClick={() => toggleLoop()}
         style={{ ...buttonsStyle.style }}
       >
         {loopState === LoopState.Off && (
-          <Repeat className={clsx(buttonsStyle.secondaryIcon, 'text-[color:var(--fs-btn-fg-muted)]')} />
+          <Repeat
+            className={clsx(
+              buttonsStyle.secondaryIcon,
+              'text-[color:var(--fs-btn-fg-muted)]',
+            )}
+          />
         )}
         {loopState === LoopState.All && (
-          <Repeat className={clsx(buttonsStyle.secondaryIcon, 'text-[color:var(--fs-btn-fg)]')} />
+          <Repeat
+            className={clsx(
+              buttonsStyle.secondaryIcon,
+              'text-[color:var(--fs-btn-fg)]',
+            )}
+          />
         )}
         {loopState === LoopState.One && (
-          <RepeatOne className={clsx(buttonsStyle.secondaryIcon, 'text-[color:var(--fs-btn-fg)]')} />
+          <RepeatOne
+            className={clsx(
+              buttonsStyle.secondaryIcon,
+              'text-[color:var(--fs-btn-fg)]',
+            )}
+          />
         )}
       </Button>
     </Fragment>
@@ -114,12 +135,12 @@ export function FullscreenControls() {
 }
 
 export const buttonsStyle = {
-  main: 'w-14 h-14 rounded-full border border-[color:var(--fs-btn-main-border)] bg-[color:var(--fs-btn-main-bg)] text-[color:var(--fs-btn-fg)] hover:bg-[color:var(--fs-btn-main-bg-hover)] hover:scale-[1.04] transition-[background-color,transform,border-color,color]',
+  main: 'w-14 h-14 rounded-full border border-[color:var(--fs-btn-main-border)] bg-[color:var(--fs-btn-main-bg)] text-[color:var(--fs-btn-fg)] hover:bg-[color:var(--fs-btn-main-bg-hover)] hover:scale-[1.08] active:scale-[0.9] transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]',
   mainIcon: 'w-7 h-7 text-current fill-current',
   secondary:
-    'relative w-12 h-12 rounded-full border border-[color:var(--fs-btn-secondary-border)] bg-[color:var(--fs-btn-secondary-bg)] text-[color:var(--fs-btn-fg-muted)] hover:text-[color:var(--fs-btn-fg)] data-[state=active]:text-[color:var(--fs-btn-fg)] data-[state=active]:bg-[color:var(--fs-btn-secondary-bg-active)] hover:bg-[color:var(--fs-btn-secondary-bg-hover)] hover:border-[color:var(--fs-btn-secondary-border-hover)] hover:scale-[1.05] transition-[background-color,transform,border-color,color]',
+    'relative w-12 h-12 rounded-full border border-[color:var(--fs-btn-secondary-border)] bg-[color:var(--fs-btn-secondary-bg)] text-[color:var(--fs-btn-fg-muted)] hover:text-[color:var(--fs-btn-fg)] data-[state=active]:text-[color:var(--fs-btn-fg)] data-[state=active]:bg-[color:var(--fs-btn-secondary-bg-active)] hover:bg-[color:var(--fs-btn-secondary-bg-hover)] hover:border-[color:var(--fs-btn-secondary-border-hover)] hover:scale-[1.08] active:scale-[0.9] transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]',
   utility:
-    'relative w-12 h-12 rounded-full border border-[color:var(--fs-btn-utility-border)] bg-[color:var(--fs-btn-utility-bg)] text-[color:var(--fs-btn-fg-muted)] hover:text-[color:var(--fs-btn-fg)] data-[state=active]:text-[color:var(--fs-btn-fg)] hover:bg-[color:var(--fs-btn-utility-bg-hover)] hover:border-[color:var(--fs-btn-utility-border-hover)] hover:scale-[1.05] transition-[background-color,transform,border-color,color]',
+    'relative w-12 h-12 rounded-full border border-[color:var(--fs-btn-utility-border)] bg-[color:var(--fs-btn-utility-bg)] text-[color:var(--fs-btn-fg-muted)] hover:text-[color:var(--fs-btn-fg)] data-[state=active]:text-[color:var(--fs-btn-fg)] hover:bg-[color:var(--fs-btn-utility-bg-hover)] hover:border-[color:var(--fs-btn-utility-border-hover)] hover:scale-[1.08] active:scale-[0.9] transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]',
   secondaryIcon: 'w-6 h-6',
   secondaryIconFilled: 'w-6 h-6 text-current fill-current',
   activeDot: 'player-button-active',

@@ -15,7 +15,11 @@ interface OnRepeatItemProps {
   compact?: boolean
 }
 
-export function OnRepeatItem({ song, playcount: _playcount, compact = false }: OnRepeatItemProps) {
+export function OnRepeatItem({
+  song,
+  playcount: _playcount,
+  compact = false,
+}: OnRepeatItemProps) {
   const { t } = useTranslation()
   const { setSongList } = usePlayerActions()
   const [imageLoaded, setImageLoaded] = useState(false)
@@ -83,15 +87,15 @@ export function OnRepeatItem({ song, playcount: _playcount, compact = false }: O
           </Link>
 
           {!compact && (
-          <div className="w-[210px] min-[1700px]:w-[230px] min-[2600px]:w-[250px]">
-            <div className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border/45 bg-background px-2.5 py-1.5 text-center text-xs font-medium text-foreground/[0.82]">
-              {song.genre && <span className="truncate">{song.genre}</span>}
-              {song.genre && song.year && (
-                <span className="text-foreground/40">•</span>
-              )}
-              {song.year && <span>{song.year}</span>}
+            <div className="w-[210px] min-[1700px]:w-[230px] min-[2600px]:w-[250px]">
+              <div className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border/45 bg-background px-2.5 py-1.5 text-center text-xs font-medium text-foreground/[0.82]">
+                {song.genre && <span className="truncate">{song.genre}</span>}
+                {song.genre && song.year && (
+                  <span className="text-foreground/40">•</span>
+                )}
+                {song.year && <span>{song.year}</span>}
+              </div>
             </div>
-          </div>
           )}
         </div>
 

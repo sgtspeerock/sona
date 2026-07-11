@@ -20,8 +20,8 @@ import { ROUTES } from '@/routes/routesList'
 import { subsonic } from '@/service/subsonic'
 import {
   useLyricsSettings,
+  usePlayerCurrentSong,
   usePlayerRef,
-  usePlayerSonglist,
 } from '@/store/player.store'
 import { ILyric } from '@/types/responses/song'
 
@@ -30,7 +30,7 @@ interface LyricProps {
 }
 
 export function LyricsTab() {
-  const { currentSong } = usePlayerSonglist()
+  const currentSong = usePlayerCurrentSong()
   const { preferSyncedLyrics } = useLyricsSettings()
   const { t } = useTranslation()
 
@@ -154,12 +154,16 @@ function LyricsStatusPill({
   return (
     <div
       className={clsx(
-        'pointer-events-none absolute right-3 top-3 z-10 rounded-full border px-2.5 py-1 text-[11px] font-medium shadow-lg backdrop-blur-md',
-        synced
-          ? 'border-primary/30 bg-primary/12 text-primary'
-          : 'border-foreground/15 bg-background/35 text-muted-foreground',
+        'pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/60 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-foreground/90 shadow-sm backdrop-blur-md',
+        synced ? 'text-emerald-400/90' : 'text-neutral-300/80',
       )}
     >
+      <span
+        className={clsx(
+          'h-1.5 w-1.5 rounded-full',
+          synced ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-400',
+        )}
+      />
       {label}
     </div>
   )
@@ -201,11 +205,10 @@ function SyncedLyrics({ lyrics }: LyricProps) {
           <p
             onClick={() => skipToTime(line.startMillisecond)}
             className={clsx(
-              'my-5 cursor-pointer hover:opacity-100 duration-500',
-              'transition-[opacity,transform,text-shadow] motion-reduce:transition-none',
+              'my-6 cursor-pointer transition-all duration-500 motion-reduce:transition-none origin-center transform-gpu',
               active
-                ? 'opacity-100 scale-125 drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]'
-                : 'opacity-50',
+                ? 'opacity-100 scale-[1.12] text-white drop-shadow-[0_0_16px_rgba(255,255,255,0.7)] font-bold'
+                : 'opacity-35 hover:opacity-80 scale-95 hover:scale-[0.98] blur-[0.4px] hover:blur-0',
             )}
           >
             {line.content}
@@ -217,7 +220,7 @@ function SyncedLyrics({ lyrics }: LyricProps) {
 }
 
 function UnsyncedLyrics({ lyrics }: LyricProps) {
-  const { currentSong } = usePlayerSonglist()
+  const currentSong = usePlayerCurrentSong()
   const lyricsBoxRef = useRef<HTMLDivElement>(null)
 
   const lines = lyrics.value!.split('\n')
@@ -277,5 +280,3 @@ function areLyricsSynced(lyrics: ILyric) {
   const lyric = lyrics.value?.trim() ?? ''
   return /^\[\d{1,2}:\d{2}(?:\.\d{1,3})?\]/m.test(lyric)
 }
-
-

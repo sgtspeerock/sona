@@ -3,12 +3,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { isSafari } from 'react-device-detect'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { getSimpleCoverArtUrl } from '@/api/httpClient'
+import { ImageLoader } from '@/app/components/image-loader'
 import {
   usePlayerCurrentSong,
   useSessionModeSettings,
   useSongColor,
 } from '@/store/player.store'
-import { isChromeOrFirefox } from '@/utils/browser'
 import { hexToRgba } from '@/utils/getAverageColor'
 
 let lastStableFullscreenBackdropUrl = ''
@@ -211,7 +211,7 @@ function OtherBackdrop({
   const adaptiveDimOpacity = getAdaptiveDimOverlay(luminance, mode)
 
   return (
-    <div className="relative w-full h-full bg-black/0">
+    <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden bg-black/0">
       <div
         className={clsx(
           'absolute bg-cover bg-center z-0',
@@ -285,7 +285,10 @@ function MacBackdrop({
   const adaptiveDimOpacity = getAdaptiveDimOverlay(luminance, mode)
 
   return (
-    <div className="relative w-full h-full flex items-center" style={{ backgroundColor }}>
+    <div
+      className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden flex items-center"
+      style={{ backgroundColor }}
+    >
       <ImageLoader id={coverArt} type="song">
         {(src) => (
           <LazyLoadImage
@@ -333,98 +336,6 @@ function MacBackdrop({
                 : 'hsl(var(--background) / 0.45)',
         }}
       />
-    </div>
-  )
-}
-
-function DynamicColorBackdrop({
-  enableKenBurns,
-  blurPx,
-  compactBlurSurface,
-}: {
-  enableKenBurns: boolean
-  blurPx: number
-  compactBlurSurface: boolean
-}) {
-  const { coverArt } = usePlayerCurrentSong()
-  const { mode } = useSessionModeSettings()
-  const coverArtUrl = getSimpleCoverArtUrl(coverArt, 'song', '150')
-  const luminance = useBackdropLuminance(coverArtUrl)
-  const [backgroundImage, setBackgroundImage] = useState(coverArtUrl)
-  const { currentSongColorIntensity } = useSongColor()
-
-  const newBackgroundImage = useMemo(() => coverArtUrl, [coverArtUrl])
-
-  useEffect(() => {
-    let cancelled = false
-    const img = new Image()
-    img.src = newBackgroundImage
-    img.onload = () => {
-      if (!cancelled) setBackgroundImage(newBackgroundImage)
-    }
-    return () => {
-      cancelled = true
-    }
-  }, [newBackgroundImage])
-
-  const modeFilter =
-    mode === 'focus'
-      ? 'saturate(0.24) brightness(0.45) contrast(1.04)'
-      : mode === 'night'
-        ? 'saturate(1.24) brightness(0.6) contrast(1.1)'
-        : 'saturate(1) brightness(1)'
-  const adaptiveDimOpacity = getAdaptiveDimOverlay(luminance, mode)
-
-  return (
-    <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-      <div
-        className={clsx(
-          'relative w-full h-full',
-          isChromeOrFirefox && 'bg-black/0',
-        )}
-      >
-        {/* Blurred background image */}
-        <div
-          className={clsx(
-            'absolute bg-cover bg-center z-0',
-            compactBlurSurface ? '-inset-2' : '-inset-10',
-            enableKenBurns && 'fullscreen-backdrop-kenburns',
-          )}
-          style={{
-            backgroundImage: `url(${backgroundImage})`,
-            filter: `blur(${blurPx}px) ${modeFilter}`,
-            willChange: 'transform',
-            transform: 'translateZ(0)',
-          }}
-        />
-
-        {/* Color overlay using theme colors - slider controls opacity */}
-        <div
-          className="absolute inset-0 w-full h-full z-[1]"
-          style={{
-            backgroundColor: 'hsl(var(--primary))',
-            opacity:
-              mode === 'focus'
-                ? Math.min(currentSongColorIntensity * 0.08, 0.07)
-                : mode === 'night'
-                  ? Math.min(currentSongColorIntensity * 0.34, 0.28)
-                  : Math.min(currentSongColorIntensity * 0.26, 0.2),
-          }}
-        />
-
-        <div
-          className="absolute inset-0 w-full h-full z-[2]"
-          style={{ backgroundColor: `rgba(0,0,0,${adaptiveDimOpacity})` }}
-        />
-
-        {/* Gradient overlay */}
-        <div
-          className={clsx(
-            'absolute inset-0 w-full h-full z-[3]',
-            'default-gradient',
-          )}
-        />
-      </div>
     </div>
   )
 }

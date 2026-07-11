@@ -117,48 +117,48 @@ export async function generateAndSavePlaylist(
   }
 
   generationInFlight = (async () => {
-  const currentDay = getDateKey(new Date())
+    const currentDay = getDateKey(new Date())
 
-  if (!force && !shouldGeneratePlaylist()) {
-    logger.info(
-      '[DiscoverDaily] Generation not needed, loading existing playlist',
-    )
-    const { playlist, metadata } = loadPlaylist()
-    if (metadata) {
-      return { playlist, metadata }
+    if (!force && !shouldGeneratePlaylist()) {
+      logger.info(
+        '[DiscoverDaily] Generation not needed, loading existing playlist',
+      )
+      const { playlist, metadata } = loadPlaylist()
+      if (metadata) {
+        return { playlist, metadata }
+      }
     }
-  }
 
-  logger.info(`[DiscoverDaily] Generating playlist for day ${currentDay}...`)
+    logger.info(`[DiscoverDaily] Generating playlist for day ${currentDay}...`)
 
-  const result = await generateDiscoverWeekly({
-    username: config.username,
-    apiKey: config.apiKey,
-    targetArtists: config.targetArtists || 50,
-    songsPerArtist: config.songsPerArtist || 1,
-  })
+    const result = await generateDiscoverWeekly({
+      username: config.username,
+      apiKey: config.apiKey,
+      targetArtists: config.targetArtists || 50,
+      songsPerArtist: config.songsPerArtist || 1,
+    })
 
-  const metadata: PlaylistMetadata = {
-    ...result.metadata,
-    dayKey: currentDay,
-  }
+    const metadata: PlaylistMetadata = {
+      ...result.metadata,
+      dayKey: currentDay,
+    }
 
-  writeStoredPlaylist(
-    STORAGE_KEY,
-    STORAGE_KEY_METADATA,
-    result.playlist,
-    metadata,
-  )
-  writeStoredString(STORAGE_KEY_DAY_FLAG, currentDay)
+    writeStoredPlaylist(
+      STORAGE_KEY,
+      STORAGE_KEY_METADATA,
+      result.playlist,
+      metadata,
+    )
+    writeStoredString(STORAGE_KEY_DAY_FLAG, currentDay)
 
-  logger.info(
-    `[DiscoverDaily] Playlist generated and saved for day ${currentDay}`,
-  )
+    logger.info(
+      `[DiscoverDaily] Playlist generated and saved for day ${currentDay}`,
+    )
 
-  return {
-    playlist: result.playlist,
-    metadata,
-  }
+    return {
+      playlist: result.playlist,
+      metadata,
+    }
   })()
 
   try {

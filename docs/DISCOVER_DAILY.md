@@ -1,12 +1,12 @@
-# Discover Weekly - Technical Documentation
+# Discover Daily - Technical Documentation
 
 ## Overview
 
-Discover Weekly is a personalized playlist feature that generates weekly music recommendations based on Last.fm listening history. The system intelligently manages playlist generation to ensure:
+Discover Daily is a personalized playlist feature that generates daily music recommendations based on Last.fm listening history. The system intelligently manages playlist generation to ensure:
 
-- ✅ **Weekly updates** every Monday at 00:00
-- ✅ **No duplicate generations** within the same week
-- ✅ **Automatic catch-up** if the app wasn't running on Monday
+- ✅ **Daily updates** every day at 00:00 (midnight) local time
+- ✅ **No duplicate generations** within the same day
+- ✅ **Automatic catch-up** if the app wasn't running at midnight
 - ✅ **Manual refresh** option for users
 - ✅ **Persistent storage** with localStorage
 
@@ -18,7 +18,7 @@ Discover Weekly is a personalized playlist feature that generates weekly music r
 ┌─────────────────────────────────────────────────┐
 │           Electron Main Process                 │
 │  electron/discover-weekly-scheduler.ts          │
-│  • Background timer (Monday 00:00)              │
+│  • Background timer (Daily 00:00)               │
 │  • Sends IPC events to renderer                 │
 └──────────────────┬──────────────────────────────┘
                    │ IPC: 'discover-weekly:schedule-event'
@@ -27,7 +27,7 @@ Discover Weekly is a personalized playlist feature that generates weekly music r
 │          Renderer Process (React)               │
 │                                                 │
 │  src/service/discover-weekly-manager.ts         │
-│  • Week-based logic (ISO week format)           │
+│  • Day-based logic (YYYY-MM-DD format)          │
 │  • localStorage persistence                     │
 │  • Generation & caching                         │
 │                                                 │
@@ -42,32 +42,31 @@ Discover Weekly is a personalized playlist feature that generates weekly music r
 └─────────────────────────────────────────────────┘
 ```
 
-## Week Tracking System
+## Day Tracking System
 
-### ISO Week Format
+### Date Format
 
-Playlists are tracked using **ISO 8601 week numbers**:
-- Format: `YYYY-Www` (e.g., `2026-W07`)
-- Week starts on **Monday**
-- Ensures consistent week boundaries globally
+Playlists are tracked using local date strings:
+- Format: `YYYY-MM-DD` (e.g., `2026-03-04`)
+- Ensures consistent daily boundaries globally
 
 ### Storage Keys
 
 ```typescript
 localStorage keys:
-- 'discover_weekly_playlist'          // Array<Song>
-- 'discover_weekly_metadata'          // Metadata + weekKey
-- 'discover_weekly_current_week'      // "2026-W07" flag
+- 'discover_daily_playlist'          // Array<Song>
+- 'discover_daily_metadata'          // Metadata + dayKey
+- 'discover_daily_current_day'       // "2026-03-04" flag
 ```
 
 ### Generation Logic
 
 ```typescript
 function shouldGeneratePlaylist(): boolean {
-  const currentWeek = getISOWeek(new Date())  // e.g., "2026-W07"
-  const storedWeek = localStorage.getItem('discover_weekly_current_week')
+  const currentDay = getDateKey(new Date())  // e.g., "2026-03-04"
+  const storedDay = localStorage.getItem('discover_daily_current_day')
   
-  return currentWeek !== storedWeek  // Generate if weeks differ
+  return currentDay !== storedDay  // Generate if days differ
 }
 ```
 
@@ -83,20 +82,20 @@ App Launch
   ├─> Wait 2 seconds (UI priority)
   |
   └─> Check if catch-up needed
-       ├─> Current week === Stored week? → No action
-       └─> Current week !== Stored week? → Generate new playlist
+       ├─> Current day === Stored day? → No action
+       └─> Current day !== Stored day? → Generate new playlist
 ```
 
-### Monday 00:00 Flow (Background)
+### Midnight 00:00 Flow (Background)
 
 ```
 Electron Scheduler (Main Process)
   |
-  ├─> Calculate time until Monday 00:00
+  ├─> Calculate time until next midnight
   |
   ├─> Set timeout
   |
-  └─> Monday arrives
+  └─> Midnight arrives
        |
        └─> Send IPC event to renderer
             |
@@ -117,7 +116,7 @@ User clicks "Refresh" button
        ├─> Search in Subsonic library
        ├─> Generate playlist
        |
-       └─> Save to localStorage with new weekKey
+       └─> Save to localStorage with new dayKey
 ```
 
 ## API Reference
@@ -125,7 +124,7 @@ User clicks "Refresh" button
 ### `discover-weekly-manager.ts`
 
 #### `shouldGeneratePlaylist(): boolean`
-Checks if current week differs from stored week.
+Checks if current day differs from stored day.
 
 ```typescript
 if (shouldGeneratePlaylist()) {
@@ -141,7 +140,7 @@ const { playlist, metadata } = loadPlaylist()
 ```
 
 #### `generateAndSavePlaylist(config, force?): Promise<{ playlist, metadata }>`
-Generates and saves playlist. Set `force: true` to bypass week check.
+Generates and saves playlist. Set `force: true` to bypass day check.
 
 ```typescript
 await generateAndSavePlaylist(
@@ -157,11 +156,11 @@ Performs catch-up generation if needed. Returns `true` if generated.
 const wasGenerated = await checkAndCatchUp(config)
 ```
 
-#### `startWeeklyScheduler(config, onGenerate?): () => void`
-Starts in-renderer timer for Monday checks. Returns cleanup function.
+#### `startDailyScheduler(config, onGenerate?): () => void`
+Starts in-renderer timer for daily checks. Returns cleanup function.
 
 ```typescript
-const cleanup = startWeeklyScheduler(config, (success) => {
+const cleanup = startDailyScheduler(config, (success) => {
   console.log('Generated:', success)
 })
 
@@ -178,7 +177,7 @@ const {
   error,             // string | null
   lastGenerated,     // string (ISO timestamp)
   artistsUsed,       // string[]
-  weekKey,           // string ("2026-W07")
+  dayKey,            // string ("2026-03-04")
   generate,          // () => Promise<void> - Manual refresh
   isConfigured,      // boolean - Last.fm configured?
 } = useDiscoverWeekly()
@@ -255,31 +254,12 @@ function DiscoverWeeklyPage() {
 
 ## Testing
 
-### Simulate Week Change
+### Simulate Day Change
 
 ```typescript
 // In browser console:
-localStorage.setItem('discover_weekly_current_week', '2026-W06')
+localStorage.setItem('discover_daily_current_day', '2026-03-03')
 location.reload()  // Should trigger catch-up
-```
-
-### Check Current Week
-
-```typescript
-function getISOWeek(date = new Date()) {
-  const target = new Date(date.valueOf())
-  const dayNumber = (date.getDay() + 6) % 7
-  target.setDate(target.getDate() - dayNumber + 3)
-  const firstThursday = target.valueOf()
-  target.setMonth(0, 1)
-  if (target.getDay() !== 4) {
-    target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7))
-  }
-  const weekNumber = 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000)
-  return `${target.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`
-}
-
-console.log('Current week:', getISOWeek())
 ```
 
 ### Force Regeneration
@@ -295,29 +275,29 @@ await generateAndSavePlaylist(
 
 ## Troubleshooting
 
-### Playlist not regenerating on Monday
+### Playlist not regenerating
 
 1. Check localStorage flag:
    ```javascript
-   console.log(localStorage.getItem('discover_weekly_current_week'))
+   console.log(localStorage.getItem('discover_daily_current_day'))
    ```
 
 2. Verify Electron scheduler is running (check console logs)
 
 3. Ensure Last.fm credentials are configured
 
-### Multiple generations in same week
+### Multiple generations in same day
 
 - This should not happen. Check if `force: true` is being used unintentionally.
 - Clear localStorage and reload:
   ```javascript
-  localStorage.removeItem('discover_weekly_current_week')
+  localStorage.removeItem('discover_daily_current_day')
   location.reload()
   ```
 
 ### Catch-up not working
 
-- Check console for `[DiscoverWeekly]` logs
+- Check console for `[DiscoverDaily]` logs
 - Verify `hasCheckedCatchup` flag in hook state
 - Ensure 2-second delay hasn't been interrupted
 
@@ -325,13 +305,12 @@ await generateAndSavePlaylist(
 
 - **Catch-up delay**: 2 seconds after mount to prioritize UI rendering
 - **localStorage**: Playlist stored as JSON (~50KB typical)
-- **Monday check**: Calculated timeout, not polling
+- **Daily check**: Calculated timeout, not polling
 - **IPC overhead**: Minimal, event-driven
 
 ## Future Improvements
 
 - [ ] IndexedDB migration for larger playlists
-- [ ] Configurable generation day (not just Monday)
 - [ ] Progress notifications during generation
-- [ ] Playlist history (previous weeks)
+- [ ] Playlist history (previous days)
 - [ ] User-configurable parameters (artists count, songs per artist)

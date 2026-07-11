@@ -34,7 +34,7 @@
     },
     "sessionEnergy": {
       "label": "Session Vibe",
-      "title": "Keep the last vibe",
+      "title": "Dive back in",
       "description": "Start a vibe",
       "descriptionWithGenre": "Start {{genre}} vibe",
       "play": "Start vibe"
@@ -52,7 +52,6 @@
     "favorites": "Favorites",
     "playlists": "Playlists",
     "radios": "Radios",
-    "podcasts": "Podcasts",
     "emptyPlaylist": "No playlists created yet",
     "discoverWeekly": "Discover Daily",
     "yourTop50": "Your Top 50",
@@ -326,7 +325,6 @@
   "podcasts": {
     "form": {
       "all": "Browse",
-      "latestEpisodes": "Latest Episodes",
       "addButton": "Add Podcast",
       "search": "Search podcasts…",
       "dialog": {
@@ -353,8 +351,7 @@
     "latestEpisodes": {
       "emptyPage": {
         "message": "No episodes available",
-        "description": "Try adding more podcasts.",
-        "goToPodcasts": "Go to Podcasts"
+        "description": "Try adding more podcasts."
       }
     },
     "emptyResults": {
@@ -373,15 +370,11 @@
       },
       "podcasts": {
         "orderBy": {
-          "title": "Title",
-          "episodeCount": "Episode Count"
+          "title": "Title"
         }
       }
     },
     "header": {
-      "episodeCount_one": "{{count}} episode",
-      "episodeCount_many": "{{count}} episodes",
-      "episodeCount_other": "{{count}} episodes",
       "feed": "Feed",
       "website": "Official Website",
       "unfollow": {
@@ -397,7 +390,6 @@
       }
     },
     "list": {
-      "episodes": "Episodes",
       "notFoundMessage": "This podcast doesn't have any episodes yet!",
       "progress": {
         "remainingTime": "{{time}} remaining",
@@ -524,6 +516,7 @@
       "description": "Connect to your Subsonic server.",
       "url": "URL",
       "urlDescription": "This is your server URL",
+      "urlPlaceholder": "http://your-server:4533",
       "username": "Username",
       "usernamePlaceholder": "Your username",
       "password": "Password",
@@ -643,11 +636,7 @@
       "removeSong": "Remove from playlist"
     },
     "info": "Get info",
-    "markAsPlayed": "Mark as played",
-    "goto": {
-      "episode": "Go to episode",
-      "podcast": "Go to podcast"
-    }
+    "markAsPlayed": "Mark as played"
   },
   "radios": {
     "label": "Radio",

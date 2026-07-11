@@ -1,14 +1,7 @@
-import { convert } from 'html-to-text'
-import LinkifyIt from 'linkify-it'
-
 export function parseHtmlToText(text: string) {
-  return convert(text, {
-    wordwrap: false,
-    selectors: [
-      { selector: 'a', format: 'inline' },
-      { selector: 'img', format: 'skip' },
-    ],
-  })
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(text, 'text/html')
+  return doc.body.textContent || ''
 }
 
 interface createParams {
@@ -26,10 +19,22 @@ function createLinkTag({ schema, url, text }: createParams) {
 }
 
 export function linkifyText(textToParse: string) {
-  const linkify = new LinkifyIt()
+  const urlRegex = /(\b(https?|mailto):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
+
+  const matchUrls = (text: string) => {
+    const matches: { url: string; text: string; schema: string }[] = []
+    let match: RegExpExecArray | null
+    // biome-ignore lint/suspicious/noAssignInExpressions: standard RegExp loop
+    while ((match = urlRegex.exec(text)) !== null) {
+      const url = match[0]
+      const schema = url.startsWith('mailto:') ? 'mailto:' : 'http:'
+      matches.push({ url, text: url, schema })
+    }
+    return matches.length > 0 ? matches : null
+  }
 
   let result = textToParse.replace(/>([^<]+)</g, (match, content) => {
-    const matches = linkify.match(content)
+    const matches = matchUrls(content)
 
     if (!matches) return match
 
@@ -45,13 +50,13 @@ export function linkifyText(textToParse: string) {
   })
 
   if (!/<[^>]+>/.test(textToParse)) {
-    const matches = linkify.match(result)
+    const matches = matchUrls(result)
 
     if (matches) {
-      matches.forEach(({ url, text, schema }) => {
+      for (const { url, text, schema } of matches) {
         const linkTag = createLinkTag({ schema, url, text })
         result = result.replace(text, linkTag)
-      })
+      }
     }
   }
 

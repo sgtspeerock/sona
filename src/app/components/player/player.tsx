@@ -1,12 +1,11 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { getCoverArtUrl, getSongStreamUrl } from '@/api/httpClient'
-import { getProxyURL } from '@/api/podcastClient'
 import { SonaDjButton } from '@/app/components/fullscreen/sona-dj'
 import { RadioInfo } from '@/app/components/player/radio-info'
 import { TrackInfo } from '@/app/components/player/track-info'
-import { useMediaQuery } from '@/app/hooks/use-media-query'
+
 import { useRenderCounter } from '@/app/hooks/use-render-counter'
-import { podcasts } from '@/service/podcasts'
+import { subsonic } from '@/service/subsonic'
 import {
   useCrossfadeSettings,
   usePlayerActions,
@@ -21,32 +20,27 @@ import {
 } from '@/store/player.store'
 import { useScrobbleStatusStore } from '@/store/scrobble.store'
 import { LoopState } from '@/types/playerContext'
+import { getAverageColor } from '@/utils/getAverageColor'
 import { logger } from '@/utils/logger'
 import { ReplayGainParams } from '@/utils/replayGain'
-import { subsonic } from '@/service/subsonic'
-import { getAverageColor } from '@/utils/getAverageColor'
 import { AudioPlayer } from './audio'
 import { PlayerClearQueueButton } from './clear-queue-button'
 import { PlayerControls } from './controls'
 import { PlayerLikeButton } from './like-button'
 import { PlayerLyricsButton } from './lyrics-button'
 import { PlaybackRail } from './playback-rail'
-import { PodcastInfo } from './podcast-info'
-import { PodcastPlaybackRate } from './podcast-playback-rate'
 import { PlayerProgress } from './progress'
 import { PlayerQueueButton } from './queue-button'
 import { PlayerVolume } from './volume'
 
 const MemoTrackInfo = memo(TrackInfo)
 const MemoRadioInfo = memo(RadioInfo)
-const MemoPodcastInfo = memo(PodcastInfo)
 const MemoPlayerControls = memo(PlayerControls)
 const MemoPlayerProgress = memo(PlayerProgress)
 const MemoPlayerLikeButton = memo(PlayerLikeButton)
 const MemoPlayerQueueButton = memo(PlayerQueueButton)
 const MemoPlayerClearQueueButton = memo(PlayerClearQueueButton)
 const MemoPlayerVolume = memo(PlayerVolume)
-const MemoPodcastPlaybackRate = memo(PodcastPlaybackRate)
 const MemoLyricsButton = memo(PlayerLyricsButton)
 const MemoAudioPlayer = memo(AudioPlayer)
 
@@ -67,7 +61,6 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
   const songDeckARef = useRef<HTMLAudioElement>(null)
   const songDeckBRef = useRef<HTMLAudioElement>(null)
   const radioRef = useRef<HTMLAudioElement>(null)
-  const podcastRef = useRef<HTMLAudioElement>(null)
   const crossfadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
     null,
   )
@@ -104,23 +97,21 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
     setPlayingState,
     handleSongEnded,
     getCurrentProgress,
-    getCurrentPodcastProgress,
     advanceToNextSongWithoutReset,
   } = usePlayerActions()
   const setScrobbleStatus = useScrobbleStatusStore((state) => state.setStatus)
-  const { currentList, currentSongIndex, radioList, podcastList } =
-    usePlayerSonglist()
+  const { currentList, currentSongIndex, radioList } = usePlayerSonglist()
   const isPlaying = usePlayerIsPlaying()
-  const { isSong, isRadio, isPodcast } = usePlayerMediaType()
+  const { isSong, isRadio } = usePlayerMediaType()
   const loopState = usePlayerLoop()
   const { hasNext } = usePlayerPrevAndNext()
   const { setCurrentSongColor } = useSongColor()
-  const currentPlaybackRate = usePlayerStore(
+  const _currentPlaybackRate = usePlayerStore(
     (state) => state.playerState.currentPlaybackRate,
   )
   const { replayGainType, replayGainPreAmp, replayGainDefaultGain } =
     useReplayGainState()
-  const useRightRailLayout = useMediaQuery('(min-width: 1500px)')
+  const useRightRailLayout = true
   const {
     enabled: crossfadeEnabled,
     durationSeconds: crossfadeDurationSetting,
@@ -135,7 +126,6 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
 
   const song = currentList[currentSongIndex]
   const radio = radioList[currentSongIndex]
-  const podcast = podcastList[currentSongIndex]
   const deckASong = deckAIndex !== null ? currentList[deckAIndex] : undefined
   const deckBSong = deckBIndex !== null ? currentList[deckBIndex] : undefined
 
@@ -187,9 +177,8 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
 
   const getAudioRef = useCallback(() => {
     if (isRadio) return radioRef
-    if (isPodcast) return podcastRef
     return getActiveSongDeckRef()
-  }, [getActiveSongDeckRef, isPodcast, isRadio])
+  }, [getActiveSongDeckRef, isRadio])
 
   const getNextSongIndex = useCallback(() => {
     if (hasNext) return currentSongIndex + 1
@@ -216,7 +205,7 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
     }
 
     const pendingCommitTarget = crossfadeCommitTargetRef.current
-    if (pendingCommitTarget) {
+    if (pendingCommitTarget && crossfadeCommitRef.current) {
       const commitReached =
         activeDeck === pendingCommitTarget.deck &&
         currentSongIndex === pendingCommitTarget.index
@@ -252,12 +241,6 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
       setAudioPlayerRef(activeRef)
     }
   }, [getActiveSongDeckRef, isSong, setAudioPlayerRef])
-
-  useEffect(() => {
-    const audio = podcastRef.current
-    if (!audio || !isPodcast) return
-    audio.playbackRate = currentPlaybackRate
-  }, [currentPlaybackRate, isPodcast])
 
   useEffect(() => {
     if (crossfadeEnabled || !isSong) return
@@ -488,11 +471,10 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
     const nextSong = currentList[nextSongIndex]
     if (!nextSong?.coverArt || !nextSong?.id) return
 
-    void prefetchSongVisuals(nextSong.coverArt, nextSong.id)
+    prefetchSongVisuals(nextSong.coverArt, nextSong.id)
   }, [
     crossfadeEnabled,
     currentList,
-    currentSongIndex,
     getNextSongIndex,
     isSong,
     prefetchSongVisuals,
@@ -513,49 +495,30 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
         }
       }
 
-      if (isPodcast && infinityDuration && podcast) {
-        setCurrentDuration(podcast.duration)
-      }
-
-      if (isPodcast) {
-        const podcastProgress = getCurrentPodcastProgress()
-
-        logger.info('[Player] - Resuming episode from:', {
-          seconds: podcastProgress,
-        })
-
-        setProgress(podcastProgress)
-        audio.currentTime = podcastProgress
-      } else {
-        if (isSong && crossfadeEnabled) {
-          if (isSong && deck && deck !== activeDeckRef.current) {
-            audio.currentTime = 0
-          }
-          if (!Number.isFinite(audio.currentTime) || audio.currentTime < 0) {
-            audio.currentTime = 0
-          }
-          return
-        }
-
+      if (isSong && crossfadeEnabled) {
         if (isSong && deck && deck !== activeDeckRef.current) {
           audio.currentTime = 0
-        } else {
-          const progress = getCurrentProgress()
-          audio.currentTime = progress
         }
+        if (!Number.isFinite(audio.currentTime) || audio.currentTime < 0) {
+          audio.currentTime = 0
+        }
+        return
+      }
+
+      if (isSong && deck && deck !== activeDeckRef.current) {
+        audio.currentTime = 0
+      } else {
+        const progress = getCurrentProgress()
+        audio.currentTime = progress
       }
     },
     [
       getAudioRef,
-      getCurrentPodcastProgress,
       getCurrentProgress,
       getDeckRef,
-      isPodcast,
       isSong,
       crossfadeEnabled,
-      podcast,
       setCurrentDuration,
-      setProgress,
     ],
   )
 
@@ -589,12 +552,12 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
         const incomingSong = currentList[nextSongIndex]
 
         if (incomingSong?.coverArt && incomingSong?.id) {
-          void prefetchSongVisuals(incomingSong.coverArt, incomingSong.id)
+          prefetchSongVisuals(incomingSong.coverArt, incomingSong.id)
         }
 
         if (incomingSong?.id) {
           setScrobbleStatus('sending-now', incomingSong.id)
-          void subsonic.scrobble
+          subsonic.scrobble
             .sendNowPlaying(incomingSong.id)
             .then(() => {
               setScrobbleStatus('now-ok', incomingSong.id)
@@ -649,19 +612,6 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
     [deckVolumeMultipliers.a, deckVolumeMultipliers.b, isSong, setDeckLevels],
   )
 
-  const sendFinishProgress = useCallback(() => {
-    if (!isPodcast || !podcast) return
-
-    podcasts
-      .saveEpisodeProgress(podcast.id, podcast.duration)
-      .then(() => {
-        logger.info('Complete progress sent:', podcast.duration)
-      })
-      .catch((error) => {
-        logger.error('Error sending complete progress', error)
-      })
-  }, [isPodcast, podcast])
-
   // Cleanup interval on unmount
   useEffect(() => {
     return () => clearFade()
@@ -707,8 +657,18 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
               setPlayingState(true)
             }
           }}
-          onPause={() => {
-            if (shouldHandleDeckTransportEvent('a')) {
+          onPause={(e) => {
+            const audio = e.currentTarget as HTMLAudioElement & {
+              isSkipping?: boolean
+            }
+            if (audio.isSkipping) {
+              audio.isSkipping = false
+              return
+            }
+            if (
+              shouldHandleDeckTransportEvent('a') &&
+              e.currentTarget.readyState > 0
+            ) {
               setPlayingState(false)
             }
           }}
@@ -742,8 +702,18 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
               setPlayingState(true)
             }
           }}
-          onPause={() => {
-            if (shouldHandleDeckTransportEvent('b')) {
+          onPause={(e) => {
+            const audio = e.currentTarget as HTMLAudioElement & {
+              isSkipping?: boolean
+            }
+            if (audio.isSkipping) {
+              audio.isSkipping = false
+              return
+            }
+            if (
+              shouldHandleDeckTransportEvent('b') &&
+              e.currentTarget.readyState > 0
+            ) {
               setPlayingState(false)
             }
           }}
@@ -769,29 +739,20 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
           autoPlay={isPlaying}
           audioRef={radioRef}
           onPlay={() => setPlayingState(true)}
-          onPause={() => setPlayingState(false)}
-          onLoadStart={setupInitialVolume}
-          data-testid="player-radio-audio"
-        />
-      )}
-
-      {isPodcast && podcast && (
-        <MemoAudioPlayer
-          volumeMultiplier={1}
-          src={getProxyURL(podcast.audio_url)}
-          autoPlay={isPlaying}
-          audioRef={podcastRef}
-          preload="auto"
-          onPlay={() => setPlayingState(true)}
-          onPause={() => setPlayingState(false)}
-          onLoadedMetadata={setupDuration}
-          onTimeUpdate={setupProgress}
-          onEnded={() => {
-            sendFinishProgress()
-            handleSongEnded()
+          onPause={(e) => {
+            const audio = e.currentTarget as HTMLAudioElement & {
+              isSkipping?: boolean
+            }
+            if (audio.isSkipping) {
+              audio.isSkipping = false
+              return
+            }
+            if (e.currentTarget.readyState > 0) {
+              setPlayingState(false)
+            }
           }}
           onLoadStart={setupInitialVolume}
-          data-testid="player-podcast-audio"
+          data-testid="player-radio-audio"
         />
       )}
     </>
@@ -800,12 +761,7 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
   return (
     <>
       {!hideUi && useRightRailLayout && (
-        <PlaybackRail
-          audioRef={getAudioRef()}
-          song={song}
-          radio={radio}
-          podcast={podcast}
-        />
+        <PlaybackRail audioRef={getAudioRef()} song={song} radio={radio} />
       )}
 
       {!hideUi && !useRightRailLayout && (
@@ -832,20 +788,16 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
             <div className="flex items-center gap-2 w-full">
               {isSong && <MemoTrackInfo song={song} />}
               {isRadio && <MemoRadioInfo radio={radio} />}
-              {isPodcast && <MemoPodcastInfo podcast={podcast} />}
             </div>
 
             <div className="col-span-2 flex flex-col justify-center items-center px-4 gap-1">
               <MemoPlayerControls
                 song={song}
                 radio={radio}
-                podcast={podcast}
                 audioRef={getAudioRef()}
               />
 
-              {(isSong || isPodcast) && (
-                <MemoPlayerProgress audioRef={getAudioRef()} />
-              )}
+              {isSong && <MemoPlayerProgress audioRef={getAudioRef()} />}
             </div>
 
             <div className="flex items-center w-full justify-end">
@@ -858,14 +810,9 @@ export function Player({ hideUi = false }: { hideUi?: boolean }) {
                     <MemoPlayerQueueButton disabled={!song} />
                   </>
                 )}
-                {isPodcast && <MemoPodcastPlaybackRate />}
-                {(isRadio || isPodcast) && (
-                  <MemoPlayerClearQueueButton disabled={!radio && !podcast} />
-                )}
+                {isRadio && <MemoPlayerClearQueueButton disabled={!radio} />}
 
-                <MemoPlayerVolume
-                  disabled={!song && !radio && !podcast}
-                />
+                <MemoPlayerVolume disabled={!song && !radio} />
               </div>
             </div>
           </div>

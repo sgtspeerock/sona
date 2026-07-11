@@ -43,24 +43,27 @@ export default function SongList() {
   useEffect(() => {
     setPageIndex(0)
     requestAnimationFrame(() => scrollPageToTop())
-  }, [artistId, filter, query])
+  }, [])
 
-  async function fetchSongs() {
-    if (filterByArtist) {
-      return getArtistAllSongs(artistId)
-    }
-
-    return songsSearch({
-      query: searchFilterIsSet ? query : '',
-      songCount: SONGS_PAGE_SIZE,
-      songOffset: pageIndex * SONGS_PAGE_SIZE,
-    })
-  }
-
-  const { data, isLoading } = useQuery({
-    queryKey: [queryKeys.song.all, filter, query, artistId, pageIndex],
-    queryFn: fetchSongs,
+  const { data: artistSongsData, isLoading: isArtistSongsLoading } = useQuery({
+    queryKey: [queryKeys.song.byArtist, artistId],
+    queryFn: () => getArtistAllSongs(artistId),
+    enabled: filterByArtist,
   })
+
+  const { data: searchSongsData, isLoading: isSearchSongsLoading } = useQuery({
+    queryKey: [queryKeys.song.all, filter, query, pageIndex],
+    queryFn: () =>
+      songsSearch({
+        query: searchFilterIsSet ? query : '',
+        songCount: SONGS_PAGE_SIZE,
+        songOffset: pageIndex * SONGS_PAGE_SIZE,
+      }),
+    enabled: !filterByArtist,
+  })
+
+  const isLoading = filterByArtist ? isArtistSongsLoading : isSearchSongsLoading
+  const data = filterByArtist ? artistSongsData : searchSongsData
 
   const { data: songCountData, isLoading: songCountIsLoading } = useTotalSongs()
 
@@ -77,7 +80,9 @@ export default function SongList() {
   const songCount = filterByArtist
     ? (data.songs?.length ?? 0)
     : searchFilterIsSet
-      ? pageIndex * SONGS_PAGE_SIZE + songlist.length + (data.nextOffset ? 1 : 0)
+      ? pageIndex * SONGS_PAGE_SIZE +
+        songlist.length +
+        (data.nextOffset ? 1 : 0)
       : (songCountData ?? 0)
   const pageCount = searchFilterIsSet
     ? pageIndex + (data.nextOffset ? 2 : 1)
@@ -123,21 +128,21 @@ export default function SongList() {
         showGlassEffect={false}
         rightSlot={
           <>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-green-500 hover:text-green-400 border-green-500/30 hover:border-green-500/60"
-            onClick={handleShuffleAll}
-            disabled={isShuffling}
-          >
-            <Shuffle className="w-4 h-4 mr-2" />
-            {t('songs.list.shuffleAll')}
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-green-500 hover:text-green-400 border-green-500/30 hover:border-green-500/60"
+              onClick={handleShuffleAll}
+              disabled={isShuffling}
+            >
+              <Shuffle className="w-4 h-4 mr-2" />
+              {t('songs.list.shuffleAll')}
+            </Button>
 
-          {filterByArtist && <ClearFilterButton />}
-          <ExpandableSearchInput
-            placeholder={t('songs.list.search.placeholder')}
-          />
+            {filterByArtist && <ClearFilterButton />}
+            <ExpandableSearchInput
+              placeholder={t('songs.list.search.placeholder')}
+            />
           </>
         }
       />
@@ -164,7 +169,9 @@ export default function SongList() {
           canNextPage={Boolean(data.nextOffset) || pageIndex < pageCount - 1}
           onFirstPage={() => setPageIndex(0)}
           onPreviousPage={() => setPageIndex(Math.max(0, pageIndex - 1))}
-          onNextPage={() => setPageIndex(Math.min(pageCount - 1, pageIndex + 1))}
+          onNextPage={() =>
+            setPageIndex(Math.min(pageCount - 1, pageIndex + 1))
+          }
           onLastPage={() => setPageIndex(pageCount - 1)}
         />
       </div>

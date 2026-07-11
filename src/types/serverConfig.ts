@@ -81,21 +81,6 @@ interface IAppSettings {
   setCurrentPage: (page: SettingsPage) => void
 }
 
-interface IPodcasts {
-  active: boolean
-  setActive: (value: boolean) => void
-  serviceUrl: string
-  setServiceUrl: (value: string) => void
-  useDefaultUser: boolean
-  setUseDefaultUser: (value: boolean) => void
-  customUser: string
-  setCustomUser: (value: string) => void
-  customUrl: string
-  setCustomUrl: (value: string) => void
-  collapsibleState: boolean
-  setCollapsibleState: (value: boolean) => void
-}
-
 interface IAccounts {
   discord: {
     rpcEnabled: boolean
@@ -138,7 +123,6 @@ export interface IAppContext {
   data: IAppData
   accounts: IAccounts
   integrations: IIntegrations
-  podcasts: IPodcasts
   pages: IAppPages
   desktop: IDesktop
   command: IAppCommand

@@ -1,9 +1,5 @@
 import clsx from 'clsx'
-import {
-  ComponentPropsWithoutRef,
-  useRef,
-  WheelEvent,
-} from 'react'
+import { ComponentPropsWithoutRef, useRef, WheelEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { VolumeIcon } from '@/app/components/icons/volume-icon'
 import { Button } from '@/app/components/ui/button'
@@ -19,7 +15,10 @@ interface PlayerVolumeProps {
   allowWheel?: boolean
 }
 
-export function PlayerVolume({ disabled, allowWheel = true }: PlayerVolumeProps) {
+export function PlayerVolume({
+  disabled,
+  allowWheel = true,
+}: PlayerVolumeProps) {
   const { t } = useTranslation()
   const { volume, handleVolumeWheel } = usePlayerVolume()
   const { useAudioHotkeys } = usePlayerHotkeys()

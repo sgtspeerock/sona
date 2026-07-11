@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { AppIcon } from '@/app/components/app-icon'
 import { Button } from '@/app/components/ui/button'
+import { clearImageCacheMetadata } from '@/cache/image'
 import { useAppUpdate } from '@/store/app.store'
 import { getAppInfo } from '@/utils/appName'
 import { isDesktop } from '@/utils/desktop'
@@ -106,7 +107,7 @@ export function AboutPage() {
         typeof window !== 'undefined' && 'caches' in window
           ? await caches.delete('images')
           : true
-      safeStorageRemove('sona.image.cache.metadata.v1')
+      await clearImageCacheMetadata()
 
       if (appCacheCleared || imageCacheCleared) {
         toast.success(

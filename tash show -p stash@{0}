@@ -1,6 +1,0 @@
-stash@{0}: WIP on main: b335a49 v0.14.0 changes
-stash@{1}: On main: Backup vor Push am 2026-02-20
-stash@{2}: WIP on main: 9268d1a Enhance settings dialog with About tab
-stash@{3}: WIP on main: d1a4711 Change 'Über' to 'Update' in German locale
-stash@{4}: WIP on main: 29371ce Bump version to 0.13.1
-stash@{5}: WIP on main: f87a6cc Refactor sidebar to use ScrollArea for content
