@@ -3,17 +3,17 @@ import type { MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { SecondaryTileFrame } from '@/app/components/home/secondary-tile'
+import { PanelBackground } from '@/app/components/home/panel-background'
 import { Button } from '@/app/components/ui/button'
 import { useThisIsArtist } from '@/app/hooks/use-this-is-artist'
 import { ROUTES } from '@/routes/routesList'
 import { usePlayerActions } from '@/store/player.store'
 import { navigateSafe } from '@/utils/navigateSafe'
 
-export function ThisIsArtist() {
+export function ThisIsArtist({ layout = 'narrow' }: { layout?: 'wide' | 'narrow' }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { playlist, artist, isGenerating, error, generate, isConfigured } =
-    useThisIsArtist()
+  const { playlist, artist, isGenerating, error, generate, isConfigured } = useThisIsArtist()
   const { setSongList } = usePlayerActions()
 
   if (!isConfigured) {
@@ -99,6 +99,61 @@ export function ThisIsArtist() {
   const handlePlay = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     setSongList(playlist, 0)
+  }
+
+  if (layout === 'wide') {
+    return (
+      <div
+        className="group relative h-full w-full overflow-hidden text-left sona-panel bg-background-foreground p-5 transition-colors hover:border-primary/35 cursor-pointer"
+        onClick={() => navigateSafe(navigate, ROUTES.LIBRARY.THIS_IS_ARTIST)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            navigateSafe(navigate, ROUTES.LIBRARY.THIS_IS_ARTIST)
+          }
+        }}
+        role="link"
+        tabIndex={0}
+      >
+        <PanelBackground coverArt={artist.coverArt} type="artist" />
+        <div className="relative z-[1] flex h-full flex-col justify-between">
+          <div>
+            <div className="sona-pill mb-3">
+              <Music className="h-3.5 w-3.5 text-primary" />
+              <span>{t('home.thisIsPrefix')}</span>
+            </div>
+            <h3 className="truncate text-xl font-bold leading-tight tracking-[-0.035em]">
+              {artist.name}
+            </h3>
+            <p className="mt-1.5 truncate text-xs font-medium leading-snug text-muted-foreground/[0.92]">
+              {t('playlist.songCount', { count: playlist.length })}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button onClick={handlePlay} className="sona-card-action" size="sm">
+              <Play className="h-3.5 w-3.5" fill="currentColor" />
+              {t('options.play')}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={(event) => {
+                event.stopPropagation()
+                generate()
+              }}
+              disabled={isGenerating}
+              className="h-7 w-7 rounded-full border border-foreground/[0.13] bg-foreground/[0.10] text-foreground/75 hover:bg-foreground/[0.16] hover:text-foreground"
+            >
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isGenerating ? 'animate-spin' : ''}`}
+              />
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

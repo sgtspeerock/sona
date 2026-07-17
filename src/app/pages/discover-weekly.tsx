@@ -10,7 +10,7 @@ import { PageLoading, PageState } from '@/app/components/ui/page-state'
 import { useDiscoverWeekly } from '@/app/hooks/use-discover-weekly'
 import { songsColumns } from '@/app/tables/songs-columns'
 import { exportPlaylist } from '@/service/export-playlist'
-import { usePlayerActions } from '@/store/player.store'
+import { useAISettings, usePlayerActions } from '@/store/player.store'
 import { ColumnFilter } from '@/types/columnFilter'
 import { convertSecondsToHumanRead } from '@/utils/convertSecondsToTime'
 import { shuffleSongList } from '@/utils/songListFunctions'
@@ -18,6 +18,7 @@ import { shuffleSongList } from '@/utils/songListFunctions'
 export default function DiscoverWeeklyPage() {
   const columns = songsColumns()
   const { t } = useTranslation()
+  const { enabled: aiEnabled } = useAISettings()
   const {
     playlist,
     isGenerating,
@@ -36,8 +37,8 @@ export default function DiscoverWeeklyPage() {
   if (!isConfigured) {
     return (
       <PageState
-        title={t('discoverWeekly.setupTitle')}
-        description={`${t('discoverWeekly.setupDescription')} ${t('discoverWeekly.setupInstructions')}`}
+        title={aiEnabled ? 'Discover Daily Setup' : t('discoverWeekly.setupTitle')}
+        description={aiEnabled ? 'Provide your OpenRouter API Key in Services Settings to enable AI recommendations.' : `${t('discoverWeekly.setupDescription')} ${t('discoverWeekly.setupInstructions')}`}
       />
     )
   }
@@ -55,14 +56,14 @@ export default function DiscoverWeeklyPage() {
   }
 
   if (isGenerating) {
-    return <PageLoading label={t('discoverWeekly.generatingPlaylist')} />
+    return <PageLoading label={aiEnabled ? 'Generating Discover Daily playlist...' : t('discoverWeekly.generatingPlaylist')} />
   }
 
   if (playlist.length === 0) {
     return (
       <PageState
-        title={t('discoverWeekly.emptyTitle')}
-        description={t('discoverWeekly.emptyDescription')}
+        title={aiEnabled ? 'Discover Daily' : t('discoverWeekly.emptyTitle')}
+        description={aiEnabled ? 'Your personalized daily mix is ready to be generated.' : t('discoverWeekly.emptyDescription')}
         actionLabel={t('discoverWeekly.generatePlaylist')}
         onAction={generate}
       />
@@ -139,13 +140,13 @@ export default function DiscoverWeeklyPage() {
   return (
     <div className="w-full">
       <ImageHeader
-        type={t('discoverWeekly.headerType')}
-        title={t('discoverWeekly.emptyTitle')}
-        subtitle={t('discoverWeekly.headerSubtitle')}
+        type={aiEnabled ? 'AI Recommendation' : t('discoverWeekly.headerType')}
+        title={aiEnabled ? 'Discover Daily' : t('discoverWeekly.emptyTitle')}
+        subtitle={aiEnabled ? 'Your personalized daily mix based on your listening habits' : t('discoverWeekly.headerSubtitle')}
         coverArtId={coverArt}
         coverArtType="album"
         coverArtSize="700"
-        coverArtAlt={t('discoverWeekly.emptyTitle')}
+        coverArtAlt={aiEnabled ? 'Discover Daily' : t('discoverWeekly.emptyTitle')}
         badges={badges}
         isPlaylist={true}
       />

@@ -1,4 +1,5 @@
 import { produce } from 'immer'
+import { fetchDaytimeMoodSongs } from '@/service/daytime-mood-manager'
 import clamp from 'lodash/clamp'
 import merge from 'lodash/merge'
 import omit from 'lodash/omit'
@@ -107,6 +108,8 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
             currentPlaybackRate: 1,
             hasPrev: false,
             hasNext: false,
+            isDaytimeMoodActive: false,
+            isDashboardEditing: false,
           },
           playerProgress: {
             progress: 0,
@@ -283,6 +286,67 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               preset: 'frequency-circle',
               autoQualityEnabled: true,
             },
+            ai: {
+              enabled: false,
+              apiKey: '',
+              setEnabled: (value) => {
+                set((state) => {
+                  state.settings.ai.enabled = value
+                })
+              },
+              setApiKey: (value) => {
+                set((state) => {
+                  state.settings.ai.apiKey = value
+                })
+              },
+            },
+            dashboardLayout: {
+              row1: ['discover-daily', 'session-vibe'],
+              row2: ['daytime-mood', 'top-1-genre'],
+              row3: ['top-2-genre', 'this-is'],
+              columnsTop: 2,
+              columnsMiddle: 2,
+              columnsBottom: 2,
+              setRow1: (layout) => {
+                set((state) => {
+                  state.settings.dashboardLayout.row1 = layout
+                })
+              },
+              setRow2: (layout) => {
+                set((state) => {
+                  state.settings.dashboardLayout.row2 = layout
+                })
+              },
+              setRow3: (layout) => {
+                set((state) => {
+                  state.settings.dashboardLayout.row3 = layout
+                })
+              },
+              setColumnsTop: (cols) => {
+                set((state) => {
+                  state.settings.dashboardLayout.columnsTop = cols
+                  const oldRow1 = state.settings.dashboardLayout.row1
+                  const newRow1 = Array(cols).fill(null).map((_, i) => oldRow1[i] ?? null)
+                  state.settings.dashboardLayout.row1 = newRow1
+                })
+              },
+              setColumnsMiddle: (cols) => {
+                set((state) => {
+                  state.settings.dashboardLayout.columnsMiddle = cols
+                  const oldRow2 = state.settings.dashboardLayout.row2
+                  const newRow2 = Array(cols).fill(null).map((_, i) => oldRow2[i] ?? null)
+                  state.settings.dashboardLayout.row2 = newRow2
+                })
+              },
+              setColumnsBottom: (cols) => {
+                set((state) => {
+                  state.settings.dashboardLayout.columnsBottom = cols
+                  const oldRow3 = state.settings.dashboardLayout.row3
+                  const newRow3 = Array(cols).fill(null).map((_, i) => oldRow3[i] ?? null)
+                  state.settings.dashboardLayout.row3 = newRow3
+                })
+              },
+            },
           },
           actions: {
             setSongList: (songlist, index, shuffle = false) => {
@@ -307,6 +371,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               }
 
               set((state) => {
+                state.playerState.isDaytimeMoodActive = false
                 state.songlist.originalList = songlist
                 state.songlist.originalSongIndex = index
                 state.playerState.mediaType = 'song'
@@ -356,9 +421,10 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 })
               } else {
                 get().actions.resetProgress()
-                set((state) => {
-                  state.playerState.mediaType = 'song'
-                  state.songlist.currentList = [song]
+                 set((state) => {
+                   state.playerState.mediaType = 'song'
+                   state.playerState.isDaytimeMoodActive = false
+                   state.songlist.currentList = [song]
                   state.songlist.currentSongIndex = 0
                   state.playerState.isShuffleActive = false
                   state.playerState.isPlaying = true
@@ -367,6 +433,33 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 })
               }
             },
+            playDaytimeMoodPlaylist: async () => {
+              try {
+                const { enabled: aiEnabled, apiKey: aiApiKey } = get().settings.ai
+                // console.info(`[DaytimeMood] playDaytimeMoodPlaylist: aiEnabled=${aiEnabled}, hasApiKey=${!!aiApiKey}`)
+                const periodSongs = await fetchDaytimeMoodSongs(aiEnabled, aiApiKey)
+                // console.info(`[DaytimeMood] fetchDaytimeMoodSongs returned ${periodSongs?.length ?? 0} songs.`)
+                if (periodSongs && periodSongs.length > 0) {
+                  const firstSong = periodSongs[0]
+                  // console.info(`[DaytimeMood] Playing first song: ${firstSong.title} (${firstSong.id})`)
+                  get().actions.setSongList([firstSong], 0)
+                  set((state) => {
+                    state.playerState.isDaytimeMoodActive = true
+                    state.playerState.loopState = LoopState.Off
+                  })
+                  await getPlaybackEngine().ensureDaytimeMoodNextTrack()
+                } else {
+                  console.warn('[DaytimeMood] No songs returned for Daytime Mood Playlist!')
+                }
+              } catch (e) {
+                console.error('[DaytimeMood] Failed to play Daytime Mood Playlist:', e)
+              }
+            },
+             setIsDashboardEditing: (value) => {
+               set((state) => {
+                 state.playerState.isDashboardEditing = value
+               })
+             },
             setNextOnQueue: (list) => {
               const {
                 currentList,
@@ -708,8 +801,9 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               const engine = getPlaybackEngine()
               engine.clearInjectedSongs()
               engine.setRuntimeShuffleEnabled(false)
-              set((state) => {
-                state.songlist.originalList = []
+               set((state) => {
+                 state.playerState.isDaytimeMoodActive = false
+                 state.songlist.originalList = []
                 state.songlist.shuffledList = []
                 state.songlist.currentList = []
                 state.songlist.currentSong = {} as ISong
@@ -1060,6 +1154,8 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                   ensureSonaDjNextTrack: engine.ensureSonaDjNextTrack,
                   ensureRuntimeShuffleNextTrack:
                     engine.ensureRuntimeShuffleNextTrack,
+                  ensureDaytimeMoodNextTrack:
+                    engine.ensureDaytimeMoodNextTrack,
                   getRuntimeMode: engine.getRuntimeMode,
                   getRuntimeShuffleEnabled: engine.getRuntimeShuffleEnabled,
                 },
@@ -1102,6 +1198,14 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 state.settings.sessionMode.mode = 'off'
                 state.settings.sessionMode.focusGenres = DEFAULT_FOCUS_GENRES
                 state.settings.sessionMode.nightGenres = DEFAULT_NIGHT_GENRES
+                state.settings.ai.enabled = false
+                state.settings.ai.apiKey = ''
+                state.settings.dashboardLayout.columnsTop = 2
+                state.settings.dashboardLayout.columnsMiddle = 2
+                state.settings.dashboardLayout.columnsBottom = 2
+                state.settings.dashboardLayout.row1 = ['discover-daily', 'session-vibe']
+                state.settings.dashboardLayout.row2 = ['daytime-mood', 'top-1-genre']
+                state.settings.dashboardLayout.row3 = ['top-2-genre', 'this-is']
               })
               setListeningMemoryEnabledPreference(true)
             },
@@ -1209,6 +1313,26 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 autoQualityEnabled: true,
               }
             }
+            if (settings?.dashboardLayout) {
+              const layout = settings.dashboardLayout
+              if (typeof layout.columnsTop !== 'number') layout.columnsTop = 2
+              if (typeof layout.columnsMiddle !== 'number') layout.columnsMiddle = 2
+              if (typeof layout.columnsBottom !== 'number') layout.columnsBottom = 2
+
+              const oldRow2 = Array.isArray(layout.row2) ? [...layout.row2] : []
+
+              if (!Array.isArray(layout.row1) || layout.row1.length !== layout.columnsTop) {
+                layout.row1 = Array(layout.columnsTop).fill(null).map((_, i) => layout.row1?.[i] ?? null)
+              }
+              // Force row2 to match columnsMiddle (slicing out extra slots)
+              if (!Array.isArray(layout.row2) || layout.row2.length !== layout.columnsMiddle) {
+                layout.row2 = Array(layout.columnsMiddle).fill(null).map((_, i) => oldRow2[i] ?? null)
+              }
+              // Force row3 to match columnsBottom, migrating extra slots from oldRow2 if needed
+              if (!Array.isArray(layout.row3) || layout.row3.length !== layout.columnsBottom) {
+                layout.row3 = Array(layout.columnsBottom).fill(null).map((_, i) => layout.row3?.[i] ?? oldRow2[i + 2] ?? null)
+              }
+            }
           }
 
           return merged
@@ -1219,6 +1343,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
             'playerProgress',
             'actions',
             'playerState.isPlaying',
+            'playerState.isDashboardEditing',
             'playerState.audioPlayerRef',
             'playerState.mainDrawerState',
             'playerState.queueState',
@@ -1296,6 +1421,8 @@ registerPlayerStoreSideEffects({
   ensureSonaDjNextTrack: () => getPlaybackEngine().ensureSonaDjNextTrack(),
   ensureRuntimeShuffleNextTrack: () =>
     getPlaybackEngine().ensureRuntimeShuffleNextTrack(),
+  ensureDaytimeMoodNextTrack: () =>
+    getPlaybackEngine().ensureDaytimeMoodNextTrack(),
 })
 
 export const usePlayerActions = () => usePlayerStore((state) => state.actions)
@@ -1371,6 +1498,15 @@ export const useFullscreenPlayerSettings = () =>
 
 export const useLrcLibSettings = () =>
   usePlayerStore((state) => state.settings.privacy.lrclib)
+
+export const useAISettings = () =>
+  usePlayerStore((state) => state.settings.ai)
+
+export const useDashboardLayoutSettings = () =>
+  usePlayerStore((state) => state.settings.dashboardLayout)
+
+export const useIsDashboardEditing = () =>
+  usePlayerStore((state) => state.playerState.isDashboardEditing)
 
 export const useLyricsSettings = () =>
   usePlayerStore((state) => state.settings.lyrics)

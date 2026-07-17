@@ -2,12 +2,12 @@ import { httpClient } from '@/api/httpClient'
 import { SubsonicResponse } from '@/types/responses/subsonicResponse'
 import dateTime from '@/utils/dateTime'
 
-async function send(id: string) {
+async function send(id: string, time?: string) {
   const response = await httpClient<SubsonicResponse>('/scrobble', {
     method: 'GET',
     query: {
       id,
-      time: dateTime().valueOf().toString(),
+      time: time ?? dateTime().valueOf().toString(),
     },
   })
 

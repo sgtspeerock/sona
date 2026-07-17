@@ -441,26 +441,10 @@ async function getInfo(id: string) {
   }
 
   if (hasArtistInfo(info2)) {
-    if (import.meta.env.DEV) {
-      console.info('[artists.getInfo] using info2', {
-        id,
-        largeImageUrl: info2?.largeImageUrl,
-        mediumImageUrl: info2?.mediumImageUrl,
-        smallImageUrl: info2?.smallImageUrl,
-      })
-    }
     return info2
   }
 
   if (hasArtistInfo(info1)) {
-    if (import.meta.env.DEV) {
-      console.info('[artists.getInfo] using info1', {
-        id,
-        largeImageUrl: info1?.largeImageUrl,
-        mediumImageUrl: info1?.mediumImageUrl,
-        smallImageUrl: info1?.smallImageUrl,
-      })
-    }
     return info1
   }
 

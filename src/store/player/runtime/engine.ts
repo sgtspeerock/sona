@@ -1,9 +1,15 @@
 import { toast } from 'react-toastify'
 import i18n from '@/i18n'
+import {
+  clearDaytimeMoodCache,
+  fetchDaytimeMoodSongs,
+  getDaytimePeriod,
+} from '@/service/daytime-mood-manager'
 import { subsonic } from '@/service/subsonic'
 import { getSonaDjMode, SonaDjMode } from '@/store/sona-dj.store'
 import { SessionMode } from '@/types/playerContext'
 import { ISong } from '@/types/responses/song'
+import { logger } from '@/utils/logger'
 import {
   getListeningMemoryEnabledPreference,
   pickByListeningMemory,
@@ -544,6 +550,73 @@ export function createPlaybackEngine(store: PlaybackEngineStoreApi) {
     return secondSong ? [firstSong, secondSong] : [firstSong]
   }
 
+  let currentPeriodKey: string | null = null
+  let daytimeMoodPlannerInFlight = false
+
+  const ensureDaytimeMoodNextTrack = async () => {
+    if (daytimeMoodPlannerInFlight) return
+    const state = store.getState()
+    if (!state.playerState.isDaytimeMoodActive) return
+    if (state.playerState.mediaType !== 'song') return
+
+    const { currentList, currentSongIndex } = state.songlist
+    const songsAhead = Math.max(0, currentList.length - currentSongIndex - 1)
+
+    // Clear old mood queue if time of day changes
+    const currentPeriod = getDaytimePeriod()
+    if (currentPeriodKey && currentPeriodKey !== currentPeriod) {
+      logger.info(`[DaytimeMood] Period shifted from ${currentPeriodKey} to ${currentPeriod}. Recalculating queue...`)
+      store.setState((draft) => {
+        draft.songlist.currentList = draft.songlist.currentList.slice(0, draft.songlist.currentSongIndex + 1)
+        draft.songlist.originalList = draft.songlist.originalList.slice(0, draft.songlist.currentSongIndex + 1)
+      })
+      clearDaytimeMoodCache()
+      state.actions.updateQueueChecks()
+    }
+    currentPeriodKey = currentPeriod
+
+    // Maintain a lookahead of 8 songs
+    if (songsAhead >= 8) return
+
+    daytimeMoodPlannerInFlight = true
+    try {
+      const { enabled: aiEnabled, apiKey: aiApiKey } = state.settings.ai
+      const periodSongs = await fetchDaytimeMoodSongs(aiEnabled, aiApiKey)
+      if (periodSongs && periodSongs.length > 0) {
+        const countNeeded = 8 - songsAhead
+        const addedSongs: Song[] = []
+        const currentExcluded = new Set([
+          ...currentList.map((song) => song.id),
+          ...addedSongs.map((song) => song.id),
+        ])
+
+        for (let i = 0; i < countNeeded; i++) {
+          const candidates = periodSongs.filter((song) => !currentExcluded.has(song.id))
+          const nextSong = candidates.length > 0
+            ? candidates[Math.floor(Math.random() * candidates.length)]
+            : periodSongs[Math.floor(Math.random() * periodSongs.length)]
+
+          if (nextSong) {
+            addedSongs.push(nextSong)
+            currentExcluded.add(nextSong.id)
+          }
+        }
+
+        if (addedSongs.length > 0) {
+          store.setState((draft) => {
+            draft.songlist.currentList.push(...addedSongs)
+            draft.songlist.originalList.push(...addedSongs)
+          })
+          state.actions.updateQueueChecks()
+        }
+      }
+    } catch (e) {
+      console.error('[DaytimeMood] ensureDaytimeMoodNextTrack error:', e)
+    } finally {
+      daytimeMoodPlannerInFlight = false
+    }
+  }
+
   return {
     clearInjectedSongs,
     setRuntimeMode,
@@ -554,5 +627,6 @@ export function createPlaybackEngine(store: PlaybackEngineStoreApi) {
     startRuntimeShuffleAll,
     ensureSonaDjNextTrack,
     ensureRuntimeShuffleNextTrack,
+    ensureDaytimeMoodNextTrack,
   }
 }

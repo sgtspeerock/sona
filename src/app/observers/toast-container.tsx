@@ -1,10 +1,15 @@
 import { XIcon } from 'lucide-react'
+import { useSessionModeSettings } from '@/store/player.store'
 import { ToastContainer as Container } from 'react-toastify'
 import { Button } from '@/app/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toastColors } from '@/utils/toastColors'
 
 export function ToastContainer() {
+  const { mode } = useSessionModeSettings()
+
+  if (mode === 'focus') return null
+
   return (
     <Container
       toastClassName={(context) => {

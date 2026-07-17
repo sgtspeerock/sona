@@ -17,18 +17,31 @@ import {
   SelectValue,
 } from '@/app/components/ui/select'
 import { Switch } from '@/app/components/ui/switch'
+import { Button } from '@/app/components/ui/button'
 import { languages } from '@/i18n/languages'
 import { useLang } from '@/store/lang.store'
-import { useFullscreenPlayerSettings } from '@/store/player.store'
+import { useFullscreenPlayerSettings, useIsDashboardEditing, usePlayerActions } from '@/store/player.store'
+import { useAppSettings } from '@/store/app.store'
 import { ThemeSettingsPicker } from './appearance/theme'
 
 const appearanceLanguages = languages
 
 export function AppearancePage() {
   const { t } = useTranslation()
+  const { setOpenDialog } = useAppSettings()
+  const isDashboardEditing = useIsDashboardEditing()
+  const { setIsDashboardEditing } = usePlayerActions()
   const { autoFullscreenEnabled, setAutoFullscreenEnabled } =
     useFullscreenPlayerSettings()
   const { langCode, setLang } = useLang()
+
+  const handleStartEditMode = () => {
+    setIsDashboardEditing(true)
+    // Close settings modal
+    setOpenDialog(false)
+    // Navigate to Home page via hash route
+    window.location.hash = '/'
+  }
 
   return (
     <div className="space-y-4">
@@ -48,6 +61,24 @@ export function AppearancePage() {
                 checked={autoFullscreenEnabled}
                 onCheckedChange={setAutoFullscreenEnabled}
               />
+            </ContentItemForm>
+          </ContentItem>
+
+          <ContentItem>
+            <ContentItemTitle
+              info="Aktiviert den Bearbeitungsmodus für das Kachel-Layout auf der Startseite."
+            >
+              Startseite anpassen
+            </ContentItemTitle>
+            <ContentItemForm>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs px-4"
+                onClick={handleStartEditMode}
+              >
+                Layout bearbeiten
+              </Button>
             </ContentItemForm>
           </ContentItem>
 

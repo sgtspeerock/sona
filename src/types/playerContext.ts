@@ -36,6 +36,8 @@ export interface IPlayerState {
   lyricsState: boolean
   hasPrev: boolean
   hasNext: boolean
+  isDaytimeMoodActive: boolean
+  isDashboardEditing: boolean
 }
 
 export interface IPlayerProgress {
@@ -165,6 +167,28 @@ interface IVisualizerSettings {
   autoQualityEnabled: boolean
 }
 
+export interface IAISettings {
+  enabled: boolean
+  apiKey: string
+  setEnabled: (value: boolean) => void
+  setApiKey: (value: string) => void
+}
+
+export interface IDashboardLayoutSettings {
+  row1: string[]
+  row2: string[]
+  row3: string[]
+  columnsTop: number
+  columnsMiddle: number
+  columnsBottom: number
+  setRow1: (layout: string[]) => void
+  setRow2: (layout: string[]) => void
+  setRow3: (layout: string[]) => void
+  setColumnsTop: (cols: number) => void
+  setColumnsMiddle: (cols: number) => void
+  setColumnsBottom: (cols: number) => void
+}
+
 export interface IPlayerSettings {
   volume: IVolumeSettings
   fullscreen: IFullscreen
@@ -177,11 +201,15 @@ export interface IPlayerSettings {
   privacy: IPrivacySettings
   colors: IColorsSettings
   visualizer: IVisualizerSettings
+  ai: IAISettings
+  dashboardLayout: IDashboardLayoutSettings
 }
 
 export interface IPlayerActions {
   playSong: (song: ISong) => void
   setSongList: (songlist: ISong[], index: number, shuffle?: boolean) => void
+  playDaytimeMoodPlaylist: () => Promise<void>
+  setIsDashboardEditing: (value: boolean) => void
   setCurrentSong: () => void
   checkIsSongStarred: () => void
   starSongInQueue: (id: string) => void

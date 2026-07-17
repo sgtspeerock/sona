@@ -7,7 +7,7 @@ import { ContextMenuProvider } from '@/app/components/table/context-menu'
 import { DrawerClose } from '@/app/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/routes/routesList'
-import { usePlayerStore } from '@/store/player.store'
+import { usePlayerStore, useSessionModeSettings } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { ALBUM_ARTISTS_MAX_NUMBER } from '@/utils/multipleArtists'
 import { useFullscreenLuminance } from './luminance-context'
@@ -28,6 +28,7 @@ export function SongInfo({
   const navigate = useNavigate()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const { useDarkForeground: useDarkText } = useFullscreenLuminance()
+  const { mode } = useSessionModeSettings()
   const [isSongSwapping, setIsSongSwapping] = useState(false)
   const lastSongIdRef = useRef(currentSong?.id)
 
@@ -38,20 +39,39 @@ export function SongInfo({
     const timeoutId = window.setTimeout(() => setIsSongSwapping(false), 220)
     return () => window.clearTimeout(timeoutId)
   }, [currentSong?.id])
-  const titleToneClass = useDarkText
-    ? 'text-black/90 hover:text-black'
-    : 'text-foreground hover:text-foreground/95'
-  const bodyToneClass = useDarkText
-    ? 'text-black/90 hover:text-black'
-    : 'text-foreground hover:text-foreground/95'
-  const mutedToneClass = useDarkText ? 'text-black/70' : 'text-foreground/40'
-  const chipToneClass = useDarkText
-    ? 'border-black/15 bg-black/5 text-black/90'
-    : 'border-white/15 bg-white/5 text-foreground/92'
-  const titleShadowClass = useDarkText
-    ? ''
-    : 'fullscreen-readable-shadow-strong'
-  const bodyShadowClass = useDarkText ? '' : 'fullscreen-readable-shadow-soft'
+
+  const titleToneClass =
+    mode === 'focus'
+      ? 'text-zinc-300 hover:text-zinc-200'
+      : useDarkText
+        ? 'text-black/90 hover:text-black'
+        : 'text-foreground hover:text-foreground/95'
+
+  const bodyToneClass =
+    mode === 'focus'
+      ? 'text-zinc-400 hover:text-zinc-300'
+      : useDarkText
+        ? 'text-black/90 hover:text-black'
+        : 'text-foreground hover:text-foreground/95'
+
+  const mutedToneClass =
+    mode === 'focus'
+      ? 'text-zinc-500'
+      : useDarkText
+        ? 'text-black/70'
+        : 'text-foreground/40'
+
+  const chipToneClass =
+    mode === 'focus'
+      ? 'border-zinc-800 bg-zinc-900/50 text-zinc-300'
+      : useDarkText
+        ? 'border-black/15 bg-black/5 text-black/90'
+        : 'border-white/15 bg-white/5 text-foreground/92'
+
+  const titleShadowClass =
+    mode === 'focus' || useDarkText ? '' : 'fullscreen-readable-shadow-strong'
+  const bodyShadowClass =
+    mode === 'focus' || useDarkText ? '' : 'fullscreen-readable-shadow-soft'
 
   function handleTitleClick() {
     closeButtonRef.current?.click()
@@ -121,7 +141,11 @@ export function SongInfo({
           <div
             className={cn(
               'min-w-0 overflow-visible',
-              useDarkText ? 'text-black/90' : 'text-foreground/74',
+              mode === 'focus'
+                ? 'text-zinc-400'
+                : useDarkText
+                  ? 'text-black/90'
+                  : 'text-foreground/74',
             )}
           >
             <p

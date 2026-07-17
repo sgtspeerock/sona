@@ -5,13 +5,15 @@ import { useNavigate } from 'react-router-dom'
 import { ImageLoader } from '@/app/components/image-loader'
 import { Button } from '@/app/components/ui/button'
 import { useDiscoverWeekly } from '@/app/hooks/use-discover-weekly'
+import { SecondaryTileFrame } from '@/app/components/home/secondary-tile'
 import { ROUTES } from '@/routes/routesList'
-import { usePlayerActions } from '@/store/player.store'
+import { useAISettings, usePlayerActions } from '@/store/player.store'
 import { navigateSafe } from '@/utils/navigateSafe'
 
-export function DiscoverWeeklyCard() {
+export function DiscoverWeeklyCard({ layout = 'wide' }: { layout?: 'wide' | 'narrow' }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { enabled: aiEnabled } = useAISettings()
   const { playlist, isGenerating, error, isConfigured } = useDiscoverWeekly()
   const { setSongList } = usePlayerActions()
 
@@ -22,10 +24,10 @@ export function DiscoverWeeklyCard() {
           <div className="max-w-sm text-center">
             <Info className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
             <h3 className="mb-1 text-sm font-semibold">
-              {t('home.discoverWeekly')}
+              {aiEnabled ? 'Discover Daily' : t('home.discoverWeekly')}
             </h3>
             <p className="text-xs text-muted-foreground">
-              {t('home.configureLastfm')}
+              {aiEnabled ? 'Provide your OpenRouter API Key in Services Settings.' : t('home.configureLastfm')}
             </p>
           </div>
         </div>
@@ -93,6 +95,44 @@ export function DiscoverWeeklyCard() {
   // Get cover art from first song
   const coverArt = playlist[0]?.coverArt
 
+  if (layout === 'narrow') {
+    return (
+      <div
+        className="group block h-full w-full cursor-pointer text-left"
+        onClick={() => navigateSafe(navigate, ROUTES.LIBRARY.DISCOVER_WEEKLY)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            navigateSafe(navigate, ROUTES.LIBRARY.DISCOVER_WEEKLY)
+          }
+        }}
+        role="link"
+        tabIndex={0}
+      >
+        <SecondaryTileFrame coverArt={coverArt}>
+          <div>
+            <div className="sona-pill mb-3">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span>{aiEnabled ? 'Daily Mix' : t('home.weeklyMix')}</span>
+            </div>
+            <h3 className="line-clamp-2 text-[1.06rem] font-semibold leading-[1.12] tracking-[-0.018em] sm:text-[1.14rem]">
+              {aiEnabled ? 'Discover Daily' : t('home.discoverWeekly')}
+            </h3>
+            <p className="mt-1 text-xs font-medium text-muted-foreground/90">
+              {t('playlist.songCount', { count: playlist.length })}
+            </p>
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <Button onClick={handlePlay} className="sona-card-action" size="sm">
+              <Play className="h-3.5 w-3.5" fill="currentColor" />
+              {t('options.play')}
+            </Button>
+          </div>
+        </SecondaryTileFrame>
+      </div>
+    )
+  }
+
   return (
     <div
       className="sona-panel group relative h-full w-full cursor-pointer bg-background-foreground p-5 transition-colors hover:border-primary/35"
@@ -140,11 +180,11 @@ export function DiscoverWeeklyCard() {
         <div>
           <div className="sona-pill mb-3">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span>{t('home.weeklyMix')}</span>
+            <span>{aiEnabled ? 'Daily Mix' : t('home.weeklyMix')}</span>
           </div>
           <div className="min-w-0">
             <h2 className="truncate text-xl font-bold leading-tight tracking-[-0.035em]">
-              {t('home.discoverWeekly')}
+              {aiEnabled ? 'Discover Daily' : t('home.discoverWeekly')}
             </h2>
             <p className="mt-1.5 truncate text-xs font-medium leading-snug text-muted-foreground/[0.92]">
               {t('playlist.songCount', { count: playlist.length })}

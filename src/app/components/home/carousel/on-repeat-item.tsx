@@ -109,7 +109,7 @@ export function OnRepeatItem({
               to={ROUTES.ALBUM.PAGE(song.albumId)}
               className="mt-4 block hover:underline"
             >
-              <h2 className="line-clamp-2 break-words text-[1.98rem] font-bold leading-[1.01] tracking-[-0.045em] min-[1700px]:text-[2.2rem] min-[2600px]:text-[2.4rem]">
+              <h2 className="line-clamp-2 break-words text-[1.98rem] font-bold leading-[1.15] tracking-[-0.045em] min-[1700px]:text-[2.2rem] min-[2600px]:text-[2.4rem] pb-0.5">
                 {song.title}
               </h2>
             </Link>

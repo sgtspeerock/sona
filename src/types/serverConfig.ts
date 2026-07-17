@@ -30,6 +30,7 @@ interface IAppPages {
   setAutoPlaylistImport: (value: boolean) => void
   autoPlaylistImportExceptions: string[]
   toggleAutoPlaylistImportException: (playlistId: string) => void
+  setAutoPlaylistImportExceptions: (exceptions: string[]) => void
   listDensity: ListDensity
   setListDensity: (value: ListDensity) => void
   playlistOrder: string[]

@@ -80,3 +80,11 @@ export async function resolveArtwork({
   inFlightArtworkRequests.set(key, request)
   return request
 }
+
+export function invalidateArtworkCache(id: string) {
+  for (const key of resolvedArtworkCache.keys()) {
+    if (key.endsWith(`:${id}`)) {
+      resolvedArtworkCache.delete(key)
+    }
+  }
+}

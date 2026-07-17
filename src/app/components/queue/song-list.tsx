@@ -36,16 +36,16 @@ export function QueueSongList({
     <div className="flex flex-1 flex-col h-full min-w-0">
       <DialogTitle className="sr-only">{t('queue.title')}</DialogTitle>
       <div className="flex items-center justify-between h-8 mb-2 pl-3 lg:pl-4">
-        <div className="flex gap-2 h-6 items-center text-foreground/70">
-          <p className="text-sm font-medium text-foreground">
+        <div className="flex gap-2 h-6 items-baseline opacity-65">
+          <h3 className="text-base font-semibold tracking-[-0.01em] text-foreground">
             {t('queue.title')}
-          </p>
-          <p>{'•'}</p>
-          <p className="text-sm">
+          </h3>
+          <p className="text-xs">•</p>
+          <p className="text-xs">
             {t('playlist.songCount', { count: trackListCount })}
           </p>
-          <p>{'•'}</p>
-          <p className="text-sm">
+          <p className="text-xs">•</p>
+          <p className="text-xs">
             {t('playlist.duration', { duration: trackListDuration })}
           </p>
         </div>

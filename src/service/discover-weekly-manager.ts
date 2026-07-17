@@ -21,8 +21,10 @@ interface PlaylistMetadata {
 }
 
 interface DiscoverWeeklyConfig {
-  username: string
-  apiKey: string
+  username?: string
+  apiKey?: string
+  aiEnabled?: boolean
+  aiApiKey?: string
   targetArtists?: number
   songsPerArtist?: number
 }
@@ -134,6 +136,8 @@ export async function generateAndSavePlaylist(
     const result = await generateDiscoverWeekly({
       username: config.username,
       apiKey: config.apiKey,
+      aiEnabled: config.aiEnabled,
+      aiApiKey: config.aiApiKey,
       targetArtists: config.targetArtists || 50,
       songsPerArtist: config.songsPerArtist || 1,
     })
@@ -171,8 +175,9 @@ export async function generateAndSavePlaylist(
 export async function checkAndCatchUp(
   config: DiscoverWeeklyConfig,
 ): Promise<boolean> {
-  if (!config.username || !config.apiKey) {
-    logger.info('[DiscoverDaily] Last.fm not configured, skipping catch-up')
+  const isConfigured = config.aiEnabled ? !!config.aiApiKey : !!(config.username && config.apiKey)
+  if (!isConfigured) {
+    logger.info('[DiscoverDaily] Not configured, skipping catch-up')
     return false
   }
 

@@ -285,27 +285,57 @@ export const useGetSessionEnergy = () => {
 
 async function getAnniversaryAlbumFallback() {
   const now = new Date()
-  const candidateYears = [5, 10, 15, 20, 25, 30]
+  const candidateYears = [
+    ...Array.from({ length: 30 }, (_, i) => i + 1),
+    35,
+    40,
+    45,
+    50,
+  ]
 
-  for (const yearsAgo of candidateYears) {
-    const releaseYear = now.getUTCFullYear() - yearsAgo
-    const albums = await subsonic.albums.getAlbumList({
-      type: 'byYear',
-      fromYear: String(releaseYear),
-      toYear: String(releaseYear),
-      size: 200,
-    })
+  const results = await Promise.all(
+    candidateYears.map(async (yearsAgo) => {
+      const releaseYear = now.getUTCFullYear() - yearsAgo
+      try {
+        const albums = await subsonic.albums.getAlbumList({
+          type: 'byYear',
+          fromYear: String(releaseYear),
+          toYear: String(releaseYear),
+          size: 200,
+        })
+        const candidates = albums?.list || []
+        if (candidates.length === 0) return null
 
-    const candidates = albums?.list || []
-    if (candidates.length === 0) continue
+        const exactishDate = candidates.find((album) =>
+          isAlbumNearToday(album, now),
+        )
 
-    const exactishDate = candidates.find((album) =>
-      isAlbumNearToday(album, now),
-    )
+        if (exactishDate) {
+          return { album: exactishDate, yearsAgo, exact: true }
+        }
+        return { album: candidates[0], yearsAgo, exact: false }
+      } catch {
+        return null
+      }
+    }),
+  )
 
+  const validResults = results.filter(
+    (r): r is { album: any; yearsAgo: number; exact: boolean } => r !== null,
+  )
+
+  const exactMatch = validResults.find((r) => r.exact)
+  if (exactMatch) {
     return {
-      album: exactishDate || candidates[0],
-      yearsAgo,
+      album: exactMatch.album,
+      yearsAgo: exactMatch.yearsAgo,
+    }
+  }
+
+  if (validResults.length > 0) {
+    return {
+      album: validResults[0].album,
+      yearsAgo: validResults[0].yearsAgo,
     }
   }
 
@@ -367,7 +397,9 @@ export const useHomeFeedData = () => {
     queries: [
       {
         ...createHomeAlbumListQuery(queryKeys.album.recentlyAdded, 'newest'),
-        ...HOME_QUERY_BASE,
+        staleTime: 0,
+        gcTime: convertMinutesToMs(30),
+        refetchOnWindowFocus: true,
       },
       {
         ...createHomeAlbumListQuery(queryKeys.album.recentlyPlayed, 'recent'),

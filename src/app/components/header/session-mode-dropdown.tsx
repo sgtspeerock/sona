@@ -90,10 +90,7 @@ export function SessionModeDropdown() {
         setTheme(previousTheme ?? fallbackTheme ?? theme ?? Theme.Reactive)
       })
       if (mode === 'focus') {
-        const closeButton = document.querySelector(
-          '[data-testid=\"fullscreen-close-button\"]',
-        ) as HTMLButtonElement | null
-        closeButton?.click()
+        setFullscreenOpen(false)
       }
       safeStorageSet(FULLSCREEN_HYPNOTIC_BACKDROP_KEY, 'false')
       startTransition(() => {

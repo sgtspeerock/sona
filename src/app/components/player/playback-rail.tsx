@@ -65,7 +65,7 @@ export function PlaybackRail({ audioRef, song, radio }: PlaybackRailProps) {
   }
 
   return (
-    <aside className="fixed bottom-0 right-0 top-[--header-height] z-30 w-[420px] overflow-y-auto overflow-x-hidden border-l border-border/55 bg-background/48 backdrop-blur-sm flex min-[1700px]:w-[450px]">
+    <aside className="fixed bottom-0 right-0 top-[--header-height] z-30 w-[410px] overflow-y-auto overflow-x-hidden border-l border-border/55 bg-background/48 backdrop-blur-sm flex min-[1700px]:w-[440px]">
       <div className="flex min-h-[760px] w-full flex-col p-3">
         <div className="shrink-0 rounded-xl border border-border/30 bg-background/72 p-3 shadow-[0_18px_70px_hsl(var(--background)/0.28)]">
           <div className="mb-3 flex items-center justify-between">
@@ -87,7 +87,7 @@ export function PlaybackRail({ audioRef, song, radio }: PlaybackRailProps) {
 
           <button
             type="button"
-            className="group relative flex h-[clamp(178px,32vh,286px)] w-full items-center justify-center overflow-hidden rounded-lg text-left outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            className="group relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg text-left outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             onClick={() => setRailVisualizerOpen((current) => !current)}
             disabled={!hasSong}
             aria-label="Toggle sidebar visualizer"
@@ -102,7 +102,7 @@ export function PlaybackRail({ audioRef, song, radio }: PlaybackRailProps) {
                       <img
                         src={src}
                         alt={currentSong.title}
-                        className="relative z-[1] aspect-square h-[96%] max-h-full max-w-[96%] rounded-md object-cover"
+                        className="relative z-[1] aspect-square h-full w-full rounded-md object-cover"
                       />
                       <div className="absolute inset-0 z-[2] bg-black/0 transition-colors group-hover:bg-black/12" />
                       <div className="absolute inset-0 z-[3] flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">

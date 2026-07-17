@@ -20,6 +20,7 @@ type PlayerSideEffectDeps = {
   store: StoreSubscriptionApi
   ensureSonaDjNextTrack: () => Promise<void>
   ensureRuntimeShuffleNextTrack: () => Promise<void>
+  ensureDaytimeMoodNextTrack: () => Promise<void>
 }
 
 let desktopPlayerStateListenerRegistered = false
@@ -28,6 +29,7 @@ export function registerPlayerStoreSideEffects({
   store,
   ensureSonaDjNextTrack,
   ensureRuntimeShuffleNextTrack,
+  ensureDaytimeMoodNextTrack,
 }: PlayerSideEffectDeps) {
   store.subscribe(
     (state) => [
@@ -59,6 +61,9 @@ export function registerPlayerStoreSideEffects({
       state.playerState.mediaType,
     ],
     () => {
+      // Daytime Mood next track can be calculated immediately (uses in-memory cache)
+      ensureDaytimeMoodNextTrack().catch(() => undefined)
+
       if (plannerTimeout) {
         clearTimeout(plannerTimeout)
       }

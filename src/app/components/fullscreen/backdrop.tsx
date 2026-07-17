@@ -56,8 +56,8 @@ function getAdaptiveDimOverlay(
   }
 
   if (mode === 'focus') opacity += 0.12
-  if (mode === 'night') opacity += 0.06
-  return Math.min(0.62, Math.max(0.1, opacity))
+  if (mode === 'night') opacity += 0.22
+  return Math.min(0.78, Math.max(0.1, opacity))
 }
 
 function useBackdropLuminance(coverUrl: string) {
@@ -87,11 +87,18 @@ function useBackdropLuminance(coverUrl: string) {
 
 export function FullscreenBackdrop() {
   const { coverArt, title } = usePlayerCurrentSong()
+  const { mode } = useSessionModeSettings()
   const {
     useSongColorOnBigPlayer,
     currentSongColor,
     currentSongColorIntensity,
   } = useSongColor()
+
+  if (mode === 'focus') {
+    return (
+      <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-neutral-950 via-neutral-900 to-zinc-950" />
+    )
+  }
 
   const dynamicOverlayStyle = useMemo(() => {
     if (!useSongColorOnBigPlayer) return undefined

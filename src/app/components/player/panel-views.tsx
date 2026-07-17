@@ -18,16 +18,16 @@ export function QueuePanelView({
       className={cn(
         'flex w-full h-full gap-6',
         inFullscreenOverlay &&
-          'items-stretch rounded-[var(--radius-surface-lg)] backdrop-blur-xl p-4 shadow-[0_32px_64px_rgba(0,0,0,0.36)] transition-all duration-300',
+          'items-stretch transition-all duration-300',
         inFullscreenOverlay &&
           (useDarkForeground
-            ? 'bg-white/48 text-neutral-900 fullscreen-panel-readable-light-bg'
-            : 'bg-white/8 text-white fullscreen-panel-readable-dark-bg'),
+            ? 'text-neutral-900 fullscreen-panel-readable-light-bg'
+            : 'text-white fullscreen-panel-readable-dark-bg'),
         !inFullscreenOverlay && 'sona-shell p-4',
       )}
     >
       <div className={cn('shrink-0', inFullscreenOverlay && 'p-0')}>
-        <CurrentSongInfo />
+        <CurrentSongInfo inFullscreenOverlay={inFullscreenOverlay} />
       </div>
       <div className={cn('flex-1 min-w-0', inFullscreenOverlay && 'p-0')}>
         <QueueSongList inFullscreenOverlay={inFullscreenOverlay} />
@@ -48,12 +48,12 @@ export function LyricsPanelView({
       className={cn(
         'w-full h-full',
         inFullscreenOverlay &&
-          'rounded-[var(--radius-surface-lg)] backdrop-blur-xl p-5 shadow-[0_32px_64px_rgba(0,0,0,0.36)] transition-all duration-300',
+          'transition-all duration-300',
         !inFullscreenOverlay && 'sona-shell p-4',
         inFullscreenOverlay &&
           (useDarkForeground
-            ? 'bg-white/48 text-neutral-900 fullscreen-panel-readable-light-bg'
-            : 'bg-white/8 text-white fullscreen-panel-readable-dark-bg'),
+            ? 'text-neutral-900 fullscreen-panel-readable-light-bg'
+            : 'text-white fullscreen-panel-readable-dark-bg'),
       )}
     >
       <LyricsTab />

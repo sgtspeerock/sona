@@ -6,6 +6,7 @@ import {
   shouldGeneratePlaylist,
 } from '@/service/discover-weekly-manager'
 import { useAppIntegrations } from '@/store/app.store'
+import { useAISettings } from '@/store/player.store'
 import type { Song } from '@/types/responses/song'
 import { logger } from '@/utils/logger'
 
@@ -18,6 +19,7 @@ interface PlaylistMetadata {
 
 export function useDiscoverWeekly() {
   const { lastfm } = useAppIntegrations()
+  const { enabled: aiEnabled, apiKey: aiApiKey } = useAISettings()
   const [playlist, setPlaylist] = useState<Song[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -25,7 +27,7 @@ export function useDiscoverWeekly() {
   const hasCheckedCatchupRef = useRef(false)
   const hasLoadedRef = useRef(false)
 
-  const isConfigured = !!(lastfm.username && lastfm.apiKey)
+  const isConfigured = aiEnabled ? !!aiApiKey : !!(lastfm.username && lastfm.apiKey)
 
   // Load playlist from localStorage on mount
   useEffect(() => {
@@ -78,6 +80,8 @@ export function useDiscoverWeekly() {
         const success = await checkAndCatchUp({
           username: lastfm.username,
           apiKey: lastfm.apiKey,
+          aiEnabled,
+          aiApiKey,
           targetArtists: 50, // CHANGED: 50 artists
           songsPerArtist: 1, // CHANGED: 1 song per artist
         })
@@ -106,7 +110,7 @@ export function useDiscoverWeekly() {
     // Delay by 2 seconds to not block initial render
     const timeoutId = setTimeout(performCatchup, 2000)
     return () => clearTimeout(timeoutId)
-  }, [isConfigured, lastfm.username, lastfm.apiKey])
+  }, [isConfigured, lastfm.username, lastfm.apiKey, aiEnabled, aiApiKey])
 
   // Manual generation (force=true)
   const generate = useCallback(async () => {
@@ -124,6 +128,8 @@ export function useDiscoverWeekly() {
         {
           username: lastfm.username,
           apiKey: lastfm.apiKey,
+          aiEnabled,
+          aiApiKey,
           targetArtists: 50, // CHANGED: 50 artists
           songsPerArtist: 1, // CHANGED: 1 song per artist
         },
@@ -145,7 +151,7 @@ export function useDiscoverWeekly() {
     } finally {
       setIsGenerating(false)
     }
-  }, [isConfigured, lastfm.username, lastfm.apiKey])
+  }, [isConfigured, lastfm.username, lastfm.apiKey, aiEnabled, aiApiKey])
 
   return {
     playlist,

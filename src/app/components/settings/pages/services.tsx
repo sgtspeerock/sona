@@ -17,7 +17,7 @@ import { Input } from '@/app/components/ui/input'
 import { Switch } from '@/app/components/ui/switch'
 import { useDebouncedFormSync } from '@/app/hooks/use-debounced-form-sync'
 import { useAppIntegrations } from '@/store/app.store'
-import { useLrcLibSettings } from '@/store/player.store'
+import { useAISettings, useLrcLibSettings } from '@/store/player.store'
 import { ScrobbleStatus, useScrobbleStatus } from '@/store/scrobble.store'
 
 const { DISABLE_LRCLIB } = window
@@ -36,6 +36,14 @@ export function ServicesPage() {
 
   // Last.fm
   const { lastfm, lidarr } = useAppIntegrations()
+
+  // AI Integration
+  const {
+    enabled: aiEnabled,
+    setEnabled: setAiEnabled,
+    apiKey: aiApiKey,
+    setApiKey: setAiApiKey,
+  } = useAISettings()
 
   // LRCLIB
   const {
@@ -375,6 +383,65 @@ export function ServicesPage() {
               )}
             </>
           )}
+        </Content>
+      </Root>
+
+      {/* AI Integration */}
+      <Root>
+        <Header>
+          <HeaderTitle>
+            {t('settings.ai.group', 'AI Integration')}
+          </HeaderTitle>
+        </Header>
+        <Content>
+          <p className="text-xs text-muted-foreground px-2 pb-1">
+            {t(
+              'settings.ai.description',
+              'Enable AI-driven playlist generation and daily recommendations powered by OpenRouter (Tencent Hunyuan Free).',
+            )}
+          </p>
+          <ContentItem>
+            <ContentItemTitle>
+              {t('settings.ai.enabled', 'Enable AI Features')}
+            </ContentItemTitle>
+            <ContentItemForm>
+              <Switch
+                checked={aiEnabled}
+                onCheckedChange={setAiEnabled}
+              />
+            </ContentItemForm>
+          </ContentItem>
+
+          {aiEnabled && (
+            <ContentItem>
+              <ContentItemTitle>
+                {t('settings.ai.apiKey.label', 'OpenRouter API Key')}
+              </ContentItemTitle>
+              <ContentItemForm>
+                <Input
+                  type="password"
+                  placeholder={t(
+                    'settings.ai.apiKey.placeholder',
+                    'sk-or-v1-...',
+                  )}
+                  value={aiApiKey}
+                  onChange={(e) => setAiApiKey(e.target.value)}
+                  className="h-8"
+                />
+              </ContentItemForm>
+            </ContentItem>
+          )}
+          <p className="text-xs text-muted-foreground px-2">
+            {t('settings.ai.apiKey.helpPrefix', 'Get your free API key from')}{' '}
+            <a
+              href="https://openrouter.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              OpenRouter
+            </a>
+          </p>
         </Content>
       </Root>
     </div>

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { usePlayerCurrentSong } from '@/store/player.store'
+import { usePlayerCurrentSong, useSessionModeSettings } from '@/store/player.store'
 import { useCoverLuminance } from './use-cover-luminance'
 
 type FullscreenLuminanceContextType = {
@@ -19,8 +19,10 @@ export function FullscreenLuminanceProvider({
   children: React.ReactNode
 }) {
   const { coverArt } = usePlayerCurrentSong()
+  const { mode } = useSessionModeSettings()
   const luminance = useCoverLuminance(coverArt, '300')
-  const useDarkForeground = luminance !== null && luminance >= 0.66
+  const useDarkForeground =
+    mode !== 'focus' && luminance !== null && luminance >= 0.66
 
   return (
     <FullscreenLuminanceContext.Provider

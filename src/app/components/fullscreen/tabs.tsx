@@ -11,6 +11,7 @@ import {
   FULLSCREEN_HYPNOTIC_BACKDROP_KEY,
   SESSION_PREVIOUS_THEME_KEY,
 } from '@/utils/session-storage-keys'
+import { useFullscreenState } from '@/store/ui.store'
 import { SongInfo } from './song-info'
 
 const MemoSongInfo = memo(SongInfo)
@@ -34,6 +35,7 @@ export function FullscreenTabs({
   const { mode } = useSessionModeSettings()
   const { startSessionMode } = usePlayerActions()
   const { setTheme } = useTheme()
+  const { setOpen: setFullscreenOpen } = useFullscreenState()
   const isFocusMode = mode === 'focus'
 
   const exitFocusMode = () => {
@@ -41,11 +43,7 @@ export function FullscreenTabs({
     setTheme(previousTheme ?? Theme.Reactive)
     safeStorageSet(FULLSCREEN_HYPNOTIC_BACKDROP_KEY, 'false')
     startSessionMode('off').catch(() => undefined)
-
-    const closeButton = document.querySelector(
-      '[data-testid="fullscreen-close-button"]',
-    ) as HTMLButtonElement | null
-    closeButton?.click()
+    setFullscreenOpen(false)
   }
 
   return (
@@ -53,16 +51,17 @@ export function FullscreenTabs({
       {isFocusMode && (
         <div
           className={clsx(
-            'relative z-40 w-full mb-4 flex justify-start transition-[opacity,transform] duration-300',
+            'absolute left-6 z-40 transition-[opacity,transform] duration-300',
             !isChromeVisible && 'opacity-0 -translate-y-2 pointer-events-none',
           )}
+          style={{ top: 'calc(var(--header-height, 48px) + 24px)' }}
         >
           <Button
             type="button"
             size="sm"
             variant="outline"
             onClick={exitFocusMode}
-            className="rounded-full border-primary/35 bg-background/35 px-3 hover:bg-background/45"
+            className="rounded-full border-primary/35 bg-background/35 px-3 hover:bg-background/45 h-8"
           >
             <Minimize2 className="mr-1 h-4 w-4" />
             {t('sessionMode.focus.exit', 'Exit Focus Mode')}

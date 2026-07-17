@@ -6,8 +6,10 @@ import { search } from './search'
 import { songs } from './songs'
 
 interface DiscoverWeeklyConfig {
-  username: string
-  apiKey: string
+  username?: string
+  apiKey?: string
+  aiEnabled?: boolean
+  aiApiKey?: string
   targetArtists?: number
   songsPerArtist?: number
   genreBoost?: number
@@ -107,11 +109,93 @@ export async function generateDiscoverWeekly(
   const {
     username,
     apiKey,
+    aiEnabled,
+    aiApiKey,
     targetArtists = 50, // CHANGED: Increased from 15 to 50
     songsPerArtist = 1, // CHANGED: 1 song per artist
   } = config
 
-  logger.info('[DiscoverWeekly] Starting generation...')
+  if (aiEnabled && aiApiKey) {
+    logger.info('[DiscoverDaily] AI mode enabled. Generating via OpenRouter...')
+    try {
+      const favs = await songs.getFavoriteSongs()
+      const favSongs = favs?.song ?? []
+
+      const rand = await songs.getRandomSongs({ size: 100 })
+      const randSongs = rand ?? []
+
+      const allCand = [...favSongs, ...randSongs]
+      if (allCand.length < 30) {
+        const fallbackSongs = await songs.getAllSongs(100)
+        allCand.push(...fallbackSongs)
+      }
+
+      const deduped = Array.from(new Map(allCand.map((s) => [s.id, s])).values())
+      const llmCandidates = deduped.map((s) => ({
+        id: s.id,
+        title: s.title,
+        artist: s.artist,
+        genre: s.genre || 'Unknown',
+        year: s.year || 'Unknown',
+      })).slice(0, 150)
+
+      logger.info(`[DiscoverDaily] Sending ${llmCandidates.length} candidate songs to OpenRouter...`)
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${aiApiKey}`,
+          'HTTP-Referer': 'https://github.com/sgtspeerock/sona',
+          'X-Title': 'Sona',
+        },
+        body: JSON.stringify({
+          model: 'tencent/hy3:free',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are Sona AI, a professional music curator. Your task is to analyze the user\'s song candidate pool and return a curated playlist of exactly 30 song IDs in a JSON array format: ["id1", "id2", ...]. Select songs that are cohesive, thematic, and flow well. Return ONLY the JSON array. Do not include markdown code block syntax, explanation text, or other characters.',
+            },
+            {
+              role: 'user',
+              content: JSON.stringify(llmCandidates),
+            },
+          ],
+          temperature: 0.7,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`OpenRouter API responded with status ${response.status}`)
+      }
+
+      const data = await response.json()
+      const text = data.choices[0].message.content.trim()
+      const jsonMatch = text.match(/\[[\s\S]*\]/)
+      const cleanedJson = jsonMatch ? jsonMatch[0] : text
+      const recommendedIds = JSON.parse(cleanedJson) as string[]
+
+      const recommendedSongs = recommendedIds
+        .map((id) => deduped.find((s) => s.id === id))
+        .filter((s): s is Song => !!s)
+
+      if (recommendedSongs.length > 0) {
+        logger.info(`[DiscoverDaily] AI successfully generated ${recommendedSongs.length} songs.`)
+        return {
+          playlist: recommendedSongs,
+          metadata: {
+            generatedAt: new Date().toISOString(),
+            artistsUsed: Array.from(new Set(recommendedSongs.map((s) => s.artist))),
+            totalSongs: recommendedSongs.length,
+          },
+        }
+      }
+    } catch (e) {
+      logger.error('[DiscoverDaily] AI generation failed, falling back to conventional Last.fm method:', e)
+    }
+  }
+
+  logger.info('[DiscoverWeekly] Starting conventional generation...')
 
   // Step 1: Get top artists from Last.fm
   const [overallTopArtists, recentTopArtists] = await Promise.all([

@@ -18,6 +18,7 @@ interface RowProps<TData> extends ComponentPropsWithoutRef<'div'> {
   dataType?: 'song' | 'artist' | 'playlist' | 'radio'
   sortableId?: string
   isHighlighted?: boolean
+  meta?: any
 }
 
 const MemoContextMenuProvider = memo(ContextMenuProvider)
@@ -33,6 +34,7 @@ export function TableRow<TData>({
   isNextRowSelected,
   sortableId,
   isHighlighted = false,
+  meta,
   ...props
 }: RowProps<TData>) {
   const currentSongId = usePlayerCurrentSongId()
@@ -106,7 +108,7 @@ export function TableRow<TData>({
           </div>
         )}
         {row.getVisibleCells().map((cell) => (
-          <MemoTableCell key={cell.id} cell={cell} />
+          <MemoTableCell key={cell.id} cell={cell} meta={meta} />
         ))}
       </div>
     </MemoContextMenuProvider>
@@ -115,6 +117,7 @@ export function TableRow<TData>({
 
 interface TableCellProps<TData, TValue> {
   cell: Cell<TData, TValue>
+  meta?: any
 }
 
 function TableCell<TData, TValue>({ cell }: TableCellProps<TData, TValue>) {

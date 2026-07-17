@@ -2,9 +2,10 @@ import { isDev } from './env'
 
 export const logger = {
   info: (message: string, ...args: unknown[]) => {
-    if (isDev) {
-      console.info(`[logger] ${message}`, ...args)
-    }
+    // Muted to reduce console clutter
+    // if (isDev) {
+    //   console.info(`[logger] ${message}`, ...args)
+    // }
   },
   warn: (message: string, ...args: unknown[]) => {
     if (isDev) {

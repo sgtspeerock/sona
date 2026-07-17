@@ -149,7 +149,7 @@ export function FullscreenSongImage({
       )}
     >
       {/* Ambient Canvas Glow */}
-      {currentSongColor && !showVisualizer && (
+      {currentSongColor && !showVisualizer && mode !== 'focus' && (
         <div
           className="absolute -inset-8 -z-10 rounded-full blur-[90px] pointer-events-none transition-all duration-1000 transform-gpu"
           style={{
@@ -160,7 +160,16 @@ export function FullscreenSongImage({
       )}
 
       {mode === 'night' && !showVisualizer && (
-        <div className="fullscreen-cover-glow pointer-events-none absolute -inset-3 z-0 rounded-[var(--radius-surface)]" />
+        <div
+          className="fullscreen-cover-glow pointer-events-none absolute -inset-3 z-0 rounded-[var(--radius-surface)]"
+          style={
+            currentSongColor
+              ? {
+                  background: `radial-gradient(circle at 50% 50%, ${currentSongColor}b7 0%, ${currentSongColor}6b 38%, ${currentSongColor}28 64%, transparent 90%)`,
+                }
+              : undefined
+          }
+        />
       )}
       <div
         className={clsx(
@@ -171,8 +180,8 @@ export function FullscreenSongImage({
         style={{
           transform: isHovered ? 'scale(1.02)' : 'scale(1)',
           boxShadow: !showVisualizer
-            ? isHovered && currentSongColor
-              ? `0 35px 70px -15px ${currentSongColor}77`
+            ? currentSongColor
+              ? `0 ${isHovered ? '8px' : '4px'} ${isHovered ? '96px' : '64px'} ${isHovered ? '6px' : '2px'} ${currentSongColor}66`
               : '0 20px 40px -20px rgba(0,0,0,0.5)'
             : 'none',
         }}

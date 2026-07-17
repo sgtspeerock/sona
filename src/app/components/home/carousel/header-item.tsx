@@ -84,10 +84,10 @@ export function HeaderItem({ song, index }: { song: ISong; index: number }) {
                   </div>
                 </div>
                 <div className="flex flex-1 h-full flex-col justify-end">
-                  <Link to={ROUTES.ALBUM.PAGE(song.albumId)} className="w-fit">
+                  <Link to={ROUTES.ALBUM.PAGE(song.albumId)} className="block w-fit pb-2 overflow-visible">
                     <h1
                       data-testid="header-title"
-                      className="w-full scroll-m-20 text-3xl 2xl:text-4xl font-bold tracking-tight mb-0 2xl:mb-1 hover:underline"
+                      className="w-full scroll-m-20 text-3xl 2xl:text-4xl font-bold tracking-tight mb-0 2xl:mb-1 leading-relaxed pb-1 overflow-visible hover:underline"
                     >
                       {song.title}
                     </h1>

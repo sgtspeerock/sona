@@ -384,9 +384,9 @@
       "play": "Radio starten"
     },
     "anniversaryRadio": {
-      "label": "Vor {{years}} Jahren veröffentlicht",
+      "label_one": "Vor {{years}} Jahr veröffentlicht",
+      "label_other": "Vor {{years}} Jahren veröffentlicht",
       "albumFallback": "Jubiläumsalbum",
-      "albumDescription": "{{artist}} · vor {{years}} Jahren",
       "empty": "Keine Erinnerung gefunden",
       "emptyDescription": "Noch keine passenden Release-Daten."
     },
@@ -396,6 +396,12 @@
       "description": "Vibe starten",
       "descriptionWithGenre": "{{genre}}-Vibe starten",
       "play": "Vibe starten"
+    },
+    "daytimeMood": {
+      "playing": "Läuft",
+      "playingShort": "Läuft",
+      "start": "Mix starten",
+      "startShort": "Starten"
     },
     "forYou": "Für dich"
   },
@@ -647,7 +653,8 @@
         "unpin": "Miniplayer lösen",
         "closeWindow": "App schließen"
       },
-      "rewind": "Spule {{amount}} Sekunden zurück"
+      "rewind": "Spule {{amount}} Sekunden zurück",
+      "close": "Schließen"
     },
     "runtimeShuffle": {
       "noSessionMatches": "Keine weiteren Songs entsprechen dem aktuellen Session-Filter."
@@ -671,7 +678,8 @@
       "create": "Neue Playlist",
       "delete": "Playlist löschen",
       "notFound": "Keine Playlist gefunden",
-      "removeSong": "Aus Playlist entfernen"
+      "removeSong": "Aus Playlist entfernen",
+      "recalculateCover": "Cover neu berechnen"
     },
     "info": "Informationen abrufen",
     "markAsPlayed": "Als gespielt markieren"
@@ -711,6 +719,7 @@
     "clear": "Warteschlange leeren",
     "open": "Warteschlange öffnen",
     "close": "Warteschlange schließen",
+    "remove": "Aus Warteschlange entfernen",
     "source": {
       "dj": "Von DJ hinzugefügt",
       "session": "Vom Session-Modus hinzugefügt"
@@ -1020,6 +1029,16 @@
         }
       }
     },
+    "ai": {
+      "group": "KI-Integration",
+      "description": "Aktivieren Sie die KI-gestützte Playlist-Generierung und tägliche Empfehlungen, unterstützt von OpenRouter (Tencent Hunyuan Free).",
+      "enabled": "KI-Funktionen aktivieren",
+      "apiKey": {
+        "label": "OpenRouter API-Key",
+        "placeholder": "sk-or-v1-...",
+        "helpPrefix": "Hole dir deinen kostenlosen API-Key von"
+      }
+    },
     "io": {
       "group": "Einstellungen sichern",
       "description": "Einstellungen als JSON-Datei exportieren oder aus einer Sicherung wiederherstellen",
@@ -1046,13 +1065,6 @@
         "cleared": "Cache geleert. App wird neu geladen...",
         "partial": "Cache nur teilweise geleert. App wird neu geladen...",
         "error": "Cache konnte nicht geleert werden."
-      },
-      "onboarding": {
-        "label": "Schnellstart",
-        "info": "Blendet die Onboarding-Hinweise erneut ein.",
-        "button": "Erneut anzeigen",
-        "resetDone": "Onboarding zurückgesetzt. Die Tour wird wieder angezeigt.",
-        "resetError": "Onboarding konnte nicht zurückgesetzt werden."
       }
     },
     "player": {
@@ -1180,6 +1192,13 @@
     "emptyPage": {
       "description": "Es sieht so aus, als noch keine Podcasts hinzugefügt wurden. Füge oberhalb einen hinzu!",
       "message": "Kein Podcast hinzugefügt"
+    }
+  },
+  "song": {
+    "actions": {
+      "goToSong": "Zum Song",
+      "goToArtist": "Zum Künstler",
+      "goToAlbum": "Zum Album"
     }
   }
 }

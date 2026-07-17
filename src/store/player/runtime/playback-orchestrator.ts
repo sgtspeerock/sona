@@ -13,6 +13,7 @@ export type SongEndedActions = {
 export type SongEndedRuntime = {
   ensureSonaDjNextTrack: () => Promise<void>
   ensureRuntimeShuffleNextTrack: () => Promise<void>
+  ensureDaytimeMoodNextTrack: () => Promise<void>
   getRuntimeMode: () => SonaDjMode
   getRuntimeShuffleEnabled: () => boolean
 }
@@ -33,6 +34,7 @@ export async function orchestrateSongEnded(
 
   await runtime.ensureSonaDjNextTrack()
   await runtime.ensureRuntimeShuffleNextTrack()
+  await runtime.ensureDaytimeMoodNextTrack()
 
   if (isSonaDjEnabled && !actions.hasNextSong()) {
     await runtime.ensureSonaDjNextTrack()

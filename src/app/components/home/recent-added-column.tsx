@@ -43,15 +43,15 @@ export function RecentAddedColumn({ albums }: { albums: Albums[] }) {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2">
+      <div className="flex min-h-0 flex-1 flex-col justify-start gap-2">
         {displayAlbums.map((album) => (
           <div
             key={album.id}
-            className="group grid grid-cols-[48px,minmax(0,1fr),auto] items-center gap-3 rounded-lg bg-background p-2 transition-colors hover:bg-muted"
+            className="group grid grid-cols-[56px,minmax(0,1fr),auto] items-center gap-3 rounded-lg bg-background p-2.5 transition-colors hover:bg-muted"
           >
             <Link
               to={ROUTES.ALBUM.PAGE(album.id)}
-              className="h-12 w-12 overflow-hidden rounded-md border border-border/35 bg-muted"
+              className="h-14 w-14 overflow-hidden rounded-md border border-border/35 bg-muted"
             >
               <ImageLoader id={album.coverArt} type="album" size="160">
                 {(src) =>

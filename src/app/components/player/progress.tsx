@@ -24,6 +24,21 @@ import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 import { logger } from '@/utils/logger'
 import { MiniWaveform } from './mini-waveform'
 
+async function processScrobbleQueue() {
+  const queue = useScrobbleStatusStore.getState().queue
+  if (queue.length === 0) return
+
+  for (const item of queue) {
+    try {
+      await subsonic.scrobble.send(item.id, item.time)
+      useScrobbleStatusStore.getState().removeFromQueue(item.id, item.time)
+    } catch (err) {
+      logger.warn('Failed to retry scrobble in queue', err)
+      break
+    }
+  }
+}
+
 interface PlayerProgressProps {
   audioRef: RefObject<HTMLAudioElement>
   layout?: 'default' | 'rail'
@@ -129,8 +144,8 @@ export function PlayerProgress({
   const activeProgress = isSeekingRef.current ? localProgress : visualProgress
   const remainingTime = `-${convertSecondsToTime((currentDuration ?? 0) - activeProgress)}`
 
-  const sendScrobble = useCallback(async (songId: string) => {
-    await subsonic.scrobble.send(songId)
+  const sendScrobble = useCallback(async (songId: string, time?: string) => {
+    await subsonic.scrobble.send(songId, time)
   }, [])
 
   const sendNowPlaying = useCallback(async (songId: string) => {
@@ -141,7 +156,6 @@ export function PlayerProgress({
   const lastProgressRef = useRef(0)
   const isScrobbleSendingRef = useRef(false)
   const lastScrobbleAttemptAtRef = useRef(0)
-  const _lastSavedPodcastProgressRef = useRef(0)
   const SCROBBLE_RETRY_COOLDOWN_MS = 10000
 
   const shouldSendFullScrobble = useCallback(
@@ -161,6 +175,10 @@ export function PlayerProgress({
   )
 
   useEffect(() => {
+    processScrobbleQueue()
+  }, [])
+
+  useEffect(() => {
     isScrobbleSentRef.current = false
     isNowPlayingSentRef.current = false
     isNowPlayingSendingRef.current = false
@@ -168,7 +186,7 @@ export function PlayerProgress({
     listenedSecondsRef.current = 0
     lastProgressRef.current = 0
     lastScrobbleAttemptAtRef.current = 0
-  }, [])
+  }, [currentSong.id])
 
   useEffect(() => {
     if (!isSong || !isPlaying || !currentSong.id) return
@@ -223,18 +241,21 @@ export function PlayerProgress({
         shouldSendFullScrobble(listenedSecondsRef.current, currentDuration)
       ) {
         isScrobbleSendingRef.current = true
+        const attemptedTime = Date.now().toString()
         lastScrobbleAttemptAtRef.current = Date.now()
         setScrobbleStatus('sending', currentSong.id)
-        sendScrobble(currentSong.id)
+        sendScrobble(currentSong.id, attemptedTime)
           .then(() => {
             isScrobbleSentRef.current = true
             isScrobbleSendingRef.current = false
             setScrobbleStatus('ok', currentSong.id)
+            processScrobbleQueue()
           })
           .catch((error) => {
             isScrobbleSendingRef.current = false
             setScrobbleStatus('failed', currentSong.id)
-            logger.warn('Scrobble request failed', error)
+            useScrobbleStatusStore.getState().addToQueue(currentSong.id, attemptedTime)
+            logger.warn('Scrobble request failed, added to queue', error)
           })
       }
     }

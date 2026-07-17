@@ -258,10 +258,11 @@
 }
 
 .fullscreen-panel-readable-dark-bg {
-  color: hsl(var(--foreground) / 0.96);
+  color: rgba(255, 255, 255, 0.96);
   text-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.82),
-    0 0 2px rgba(0, 0, 0, 0.58);
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    0 12px 28px rgba(0, 0, 0, 0.25);
 }
 
 .fullscreen-panel-readable-dark-bg .text-muted-foreground,
@@ -269,19 +270,20 @@
 .fullscreen-panel-readable-dark-bg .text-foreground\/65,
 .fullscreen-panel-readable-dark-bg a.text-muted-foreground,
 .fullscreen-panel-readable-dark-bg a.text-foreground\/70 {
-  color: hsl(var(--foreground) / 0.8) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
 }
 
 .fullscreen-panel-readable-dark-bg a:hover,
 .fullscreen-panel-readable-dark-bg .hover\:text-foreground:hover {
-  color: hsl(var(--foreground) / 0.98) !important;
+  color: rgba(255, 255, 255, 0.98) !important;
 }
 
 .fullscreen-panel-readable-light-bg {
-  color: rgba(0, 0, 0, 0.92);
+  color: rgba(9, 9, 11, 0.96);
   text-shadow:
-    0 1px 10px rgba(255, 255, 255, 0.68),
-    0 0 2px rgba(255, 255, 255, 0.78);
+    0 1px 1px rgba(255, 255, 255, 0.9),
+    0 0 8px rgba(255, 255, 255, 0.7),
+    0 0 16px rgba(255, 255, 255, 0.4);
 }
 
 .fullscreen-panel-readable-light-bg .text-muted-foreground,
@@ -289,12 +291,12 @@
 .fullscreen-panel-readable-light-bg .text-foreground\/65,
 .fullscreen-panel-readable-light-bg a.text-muted-foreground,
 .fullscreen-panel-readable-light-bg a.text-foreground\/70 {
-  color: rgba(0, 0, 0, 0.68) !important;
+  color: rgba(9, 9, 11, 0.7) !important;
 }
 
 .fullscreen-panel-readable-light-bg a:hover,
 .fullscreen-panel-readable-light-bg .hover\:text-foreground:hover {
-  color: rgba(0, 0, 0, 0.95) !important;
+  color: rgba(9, 9, 11, 0.98) !important;
 }
 
 .fullscreen-panel-readable-light-bg .row-active,
@@ -346,12 +348,13 @@
 
 .fullscreen-readable-shadow-strong {
   text-shadow:
-    0 2px 14px rgba(0, 0, 0, 0.92),
-    0 0 2px rgba(0, 0, 0, 0.65);
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    0 16px 40px rgba(0, 0, 0, 0.3);
 }
 
 .fullscreen-readable-shadow-soft {
   text-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.86),
-    0 0 2px rgba(0, 0, 0, 0.55);
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.3);
 }

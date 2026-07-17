@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { PlusIcon } from 'lucide-react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ShadowHeader } from '@/app/components/album/shadow-header'
@@ -12,18 +13,58 @@ import { DataTable } from '@/app/components/ui/data-table'
 import { PageState } from '@/app/components/ui/page-state'
 import { usePlaylistsQuery } from '@/app/hooks/use-playlists-query'
 import { playlistsColumns } from '@/app/tables/playlists-columns'
+import { isLikelyAutoImportedM3uPlaylist } from '@/service/playlists'
 import { subsonic } from '@/service/subsonic'
 import { usePlayerActions } from '@/store/player.store'
+import { useAppPages } from '@/store/app.store'
 import { usePlaylists } from '@/store/playlists.store'
 
 export default function PlaylistsPage() {
   const { setPlaylistDialogState } = usePlaylists()
   const { setSongList } = usePlayerActions()
   const { t } = useTranslation()
+  const [showImportedManagement, setShowImportedManagement] = useState(false)
 
-  const { data: playlists, isLoading, isError, refetch } = usePlaylistsQuery()
+  const {
+    autoPlaylistImport,
+    autoPlaylistImportExceptions,
+    toggleAutoPlaylistImportException,
+    setAutoPlaylistImport,
+    setAutoPlaylistImportExceptions,
+  } = useAppPages()
 
-  const columns = playlistsColumns()
+  const { data: playlists, isLoading, isError, refetch } = usePlaylistsQuery(showImportedManagement)
+
+  const columns = useMemo(() => {
+    return playlistsColumns({
+      showCheckboxes: showImportedManagement,
+    })
+  }, [showImportedManagement])
+
+  const tableMeta = useMemo(() => {
+    return {
+      autoPlaylistImport,
+      autoPlaylistImportExceptions,
+      onToggleImportException: (playlistId: string) => {
+        if (autoPlaylistImport) {
+          const otherImportedIds = (playlists || [])
+            .filter((p) => isLikelyAutoImportedM3uPlaylist(p) && p.id !== playlistId)
+            .map((p) => p.id)
+          setAutoPlaylistImport(false)
+          setAutoPlaylistImportExceptions(otherImportedIds)
+        } else {
+          toggleAutoPlaylistImportException(playlistId)
+        }
+      },
+    }
+  }, [
+    playlists,
+    autoPlaylistImport,
+    autoPlaylistImportExceptions,
+    setAutoPlaylistImport,
+    setAutoPlaylistImportExceptions,
+    toggleAutoPlaylistImportException,
+  ])
 
   async function handlePlayPlaylist(playlistId: string) {
     const playlist = await subsonic.playlists.getOne(playlistId)
@@ -63,23 +104,34 @@ export default function PlaylistsPage() {
 
   return (
     <div className={clsx('w-full', showTable ? 'h-full' : 'h-empty-content')}>
-      <ShadowHeader>
-        <div className="w-full flex items-center justify-between">
-          <HeaderTitle
-            title={t('sidebar.playlists')}
-            count={playlists.length}
-          />
-        </div>
+      <ShadowHeader className="justify-between">
+        <HeaderTitle
+          title={t('sidebar.playlists')}
+          count={playlists.length}
+        />
 
-        <Button
-          size="sm"
-          variant="default"
-          className="h-9 px-3.5"
-          onClick={() => setPlaylistDialogState(true)}
-        >
-          <PlusIcon className="w-5 h-5 -ml-[3px]" />
-          <span className="ml-2">{t('playlist.form.create.title')}</span>
-        </Button>
+        <div className="flex gap-2 items-center">
+          <Button
+            size="sm"
+            variant={showImportedManagement ? 'secondary' : 'outline'}
+            className="h-9 px-3.5"
+            onClick={() => setShowImportedManagement((prev) => !prev)}
+          >
+            {showImportedManagement
+              ? t('playlist.manageImported.stop', 'Fertig')
+              : t('playlist.manageImported.start', 'Importierte Playlists verwalten')}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="default"
+            className="h-9 px-3.5"
+            onClick={() => setPlaylistDialogState(true)}
+          >
+            <PlusIcon className="w-5 h-5 -ml-[3px]" />
+            <span className="ml-2">{t('playlist.form.create.title')}</span>
+          </Button>
+        </div>
       </ShadowHeader>
 
       {!showTable && <EmptyPlaylistsPage />}
@@ -96,6 +148,7 @@ export default function PlaylistsPage() {
             allowRowSelection={false}
             dataType="playlist"
             noRowsMessage={t('options.playlist.notFound')}
+            meta={tableMeta}
           />
         </ListWrapper>
       )}

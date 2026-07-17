@@ -129,24 +129,7 @@ export function AboutPage() {
     }
   }
 
-  const handleResetOnboarding = () => {
-    try {
-      safeStorageRemove(ONBOARDING_STORAGE_KEY)
-      toast.success(
-        t(
-          'settings.system.onboarding.resetDone',
-          'Onboarding reset. The quick tour will appear again.',
-        ),
-      )
-    } catch {
-      toast.error(
-        t(
-          'settings.system.onboarding.resetError',
-          'Failed to reset onboarding.',
-        ),
-      )
-    }
-  }
+
 
   return (
     <div className="space-y-4">
@@ -248,25 +231,7 @@ export function AboutPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-card/25 p-4 shadow-sm">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t('settings.system.onboarding.label', 'Quick tour')}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t(
-                'settings.system.onboarding.info',
-                'Show the onboarding coach marks again.',
-              )}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleResetOnboarding}>
-            <RotateCcw className="mr-2 h-3.5 w-3.5" />
-            {t('settings.system.onboarding.button', 'Show again')}
-          </Button>
-        </div>
-      </div>
+
 
       <div className="rounded-xl border border-border/60 bg-card/25 p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">

@@ -143,6 +143,11 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                 ]
               })
             },
+            setAutoPlaylistImportExceptions: (exceptions) => {
+              set((state) => {
+                state.pages.autoPlaylistImportExceptions = exceptions
+              })
+            },
             listDensity: 'default',
             setListDensity: (value) => {
               set((state) => {

@@ -59,6 +59,7 @@ const MemoTableRow = memo(TableRow) as typeof TableRow
 declare module '@tanstack/react-table' {
   interface TableMeta<TData extends RowData> {
     handlePlaySong: ((row: Row<TData>) => void) | undefined
+    [key: string]: any
   }
   interface SortingFns {
     customSortFn: SortingFn<unknown>
@@ -89,6 +90,7 @@ interface DataTableProps<TData, TValue> {
   onReorder?: (fromIndex: number, toIndex: number) => void
   enableSorting?: boolean
   highlightRowId?: string
+  meta?: Record<string, any>
 }
 
 let isTap = false
@@ -109,11 +111,12 @@ export function DataTable<TData, TValue>({
   showContextMenu = true,
   showHeader = true,
   showDiscNumber = false,
-  variant = 'classic',
+  variant = 'modern',
   dataType = 'song',
   onReorder,
   enableSorting,
   highlightRowId,
+  meta,
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation()
   const resolvedNoRowsMessage = noRowsMessage ?? t('states.empty.noResults')
@@ -175,6 +178,7 @@ export function DataTable<TData, TValue>({
     },
     meta: {
       handlePlaySong,
+      ...meta,
     },
     state: {
       columnFilters: columnSearch,
@@ -466,6 +470,7 @@ export function DataTable<TData, TValue>({
           onTouchEnd={(e) => handleRowTap(e, row)}
           onTouchCancel={handleTouchCancel}
           onContextMenu={(e) => handleClicks(e, row)}
+          meta={table.options.meta}
         />
       </Fragment>
     ))

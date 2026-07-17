@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { getSimpleCoverArtUrl } from '@/api/httpClient'
 import { usePlayerCurrentSong, useSongColor } from '@/store/player.store'
 import { getAlbumColorPalette } from '@/utils/getAlbumColors'
+import { getAverageColor } from '@/utils/getAverageColor'
 
 /**
  * Hook that automatically extracts 4 colors from album cover
@@ -9,7 +10,7 @@ import { getAlbumColorPalette } from '@/utils/getAlbumColors'
  */
 export function useAlbumColorExtractor() {
   const { coverArt } = usePlayerCurrentSong()
-  const { setCurrentSongColorPalette } = useSongColor()
+  const { setCurrentSongColorPalette, setCurrentSongColor } = useSongColor()
   const lastCoverArtRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -29,9 +30,19 @@ export function useAlbumColorExtractor() {
 
         img.onload = async () => {
           if (cancelled) return
-          const palette = await getAlbumColorPalette(img)
-          if (!cancelled && palette) {
-            setCurrentSongColorPalette(palette)
+          try {
+            const palette = await getAlbumColorPalette(img)
+            const averageColor = (await getAverageColor(img)).hex
+            if (!cancelled) {
+              if (palette) setCurrentSongColorPalette(palette)
+              if (averageColor) setCurrentSongColor(averageColor)
+            }
+          } catch (e) {
+            console.error('Failed to parse color palette or average color:', e)
+            if (!cancelled) {
+              setCurrentSongColorPalette(null)
+              setCurrentSongColor(null)
+            }
           }
         }
 
@@ -39,6 +50,7 @@ export function useAlbumColorExtractor() {
           if (cancelled) return
           console.error('Failed to load album cover for color extraction')
           setCurrentSongColorPalette(null)
+          setCurrentSongColor(null)
         }
 
         img.src = coverArtUrl
@@ -46,6 +58,7 @@ export function useAlbumColorExtractor() {
         if (cancelled) return
         console.error('Color extraction error:', error)
         setCurrentSongColorPalette(null)
+        setCurrentSongColor(null)
       }
     }
 
@@ -54,5 +67,5 @@ export function useAlbumColorExtractor() {
     return () => {
       cancelled = true
     }
-  }, [coverArt, setCurrentSongColorPalette])
+  }, [coverArt, setCurrentSongColorPalette, setCurrentSongColor])
 }

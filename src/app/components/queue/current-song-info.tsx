@@ -7,14 +7,18 @@ import { useMainDrawerState, usePlayerCurrentSong } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { ALBUM_ARTISTS_MAX_NUMBER } from '@/utils/multipleArtists'
 
-export function CurrentSongInfo() {
+export function CurrentSongInfo({
+  inFullscreenOverlay = false,
+}: {
+  inFullscreenOverlay?: boolean
+}) {
   const currentSong = usePlayerCurrentSong()
   const { closeDrawer } = useMainDrawerState()
   const { title, album, albumId, artist, coverArt } = currentSong
 
   return (
-    <div className="flex-shrink-0 w-64 flex flex-col gap-4">
-      <div className="w-full aspect-square rounded-lg overflow-hidden shadow-2xl bg-accent">
+    <div className={cn('flex-shrink-0 flex flex-col gap-4', inFullscreenOverlay ? 'w-[300px] 2xl:w-[380px]' : 'w-64')}>
+      <div className={cn('w-full aspect-square rounded-lg overflow-hidden bg-accent flex-shrink-0', !inFullscreenOverlay && 'shadow-2xl')}>
         <ImageLoader id={coverArt} type="song" size={900}>
           {(src) => (
             <img
@@ -28,8 +32,8 @@ export function CurrentSongInfo() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight truncate text-shadow-lg">
-          {albumId ? (
+        <h4 className={cn('scroll-m-20 text-xl tracking-tight truncate text-shadow-lg', inFullscreenOverlay ? 'font-bold' : 'font-semibold')}>
+          {albumId && !inFullscreenOverlay ? (
             <Link
               to={ROUTES.ALBUM.PAGE(albumId)}
               className="hover:underline"
@@ -42,11 +46,11 @@ export function CurrentSongInfo() {
           )}
         </h4>
 
-        <div className="text-sm text-muted-foreground truncate text-shadow-lg">
+        <div className={cn('text-muted-foreground truncate text-shadow-lg', inFullscreenOverlay ? 'text-base' : 'text-sm')}>
           <QueueArtistsLinks song={currentSong} />
         </div>
 
-        {album && albumId && (
+        {!inFullscreenOverlay && album && albumId && (
           <Link
             to={ROUTES.ALBUM.PAGE(albumId)}
             className="text-sm text-muted-foreground truncate hover:text-foreground hover:underline transition-colors"

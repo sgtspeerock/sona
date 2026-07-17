@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { usePlaylistDialog } from '@/app/context/playlist-dialog-context'
 import { checkAndCatchUp } from '@/service/discover-weekly-manager'
 import { useAppIntegrations } from '@/store/app.store'
+import { useAISettings } from '@/store/player.store'
 import { runWithRetry } from '@/utils/background-task-runner'
 import { isDesktop } from '@/utils/desktop'
 import { logger } from '@/utils/logger'
@@ -15,6 +16,7 @@ import { logger } from '@/utils/logger'
  */
 export function DiscoverWeeklyObserver() {
   const { lastfm } = useAppIntegrations()
+  const { enabled: aiEnabled, apiKey: aiApiKey } = useAISettings()
   const { showPlaylistSaved } = usePlaylistDialog()
 
   useEffect(() => {
@@ -35,10 +37,11 @@ export function DiscoverWeeklyObserver() {
         data.dayKey,
       )
 
-      // Check if Last.fm is configured
-      if (!lastfm.username || !lastfm.apiKey) {
+      // Check configuration
+      const isConfigured = aiEnabled ? !!aiApiKey : !!(lastfm.username && lastfm.apiKey)
+      if (!isConfigured) {
         logger.info(
-          '[DiscoverWeekly Observer] Last.fm not configured, skipping',
+          '[DiscoverWeekly Observer] Neither AI nor Last.fm is configured, skipping',
         )
         return
       }
@@ -57,6 +60,8 @@ export function DiscoverWeeklyObserver() {
             checkAndCatchUp({
               username: lastfm.username,
               apiKey: lastfm.apiKey,
+              aiEnabled,
+              aiApiKey,
               targetArtists: 50,
               songsPerArtist: 1,
             }),
@@ -102,7 +107,7 @@ export function DiscoverWeeklyObserver() {
         removeListener()
       }
     }
-  }, [lastfm.username, lastfm.apiKey, showPlaylistSaved])
+  }, [lastfm.username, lastfm.apiKey, aiEnabled, aiApiKey, showPlaylistSaved])
 
   // This is an observer component, it doesn't render anything
   return null

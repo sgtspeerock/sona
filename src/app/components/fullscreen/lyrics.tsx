@@ -63,10 +63,10 @@ export function LyricsTab() {
   return (
     <div className="flex w-full h-full gap-6">
       {/* Left side - Song Info */}
-      <div className="flex-shrink-0 w-64 flex flex-col gap-4">
+      <div className="flex-shrink-0 w-[300px] 2xl:w-[380px] flex flex-col gap-4">
         {/* Cover Art */}
-        <div className="w-full aspect-square rounded-lg overflow-hidden shadow-2xl">
-          <ImageLoader id={coverArt} type="song" size="300">
+        <div className="w-full aspect-square rounded-lg overflow-hidden flex-shrink-0">
+          <ImageLoader id={coverArt} type="song" size="500">
             {(src) => (
               <img
                 src={src}
@@ -81,7 +81,7 @@ export function LyricsTab() {
         <div className="flex flex-col gap-1">
           <ContextMenu>
             <ContextMenuTrigger asChild>
-              <h2 className="text-xl font-bold truncate cursor-pointer hover:text-foreground/95 transition-colors">
+              <h2 className="text-xl font-bold truncate cursor-pointer hover:text-foreground/95 transition-colors text-shadow-lg">
                 {title}
               </h2>
             </ContextMenuTrigger>
@@ -93,25 +93,13 @@ export function LyricsTab() {
           {artistId && (
             <Link
               to={ROUTES.ARTIST.PAGE(artistId)}
-              className="text-lg text-muted-foreground truncate hover:text-foreground transition-colors"
+              className="text-base text-muted-foreground truncate hover:text-foreground transition-colors text-shadow-lg"
             >
               {artist}
             </Link>
           )}
           {!artistId && (
-            <p className="text-lg text-muted-foreground truncate">{artist}</p>
-          )}
-
-          {album && albumId && (
-            <Link
-              to={ROUTES.ALBUM.PAGE(albumId)}
-              className="text-sm text-muted-foreground truncate hover:text-foreground transition-colors"
-            >
-              {album}
-            </Link>
-          )}
-          {album && !albumId && (
-            <p className="text-sm text-muted-foreground truncate">{album}</p>
+            <p className="text-base text-muted-foreground truncate text-shadow-lg">{artist}</p>
           )}
         </div>
       </div>

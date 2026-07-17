@@ -26,9 +26,9 @@
       "play": "Start radio"
     },
     "anniversaryRadio": {
-      "label": "Released {{years}} years ago",
+      "label_one": "Released {{years}} year ago",
+      "label_other": "Released {{years}} years ago",
       "albumFallback": "Anniversary album",
-      "albumDescription": "{{artist}} · {{years}} years ago",
       "empty": "No memory found",
       "emptyDescription": "No matching release metadata yet."
     },
@@ -38,6 +38,12 @@
       "description": "Start a vibe",
       "descriptionWithGenre": "Start {{genre}} vibe",
       "play": "Start vibe"
+    },
+    "daytimeMood": {
+      "playing": "Playing",
+      "playingShort": "Playing",
+      "start": "Start mix",
+      "startShort": "Start"
     },
     "forYou": "For you"
   },
@@ -609,7 +615,8 @@
       "volume": {
         "mute": "Mute",
         "unmute": "Unmute"
-      }
+      },
+      "close": "Close"
     },
     "runtimeShuffle": {
       "noSessionMatches": "No more songs match the current session filter."
@@ -633,7 +640,8 @@
       "search": "Find a playlist",
       "create": "New playlist",
       "notFound": "No playlist found",
-      "removeSong": "Remove from playlist"
+      "removeSong": "Remove from playlist",
+      "recalculateCover": "Recalculate cover"
     },
     "info": "Get info",
     "markAsPlayed": "Mark as played"
@@ -734,6 +742,7 @@
     "clear": "Clear queue",
     "close": "Close queue",
     "open": "Open queue",
+    "remove": "Remove from queue",
     "source": {
       "dj": "Added by DJ",
       "session": "Added by Session Mode"
@@ -1069,13 +1078,6 @@
         "cleared": "Cache cleared. Reloading...",
         "partial": "Cache was only partially cleared. Reloading...",
         "error": "Failed to clear cache."
-      },
-      "onboarding": {
-        "label": "Quick tour",
-        "info": "Show the onboarding coach marks again.",
-        "button": "Show again",
-        "resetDone": "Onboarding reset. The quick tour will appear again.",
-        "resetError": "Failed to reset onboarding."
       }
     },
     "player": {

@@ -272,39 +272,7 @@ export function ContentPage() {
           </Content>
         </Root>
 
-        {/* Homepage Playlists */}
-        <Root>
-          <Header>
-            <HeaderTitle>
-              {t('settings.content.homepage.group', 'Homepage Features')}
-            </HeaderTitle>
-          </Header>
-          <Content>
-            <ContentItem>
-              <ContentItemTitle>
-                {t(
-                  'settings.content.homepage.thisIsArtist.label',
-                  'Show "This is [Artist]" Playlist',
-                )}
-              </ContentItemTitle>
-              <ContentItemForm>
-                <Switch
-                  checked={lastfm.showThisIsArtist}
-                  onCheckedChange={lastfm.setShowThisIsArtist}
-                  disabled={!isLastfmConfigured}
-                />
-              </ContentItemForm>
-            </ContentItem>
-            {!isLastfmConfigured && (
-              <p className="text-xs text-muted-foreground">
-                {t(
-                  'settings.content.homepage.requiresLastfm',
-                  'Configure Last.fm in Services to enable this feature',
-                )}
-              </p>
-            )}
-          </Content>
-        </Root>
+
       </div>
 
       <Dialog

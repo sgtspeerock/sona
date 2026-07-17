@@ -13,6 +13,7 @@ import {
 } from '@/app/components/ui/main-sidebar'
 import { Header } from '@/app/layout/header'
 import { useFullscreenState, useMiniPlayerState } from '@/store/ui.store'
+import { useSessionModeSettings } from '@/store/player.store'
 import { MainRoutes } from './main'
 
 const MemoHeader = memo(Header)
@@ -26,9 +27,10 @@ const MemoFullscreenGlobal = memo(FullscreenGlobal)
 export default function BaseLayout() {
   const { open: miniPlayerOpen } = useMiniPlayerState()
   const { open: fullscreenOpen } = useFullscreenState()
+  const { mode } = useSessionModeSettings()
 
   return (
-    <div className="h-screen w-screen overflow-hidden">
+    <div className="h-screen w-screen overflow-hidden relative">
       {miniPlayerOpen ? (
         <MemoMiniPlayerModePage />
       ) : (
@@ -52,6 +54,9 @@ export default function BaseLayout() {
         </>
       )}
       <MemoPlayer hideUi={miniPlayerOpen || fullscreenOpen} />
+      {mode === 'night' && (
+        <div className="pointer-events-none fixed inset-0 z-[9999] bg-black/16 backdrop-brightness-75 mix-blend-multiply" />
+      )}
     </div>
   )
 }

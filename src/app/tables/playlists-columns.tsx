@@ -1,43 +1,74 @@
-import { ClockIcon, Eye, EyeOff } from 'lucide-react'
+import { ClockIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { PlaylistOptions } from '@/app/components/playlist/options'
 import { TableActionButton } from '@/app/components/table/action-button'
 import { CoverImage } from '@/app/components/table/cover-image'
-import PlaySongButton from '@/app/components/table/play-button'
+import { Checkbox } from '@/app/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/app/components/ui/data-table-column-header'
 import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
 import i18n from '@/i18n'
 import { ROUTES } from '@/routes/routesList'
+import { isLikelyAutoImportedM3uPlaylist } from '@/service/playlists'
 import { ColumnDefType } from '@/types/react-table/columnDef'
 import { Playlist } from '@/types/responses/playlist'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 
-export function playlistsColumns(): ColumnDefType<Playlist>[] {
-  return [
-    {
-      id: 'index',
-      accessorKey: 'index',
+export interface PlaylistsColumnsOptions {
+  showCheckboxes?: boolean
+}
+
+export function playlistsColumns(options: PlaylistsColumnsOptions = {}): ColumnDefType<Playlist>[] {
+  const {
+    showCheckboxes = false,
+  } = options
+
+  const cols: ColumnDefType<Playlist>[] = []
+
+  if (showCheckboxes) {
+    cols.push({
+      id: 'select',
+      accessorKey: 'select',
       style: {
         width: 48,
         minWidth: '48px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex',
       },
-      header: () => {
-        return <div className="w-full text-center">#</div>
-      },
+      header: () => null,
       cell: ({ row, table }) => {
-        const index = row.index + 1
         const playlist = row.original
+        const isImported = isLikelyAutoImportedM3uPlaylist(playlist)
+
+        const autoPlaylistImport = table.options.meta?.autoPlaylistImport
+        const autoPlaylistImportExceptions = table.options.meta?.autoPlaylistImportExceptions || []
+        const onToggleImportException = table.options.meta?.onToggleImportException
+
+        const isChecked = !isImported || autoPlaylistImport || autoPlaylistImportExceptions.includes(playlist.id)
 
         return (
-          <PlaySongButton
-            trackNumber={index}
-            trackId={playlist.id}
-            handlePlayButton={() => table.options.meta?.handlePlaySong?.(row)}
-          />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onDoubleClick={(e) => e.stopPropagation()}
+            className="flex items-center justify-center w-full h-full"
+          >
+            <Checkbox
+              checked={isChecked}
+              disabled={!isImported}
+              onCheckedChange={() => {
+                if (isImported && onToggleImportException) {
+                  onToggleImportException(playlist.id)
+                }
+              }}
+            />
+          </div>
         )
       },
-    },
+    })
+  }
+
+  cols.push(
     {
       id: 'name',
       accessorKey: 'name',
@@ -67,22 +98,6 @@ export function playlistsColumns(): ColumnDefType<Playlist>[] {
               {row.original.name}
             </Link>
           </div>
-        </div>
-      ),
-    },
-    {
-      id: 'comment',
-      accessorKey: 'comment',
-      style: {
-        width: '25%',
-        maxWidth: '25%',
-        marginRight: '1rem',
-      },
-      className: 'hidden 2xl:flex',
-      header: i18n.t('table.columns.comment'),
-      cell: ({ row }) => (
-        <div className="text-muted-foreground w-full truncate">
-          <p className="truncate">{row.original.comment}</p>
         </div>
       ),
     },
@@ -121,24 +136,6 @@ export function playlistsColumns(): ColumnDefType<Playlist>[] {
       },
     },
     {
-      id: 'public',
-      accessorKey: 'public',
-      style: {
-        width: 100,
-        maxWidth: 100,
-      },
-      header: i18n.t('table.columns.public'),
-      cell: ({ row }) => (
-        <div>
-          {row.original.public ? (
-            <Eye className="w-5 h-5 text-foreground" />
-          ) : (
-            <EyeOff className="w-5 h-5 text-muted-foreground opacity-70" />
-          )}
-        </div>
-      ),
-    },
-    {
       id: 'actions',
       accessorKey: 'actions',
       style: {
@@ -166,5 +163,7 @@ export function playlistsColumns(): ColumnDefType<Playlist>[] {
         )
       },
     },
-  ]
+  )
+
+  return cols
 }

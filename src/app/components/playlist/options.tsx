@@ -1,5 +1,6 @@
-import { Pin, PinOff } from 'lucide-react'
+import { Pin, PinOff, RefreshCw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { OptionsButtons } from '@/app/components/options/buttons'
 import { DownloadOptionHandler } from '@/app/components/options/download-handler'
 import { MenuItemFactory } from '@/app/components/options/menu-item-factory'
@@ -11,6 +12,10 @@ import { useAppPages } from '@/store/app.store'
 import { usePlaylists, useRemovePlaylist } from '@/store/playlists.store'
 import { Playlist, PlaylistWithEntries } from '@/types/responses/playlist'
 import { ISong } from '@/types/responses/song'
+import { getCoverArtUrl, getSimpleCoverArtUrl } from '@/api/httpClient'
+import { invalidateArtworkCache } from '@/api/artwork'
+import { queryKeys } from '@/utils/queryKeys'
+import { deleteCachedImage } from '@/cache/image'
 
 interface PlaylistOptionsProps {
   playlist: PlaylistWithEntries | Playlist
@@ -39,6 +44,29 @@ export function PlaylistOptions({
   const { setPlaylistId, setConfirmDialogState } = useRemovePlaylist()
   const { autoPlaylistImportExceptions, toggleAutoPlaylistImportException } =
     useAppPages()
+
+  const queryClient = useQueryClient()
+
+  async function handleRecalculateCover() {
+    try {
+      await subsonic.playlists.update({
+        playlistId: playlist.id,
+        name: playlist.name,
+      })
+      if (playlist.coverArt) {
+        invalidateArtworkCache(playlist.coverArt)
+        const url80 = getSimpleCoverArtUrl(playlist.coverArt, 'playlist', '80')
+        const url300 = getSimpleCoverArtUrl(playlist.coverArt, 'playlist', '300')
+        await deleteCachedImage(url80)
+        await deleteCachedImage(url300)
+      }
+      await queryClient.invalidateQueries({
+        queryKey: [queryKeys.playlist.all],
+      })
+    } catch (error) {
+      console.error('Failed to recalculate playlist cover', error)
+    }
+  }
 
   const isAutoImportedM3u = isLikelyAutoImportedM3uPlaylist(playlist)
   const isException = autoPlaylistImportExceptions.includes(playlist.id)
@@ -152,6 +180,16 @@ export function PlaylistOptions({
           setConfirmDialogState(true)
         }}
         disabled={disableDelete}
+      />
+      <DropdownMenuSeparator />
+      <MenuItemFactory
+        variant={variant}
+        icon={<RefreshCw className="mr-2 h-4 w-4" />}
+        label={t('options.playlist.recalculateCover', 'Cover neu berechnen')}
+        onClick={(e) => {
+          e.stopPropagation()
+          handleRecalculateCover()
+        }}
       />
       {isAutoImportedM3u && (
         <>

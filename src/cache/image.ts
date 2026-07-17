@@ -358,3 +358,16 @@ async function trimServiceWorkerCache(maxEntries = 600) {
 applyAdaptivePrefetchProfile()
 subscribeToNetworkChanges()
 trimServiceWorkerCache()
+
+export async function deleteCachedImage(url: string) {
+  const key = getImageIdentityKey(url)
+  objectUrlCache.delete(key)
+  objectUrlTimestamps.delete(key)
+  cacheMetadata.delete(key)
+  try {
+    const cache = await caches.open('images')
+    await cache.delete(url)
+  } catch (e) {
+    console.error('Failed to delete cached image', e)
+  }
+}

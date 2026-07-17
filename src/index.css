@@ -640,3 +640,21 @@ div[data-test-id="table-row"]:hover {
     transparent 100%
   );
 }
+
+/* GPU layer isolation to prevent backdrop-filter repaint lag on large screens */
+div[data-test-id="table-row"],
+.sona-panel,
+.sona-panel-soft,
+[class*="sidebar-item"],
+[class*="nav-link"] {
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Disable backdrop blur only on specific lag-prone containers (sidebar, playback-rail, and list headers) */
+div[data-sidebar="sidebar"],
+aside,
+.sona-shadow-header {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

@@ -42,7 +42,7 @@ type PlaylistSchema = z.infer<typeof playlistSchema>
 const defaultValues: PlaylistSchema = {
   name: '',
   comment: '',
-  isPublic: true,
+  isPublic: false,
 }
 
 export function CreatePlaylistDialog() {
@@ -64,7 +64,7 @@ export function CreatePlaylistDialog() {
       form.reset({
         name: data.name ?? '',
         comment: data.comment ?? '',
-        isPublic: data.public,
+        isPublic: false,
       })
     }
   }, [data, form, isCreation])
@@ -102,19 +102,19 @@ export function CreatePlaylistDialog() {
     },
   })
 
-  async function onSubmit({ name, comment, isPublic }: PlaylistSchema) {
+  async function onSubmit({ name, comment }: PlaylistSchema) {
     if (isCreation) {
       await createMutation.mutateAsync({
         name,
         comment,
-        isPublic: isPublic ? 'true' : 'false',
+        isPublic: 'false',
       })
     } else {
       await updateMutation.mutateAsync({
         playlistId: data.id,
         name,
         comment,
-        isPublic: isPublic ? 'true' : 'false',
+        isPublic: 'false',
       })
     }
 
@@ -177,31 +177,6 @@ export function CreatePlaylistDialog() {
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="isPublic"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-accent/40">
-                    <div>
-                      <FormLabel>
-                        {t('playlist.form.labels.isPublic')}
-                      </FormLabel>
-                      <FormDescription className="my-1">
-                        {t('playlist.form.labels.isPublicDescription')}
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        id="playlist-is-public"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="ml-4"
-                      />
-                    </FormControl>
                   </FormItem>
                 )}
               />
